@@ -3834,9 +3834,11 @@ function _buildTrimConfigPanel(td){
     subTabs += `<button class="ctab${ativo}" onclick="ctab(this,'ctrim-${k}')">${NOMES[k]}</button>`;
     let trimSections = '';
     trims.forEach(tKey=>{
-      const tShort = tKey.replace('/','');
+      // tKey = '1T/2026' → chave no JSON = '1T'; ID dos campos = '1T2026'
+      const tJsonKey = tKey.split('/')[0];           // '1T' ou '2T'
+      const tFieldId = tKey.replace('/','');         // '1T2026' ou '2T2026' — ID seguro para HTML
       const ameBase = td.ames?.[k];
-      const ameT = ameBase?.[tKey] || ameBase;
+      const ameT = ameBase?.[tJsonKey] || ameBase;  // acessa '1T' ou '2T' corretamente
       const metas = ameT?.metas || {};
       const rows = defs.map(m=>{
         const v = metas[m.id] || {};
@@ -3847,9 +3849,9 @@ function _buildTrimConfigPanel(td){
         ).join('');
         return `<tr>
           <td style="font-size:11px;font-weight:600;color:#333;min-width:130px">${m.nome}</td>
-          <td><select class="cfg-trim-sel" id="cftrim_${k}_${tShort}_${m.id}_st" ${isNa?'disabled':''} style="width:100%;padding:3px 4px;border:1px solid #ddd;border-radius:6px;font-size:11px">${opts}</select></td>
-          <td><input type="number" class="cfg-int" id="cftrim_${k}_${tShort}_${m.id}_val" value="${v.valor??''}" placeholder="–" ${isNa?'disabled':''} style="width:60px;font-size:11px"></td>
-          <td><input type="text" class="cfg-int" id="cftrim_${k}_${tShort}_${m.id}_obs" value="${esc(v.observacao||'')}" placeholder="Observação…" ${isNa?'disabled':''} style="width:100%;font-size:11px"></td>
+          <td><select class="cfg-trim-sel" id="cftrim_${k}_${tFieldId}_${m.id}_st" ${isNa?'disabled':''} style="width:100%;padding:3px 4px;border:1px solid #ddd;border-radius:6px;font-size:11px">${opts}</select></td>
+          <td><input type="number" class="cfg-int" id="cftrim_${k}_${tFieldId}_${m.id}_val" value="${v.valor??''}" placeholder="–" ${isNa?'disabled':''} style="width:60px;font-size:11px"></td>
+          <td><input type="text" class="cfg-int" id="cftrim_${k}_${tFieldId}_${m.id}_obs" value="${esc(v.observacao||'')}" placeholder="Observação…" ${isNa?'disabled':''} style="width:100%;font-size:11px"></td>
         </tr>`;
       }).join('');
       trimSections += `
@@ -3896,14 +3898,15 @@ async function salvarMetasTrimestrais(){
   const trims = td.trimestres || ['1T/2026'];
   KEYS.forEach(k=>{
     trims.forEach(tKey=>{
-      const tShort = tKey.replace('/','');
+      const tJsonKey = tKey.split('/')[0];           // '1T' ou '2T'
+      const tFieldId = tKey.replace('/','');         // '1T2026' ou '2T2026'
       const ameBase = td.ames?.[k];
-      const ameT = ameBase?.[tKey] || ameBase;
+      const ameT = ameBase?.[tJsonKey] || ameBase;  // acessa '1T' ou '2T'
       if(!ameT?.metas) return;
       defs.forEach(m=>{
-        const st  = document.getElementById(`cftrim_${k}_${tShort}_${m.id}_st`)?.value;
-        const val = document.getElementById(`cftrim_${k}_${tShort}_${m.id}_val`)?.value;
-        const obs = document.getElementById(`cftrim_${k}_${tShort}_${m.id}_obs`)?.value;
+        const st  = document.getElementById(`cftrim_${k}_${tFieldId}_${m.id}_st`)?.value;
+        const val = document.getElementById(`cftrim_${k}_${tFieldId}_${m.id}_val`)?.value;
+        const obs = document.getElementById(`cftrim_${k}_${tFieldId}_${m.id}_obs`)?.value;
         if(st !== undefined) {
           ameT.metas[m.id] = {
             status: st,
