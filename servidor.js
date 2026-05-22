@@ -21,6 +21,9 @@ loadEnv(path.join(__dirname, 'CONFIGURACAO.env'));
 const PORT = parseInt(process.env.PORTA_SERVIDOR || '3000');
 const ROOT = __dirname;
 
+// ── Versão do Cronoata (detecta mudanças para sync entre usuários) ──
+let _cronVersion = Date.now();
+
 // ── Watcher: detecta mudança no CONFIGURACAO.env e regera tudo ──
 let _regeandoStatus = 'idle'; // 'idle' | 'running'
 let _regeandoTimer  = null;
@@ -100,9 +103,10 @@ function handleSaveJSON(req, res, filename, label) {
           res.writeHead(500, {'Content-Type': 'application/json; charset=utf-8', ...cors});
           res.end(JSON.stringify({ok: false, erro: err.message}));
         } else {
-          console.log(`${new Date().toLocaleTimeString('pt-BR')} âœ… ${label} salvo`);
+          console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ ${label} salvo`);
+          if (filename === 'cronoata-data.json') _cronVersion = Date.now();
           res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8', ...cors});
-          res.end(JSON.stringify({ok: true}));
+          res.end(JSON.stringify({ok: true, version: _cronVersion}));
         }
       });
     } catch(e) {
@@ -148,6 +152,10 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === 'GET' && req.url.startsWith('/api/configuracao')) {
     return handleLerConfiguracao(req, res);
+  }
+  if (req.method === 'GET' && req.url.startsWith('/api/cronoata-version')) {
+    res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+    return res.end(JSON.stringify({ version: _cronVersion }));
   }
   if (req.method === 'GET' && req.url.startsWith('/api/status-atualizacao')) {
     res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});

@@ -1003,7 +1003,7 @@ function showView(viewId, label, targetAme){
   document.getElementById('tb-view').textContent = label || viewId;
   _activeView = viewId;
   if(viewId==='ames') renderAmesView(targetAme);
-  if(viewId==='cronoata') initCronoata();
+  if(viewId==='cronoata'){ _cronData=null; initCronoata(); } // sempre busca dados frescos
   if(viewId==='trimestrais') initTrimestrais();
   if(viewId==='financeiro') setTimeout(renderFinanceiro, 50);
   if(viewId==='benchmark') setTimeout(renderBenchmark, 50);
@@ -1442,18 +1442,67 @@ function rebuildCronIndex(){
   AME_KEYS.forEach(k=>(_cronData[k]?.items||[]).forEach(i=>_cronIndex.set(String(i.id),{item:i,k})));
 }
 
+let _cronKnownVersion = 0;
+let _cronSyncInterval = null;
+
 async function initCronoata(){
   if(!_cronData){
     try{
-      const raw = window.CRONOATA_DATA || await fetch('/cronoata-data.json?t='+Date.now()).then(r=>r.json());
+      // Sempre busca dados frescos do servidor (não usa cache window.CRONOATA_DATA)
+      const raw = await fetch('/cronoata-data.json?t='+Date.now()).then(r=>r.json());
       _cronData={};
       AME_KEYS.forEach(k=>{_cronData[k]=raw[k]||{items:[]};});
       rebuildCronIndex();
       updateCronTopbar();
-    }catch(e){ document.getElementById('cron-content').innerHTML='<div style="color:#c0392b;padding:20px">Erro ao carregar cronoata-data.json</div>'; return; }
+      // Registra versão atual
+      try{ const v=await (await fetch('/api/cronoata-version')).json(); _cronKnownVersion=v.version||0; }catch{}
+    }catch(e){ document.getElementById('cron-content').innerHTML='<div style="color:#c0392b;padding:20px">Erro ao carregar dados: '+e.message+'</div>'; return; }
   }
   renderCronTabs();
   renderCronView();
+  // Inicia sync automático se ainda não rodando
+  _iniciarCronSync();
+}
+
+function _iniciarCronSync(){
+  if(_cronSyncInterval) return; // já rodando
+  _cronSyncInterval = setInterval(_cronSyncCheck, 20000); // verifica a cada 20s
+}
+
+async function _cronSyncCheck(){
+  // Só sincroniza se a view Cronoata está ativa (não interrompe o usuário em outras telas)
+  try{
+    const v = await (await fetch('/api/cronoata-version')).json();
+    if(_cronKnownVersion && v.version && v.version !== _cronKnownVersion){
+      // Dados mudaram no servidor! Recarregar silenciosamente.
+      _cronKnownVersion = v.version;
+      const raw = await fetch('/cronoata-data.json?t='+Date.now()).then(r=>r.json());
+      _cronData = {};
+      AME_KEYS.forEach(k=>{ _cronData[k]=raw[k]||{items:[]}; });
+      rebuildCronIndex();
+      updateCronTopbar();
+      if(_activeView==='cronoata'){
+        renderCronTabs();
+        renderCronView();
+        // Notificação discreta no topo da view
+        _mostrarNotifCron('🔔 Dados atualizados por outro usuário');
+      }
+    }
+  }catch{ /* falha silenciosa — sem rede ou servidor offline */ }
+}
+
+function _mostrarNotifCron(msg){
+  let el = document.getElementById('cron-sync-notif');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'cron-sync-notif';
+    el.style.cssText='position:fixed;top:58px;right:16px;background:#1b5e20;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);transition:opacity .4s';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.style.opacity='0'; }, 4000);
 }
 
 function updateCronTopbar(){
@@ -1636,7 +1685,13 @@ async function cronSaveServer(){
   try{
     const r=await fetch('/api/salvar-cronoata',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_cronData)});
     const res=await r.json();
-    if(el) el.textContent=res.ok?'✓ Salvo '+new Date().toLocaleTimeString('pt-BR'):'Erro';
+    if(res.ok){
+      // Atualiza versão local para não re-disparar sync do próprio save
+      if(res.version) _cronKnownVersion = res.version;
+      if(el) el.textContent='✓ Salvo '+new Date().toLocaleTimeString('pt-BR');
+    } else {
+      if(el) el.textContent='Erro ao salvar';
+    }
   }catch(e){ if(el) el.textContent='Erro de rede'; }
   _cronSaving=false;
 }
