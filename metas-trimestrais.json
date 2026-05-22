@@ -154,7 +154,7 @@
           "monitoramento": {
             "status": "pendente",
             "valor": null,
-            "observacao": ""
+            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
           },
           "esp_drs": {
             "status": "pendente",
@@ -177,14 +177,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 119,
+            "observacao": "7.368 de 6.206 consultas (Abr/2026) — 1 de 3 meses"
           },
           "sadt_linha": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 92,
+            "observacao": "3.016 de 3.274 exames SADT (Abr/2026) — 1 de 3 meses"
           },
           "avastin": {
             "status": "sim",
@@ -290,7 +290,7 @@
           "monitoramento": {
             "status": "pendente",
             "valor": null,
-            "observacao": ""
+            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
           },
           "esp_drs": {
             "status": "pendente",
@@ -313,14 +313,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 89,
+            "observacao": "5.883 de 6.610 consultas (Abr/2026) — 1 de 3 meses"
           },
           "sadt_linha": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 90,
+            "observacao": "1.096 de 1.212 exames SADT (Abr/2026) — 1 de 3 meses"
           },
           "avastin": {
             "status": "na",
@@ -424,9 +424,9 @@
         "trimestre": "2T/2026",
         "metas": {
           "monitoramento": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": ""
+            "status": "sim",
+            "valor": 119,
+            "observacao": "Abaixo de 100%: Biopsia De Tireoide Ou Parat… (Abr/2026 — 1 de 3 meses)"
           },
           "esp_drs": {
             "status": "pendente",
@@ -449,14 +449,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 90,
+            "observacao": "4.098 de 4.547 consultas (Abr/2026) — 1 de 3 meses"
           },
           "sadt_linha": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 97,
+            "observacao": "864 de 890 exames SADT (Abr/2026) — 1 de 3 meses"
           },
           "avastin": {
             "status": "na",
@@ -562,7 +562,7 @@
           "monitoramento": {
             "status": "pendente",
             "valor": null,
-            "observacao": ""
+            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
           },
           "esp_drs": {
             "status": "pendente",
@@ -585,14 +585,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 78,
+            "observacao": "5.012 de 6.444 consultas (Abr/2026) — 1 de 3 meses"
           },
           "sadt_linha": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 87,
+            "observacao": "1.621 de 1.867 exames SADT (Abr/2026) — 1 de 3 meses"
           },
           "avastin": {
             "status": "sim",
@@ -698,7 +698,7 @@
           "monitoramento": {
             "status": "pendente",
             "valor": null,
-            "observacao": ""
+            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
           },
           "esp_drs": {
             "status": "pendente",
@@ -721,14 +721,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 89,
+            "observacao": "6.550 de 7.400 consultas (Abr/2026) — 1 de 3 meses"
           },
           "sadt_linha": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 91,
+            "observacao": "2.346 de 2.577 exames SADT (Abr/2026) — 1 de 3 meses"
           },
           "avastin": {
             "status": "parcial",
@@ -834,7 +834,7 @@
           "monitoramento": {
             "status": "pendente",
             "valor": null,
-            "observacao": ""
+            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
           },
           "esp_drs": {
             "status": "pendente",
@@ -857,14 +857,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 101,
+            "observacao": "3.036 de 3.000 consultas (Abr/2026) — 1 de 3 meses"
           },
           "sadt_linha": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Aguardando dados Mai-Jun/2026"
+            "status": "parcial",
+            "valor": 94,
+            "observacao": "1.292 de 1.371 exames SADT (Abr/2026) — 1 de 3 meses"
           },
           "avastin": {
             "status": "na",

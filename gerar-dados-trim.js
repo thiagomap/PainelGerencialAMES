@@ -166,6 +166,53 @@ function calcSadtLinha(k) {
   } catch(e) { return { status: 'pendente', valor: null, observacao: '' }; }
 }
 
+// Lê valores mensais de Abril do CONFIGURACAO.env para uso no 2T parcial
+function lerEnvAbril(ameEnvKey, metricKey) {
+  try {
+    const cfgPath = path.join(BASE, '..', 'CONFIGURACAO.env');
+    const lines = fs.readFileSync(cfgPath, 'utf8').split('\n');
+    const get = k => { const l = lines.find(l => l.startsWith(k+'=')); return l ? l.slice(k.length+1).trim() : ''; };
+    const v = get(`${ameEnvKey}_${metricKey}_ABR`);
+    if (!v) return null;
+    const parts = v.split('|');
+    const real = parseFloat(parts[0]) || 0;
+    const meta = parseFloat(parts[1]) || 0;
+    return { real, meta };
+  } catch(e) { return null; }
+}
+
+const ENV_AME_KEYS = { cp:'CAMPINAS', cb:'CASA_BRANCA', frc:'FRANCA', rp:'RIBEIRAO', scl:'SAO_CARLOS', avj:'JURUMIRIM' };
+
+function calcOfertaConsulta2T(k) {
+  try {
+    const envKey = ENV_AME_KEYS[k];
+    const abr = lerEnvAbril(envKey, 'CONS');
+    if (!abr || !abr.meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
+    const p = pct(abr.real, abr.meta);
+    const metaQ2 = abr.meta * 3; // estimativa meta trimestral = meta mensal × 3
+    const progQ2 = pct(abr.real, metaQ2); // % da meta trimestral com apenas Abr
+    return {
+      status: 'parcial', // sempre parcial pois faltam 2 meses
+      valor: p, // % vs meta mensal de Abr
+      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} consultas (Abr/2026) — 1 de 3 meses`
+    };
+  } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
+}
+
+function calcSadtLinha2T(k) {
+  try {
+    const envKey = ENV_AME_KEYS[k];
+    const abr = lerEnvAbril(envKey, 'SADT');
+    if (!abr || !abr.meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
+    const p = pct(abr.real, abr.meta);
+    return {
+      status: 'parcial',
+      valor: p,
+      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} exames SADT (Abr/2026) — 1 de 3 meses`
+    };
+  } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
+}
+
 // ─── 1. Lê Quadro de Monitoramento (procedimentos CMA/cma) ───────────────────
 const QUAD_FILES = {
   cp:  '1º Trimestre - Quadro de Monitoramento/Quadro Monitoramento - Campinas  .xlsx',
@@ -464,11 +511,21 @@ KEYS.forEach(k => {
   }
 
   const metas1T = buildMetas(mon1T.status, mon1T.pct, mon1T.obs, esp1T.status, esp1T.pct, esp1T.obs, oferta1T, sadt1T);
+  // Para 2T: usar dados reais de Abril do CONFIGURACAO.env para oferta e SADT
+  // Monitoramento 2T: tentar usar real2T do mesmo arquivo 1T (col 19); se vazio, pendente
+  const mon2TReal = calcMonitoramentoStatus(procs1T, '2T');
+  const mon2TFinal = (mon2TReal.pct !== null && mon2TReal.pct > 0)
+    ? { ...mon2TReal, obs: mon2TReal.obs + ' (Abr/2026 — 1 de 3 meses)' }
+    : { status: 'pendente', pct: null, obs: 'Quadro de Monitoramento 2T sem dados de Abr ainda' };
+
+  const oferta2T = calcOfertaConsulta2T(k);
+  const sadt2T   = calcSadtLinha2T(k);
+
   const metas2T = buildMetas(
-    mon2T.status, mon2T.pct, mon2T.obs,
+    mon2TFinal.status, mon2TFinal.pct, mon2TFinal.obs,
     esp2T.status, esp2T.pct, esp2T.obs,
-    { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' },
-    { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }
+    oferta2T,
+    sadt2T
   );
 
   // Salva nos sub-objetos 1T e 2T
