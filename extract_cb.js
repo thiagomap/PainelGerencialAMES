@@ -1,0 +1,17 @@
+const fs = require('fs');
+const data = JSON.parse(fs.readFileSync('dados-dashboard.json', 'utf8'));
+const cb = data.ames.cb;
+console.log('CASA BRANCA (cb) - Detailed Analysis:');
+console.log('=====================================');
+console.log('\nQuantidades (4 meses Janeiro-Abril 2026):');
+console.log('  CMA (código 571): contratado=', cb.qtde.cmaA.cont, '| realizado=', cb.qtde.cmaA.real);
+console.log('  cma (código 572): contratado=', cb.qtde.cmaM.cont, '| realizado=', cb.qtde.cmaM.real);
+console.log('\nPercentuais de Cumprimento:');
+console.log('  CMA%:', (cb.analise.pctCmaA || 'não calculado'));
+console.log('  cma%:', (cb.analise.pctCmaM || 'não calculado'));
+console.log('\nAnalise contratual:');
+console.log('  Status:', cb.analise.status.toUpperCase());
+console.log('  Riscos:', cb.analise.riscos);
+console.log('\nMetas semestrais (projetadas):');
+console.log('  CMA meta (6m):', cb.analise.cmaAMeta, '| projetado:', cb.analise.cmaAProj);
+console.log('  cma meta (6m):', cb.analise.cmaMeta, '| projetado:', cb.analise.cmaMProj);

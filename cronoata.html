@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cronoata – Grupo Santa Casa de Franca</title>
+<script src="cronoata-data.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#eef1f6;color:#222;min-height:100vh}
+
+header{background:linear-gradient(135deg,#1a237e 0%,#283593 100%);color:#fff;padding:16px 28px;box-shadow:0 3px 14px rgba(0,0,0,.3)}
+.hdr-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:19px;font-weight:700}
+header p{font-size:12px;opacity:.78;margin-top:3px}
+.hdr-right{font-size:11px;opacity:.8;text-align:right;line-height:1.7}
+
+/* TABS */
+.ame-tabs{display:flex;gap:0;padding:0 28px;background:#fff;border-bottom:1px solid #dde3ef;overflow-x:auto}
+.ame-tab{padding:12px 20px;font-size:13px;font-weight:600;color:#666;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s;position:relative}
+.ame-tab:hover{color:#1a237e}
+.ame-tab.active{color:#1a237e;border-bottom-color:#1a237e}
+.tab-badge{position:absolute;top:6px;right:4px;background:#c0392b;color:#fff;font-size:9px;font-weight:800;border-radius:8px;padding:1px 5px;line-height:1.4}
+
+/* SUMMARY BAR */
+.summary-bar{display:flex;gap:8px;padding:12px 28px;background:#fff;border-bottom:1px solid #dde3ef;flex-wrap:wrap;align-items:center}
+.s-chip{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:all .15s}
+.s-chip.active{border-color:currentColor}
+.s-chip .s-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.s-chip .s-cnt{font-size:14px;font-weight:800;min-width:18px}
+.chip-all{color:#1a237e;background:#e8eaf6} .chip-all .s-dot{background:#1a237e}
+.chip-k{color:#1565c0;background:#e3f2fd}   .chip-k .s-dot{background:#1565c0}
+.chip-6{color:#e65100;background:#fff3e0}   .chip-6 .s-dot{background:#e65100}
+.chip-l{color:#c0392b;background:#fff0f0}   .chip-l .s-dot{background:#c0392b}
+.chip-j{color:#00875a;background:#e8f5e9}   .chip-j .s-dot{background:#00875a}
+.chip-u{color:#757575;background:#f5f5f5}   .chip-u .s-dot{background:#9e9e9e}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:10px;padding:10px 28px;background:#f8f9ff;border-bottom:1px solid #dde3ef;flex-wrap:wrap;align-items:center}
+.search-inp{font-size:12px;padding:6px 12px;border-radius:8px;border:1.5px solid #ccc;width:200px}
+.ame-filter-sel{font-size:12px;padding:6px 10px;border-radius:8px;border:1.5px solid #ccc;background:#fff;cursor:pointer;display:none}
+.ame-filter-sel.visible{display:inline-block}
+.btn{font-size:12px;padding:7px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:600;transition:all .15s}
+.btn-primary{background:#1a237e;color:#fff}.btn-primary:hover{background:#283593}
+.btn-success{background:#00875a;color:#fff}.btn-success:hover{background:#006644}
+.btn-outline{background:#fff;color:#1a237e;border:1.5px solid #1a237e}.btn-outline:hover{background:#e8eaf6}
+.save-status{font-size:12px;margin-left:auto;font-style:italic;color:#888}
+.save-status.saving{color:#e65100}.save-status.saved{color:#00875a}.save-status.err{color:#c0392b}
+
+/* TABLE */
+.table-wrap{padding:12px 28px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+thead tr{background:#1a237e;color:#fff}
+thead th{padding:9px 10px;text-align:left;font-size:11px;font-weight:600;white-space:nowrap}
+thead th.c{text-align:center}
+tbody tr{border-bottom:1px solid #f0f0f0;transition:background .1s}
+tbody tr:hover{background:#f5f7ff}
+tbody tr.st-l{background:#fff8f8}
+tbody tr.st-j{background:#f9fff9}
+tbody tr.hidden-row{display:none}
+td{padding:6px 8px;vertical-align:top}
+td.num-col{width:30px;text-align:center;color:#aaa;font-size:11px}
+td.ame-col{width:100px}
+td.tema-col{width:110px}
+td.resp-col{width:120px}
+td.date-col{width:100px}
+td.status-col{width:95px;text-align:center}
+td.obs-col{max-width:240px;color:#555;font-size:11px;line-height:1.4}
+
+/* Editable cells */
+.editable{cursor:text;min-height:18px;padding:2px 4px;border-radius:4px;transition:background .1s;word-break:break-word}
+.editable:hover{background:#eef2ff}
+.editable:focus{outline:2px solid #3f51b5;background:#fff8dc}
+
+/* AME tag */
+.ame-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700;white-space:nowrap}
+.ame-frc{background:#e8f5e9;color:#2e7d32}
+.ame-scl{background:#e3f2fd;color:#1565c0}
+.ame-rp{background:#f3e5f5;color:#6a1b9a}
+.ame-cp{background:#fff8e1;color:#f57f17}
+.ame-cb{background:#fbe9e7;color:#bf360c}
+.ame-avj{background:#e0f7fa;color:#006064}
+
+/* Status select */
+.status-sel{font-size:11px;border:1.5px solid #ddd;border-radius:6px;padding:2px 4px;background:#fff;cursor:pointer;width:100%}
+
+/* Row actions */
+.act-btn{font-size:10px;padding:2px 7px;border-radius:5px;border:none;cursor:pointer;font-weight:600;transition:all .15s}
+.act-del{background:#fff0f0;color:#c0392b}.act-del:hover{background:#c0392b;color:#fff}
+
+/* Pagination */
+.pagination{display:flex;gap:6px;padding:10px 28px 18px;align-items:center;flex-wrap:wrap}
+.pg-btn{font-size:12px;padding:5px 12px;border-radius:8px;border:1.5px solid #ddd;background:#fff;cursor:pointer;font-weight:600}
+.pg-btn.active{background:#1a237e;color:#fff;border-color:#1a237e}
+.pg-btn:hover:not(.active){background:#eef2ff}
+.pg-info{font-size:12px;color:#666;margin-left:6px}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:28px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.25)}
+.modal h2{font-size:16px;font-weight:700;color:#1a237e;margin-bottom:18px}
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.form-row input,.form-row textarea,.form-row select{width:100%;padding:8px 12px;font-size:13px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;transition:border-color .15s}
+.form-row input:focus,.form-row textarea:focus,.form-row select:focus{outline:none;border-color:#3f51b5}
+.form-row textarea{height:80px;resize:vertical}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;border-top:1px solid #eee;padding-top:16px}
+
+.empty-state{text-align:center;padding:40px;color:#aaa;font-size:14px}
+footer{text-align:center;padding:16px;font-size:11px;color:#aaa;margin-top:4px}
+
+/* ── TEMA FILTER ──────────────────────────────────────────── */
+.tema-filter-sel{font-size:12px;padding:6px 10px;border-radius:8px;border:1.5px solid #ccc;background:#fff;cursor:pointer}
+
+/* ── DASHBOARD ────────────────────────────────────────────── */
+#dashboard-panel{padding:16px 28px;display:none}
+.dash-kpis{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.dash-kpi{background:#fff;border-radius:10px;padding:12px 20px;box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center;flex:1;min-width:110px}
+.dash-kpi .dkv{font-size:22px;font-weight:900;color:#1a237e}
+.dash-kpi .dkl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.dash-kpi.dk-l .dkv{color:#c0392b}
+.dash-kpi.dk-k .dkv{color:#1565c0}
+.dash-kpi.dk-j .dkv{color:#00875a}
+.dash-kpi.dk-6 .dkv{color:#e65100}
+
+.dash-ame-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:900px){.dash-ame-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.dash-ame-grid{grid-template-columns:1fr}}
+.dash-ame-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);border-left:5px solid #ccc;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.dash-ame-card:hover{transform:translateY(-3px);box-shadow:0 6px 22px rgba(0,0,0,.12)}
+.dash-ame-card.has-late{border-left-color:#c0392b}
+.dash-ame-card.no-late{border-left-color:#00875a}
+.dac-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dac-name{font-size:13px;font-weight:700;color:#1a237e}
+.dac-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700}
+.dac-b-ok{background:#e8f5e9;color:#00875a}
+.dac-b-late{background:#fff0f0;color:#c0392b}
+/* Barra de progresso */
+.dac-bar-track{height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:10px}
+.dac-bar-fill{height:100%;border-radius:4px;background:#00875a;transition:width .4s}
+/* Status dots */
+.dac-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px}
+.dac-stat{text-align:center;padding:4px 2px;border-radius:6px;background:#f5f7ff}
+.dac-stat .dsn{font-size:14px;font-weight:800}
+.dac-stat .dsl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.3px}
+.ds-l{background:#fff0f0}.ds-l .dsn{color:#c0392b}
+.ds-k{background:#e3f2fd}.ds-k .dsn{color:#1565c0}
+.ds-6{background:#fff3e0}.ds-6 .dsn{color:#e65100}
+.ds-j{background:#e8f5e9}.ds-j .dsn{color:#00875a}
+/* Lista de atrasadas */
+.dac-late-title{font-size:10px;font-weight:700;color:#c0392b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.dac-late-item{font-size:11px;color:#444;padding:3px 0;border-bottom:1px solid #f5f5f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dac-late-item:last-child{border-bottom:none}
+.dac-no-late{font-size:11px;color:#00875a;font-weight:600}
+.dac-view-btn{width:100%;margin-top:10px;font-size:11px;padding:5px;border-radius:8px;border:1.5px solid #1a237e;color:#1a237e;background:#fff;cursor:pointer;font-weight:700}
+.dac-view-btn:hover{background:#1a237e;color:#fff}
+
+/* Atividades críticas */
+.dash-criticas{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:16px}
+.dash-criticas h3{font-size:13px;font-weight:700;color:#c0392b;margin-bottom:12px}
+.crit-table{width:100%;border-collapse:collapse;font-size:12px}
+.crit-table th{background:#c0392b;color:#fff;padding:6px 10px;text-align:left;font-size:11px}
+.crit-table td{padding:6px 10px;border-bottom:1px solid #f0f0f0}
+.crit-table tr:hover td{background:#fff5f5}
+.crit-ame-tag{font-size:10px;padding:2px 6px;border-radius:6px;font-weight:700}
+
+/* Mini painel por AME (individual) */
+.ame-mini-dash{display:flex;gap:10px;padding:14px 0 8px;flex-wrap:wrap}
+.amd-card{background:#fff;border-radius:10px;padding:10px 16px;font-size:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);flex:1;min-width:100px;text-align:center}
+.amd-card .amc-v{font-size:20px;font-weight:800;color:#1a237e}
+.amd-card .amc-l{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.3px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-inner">
+    <div>
+      <h1>Cronoata – Reunião Gerencial AMEs</h1>
+      <p>Grupo Santa Casa de Franca · Acompanhamento de atividades por unidade</p>
+    </div>
+    <div class="hdr-right">
+      <div id="hdr-ame">–</div>
+      <div id="hdr-counts" style="font-size:10px;opacity:.8">–</div>
+    </div>
+  </div>
+</header>
+
+<div class="ame-tabs" id="ame-tabs"></div>
+
+<div class="summary-bar">
+  <span style="font-size:12px;font-weight:600;color:#555">Status:</span>
+  <div class="s-chip chip-all active" data-filter="all" onclick="setFilter('all',this)">
+    <div class="s-dot"></div><span class="s-cnt" id="cnt-all">–</span><span>Todas</span>
+  </div>
+  <div class="s-chip chip-k" data-filter="K" onclick="setFilter('K',this)">
+    <div class="s-dot"></div><span class="s-cnt" id="cnt-K">–</span><span>Em andamento</span>
+  </div>
+  <div class="s-chip chip-6" data-filter="6" onclick="setFilter('6',this)">
+    <div class="s-dot"></div><span class="s-cnt" id="cnt-6">–</span><span>Não iniciada</span>
+  </div>
+  <div class="s-chip chip-l" data-filter="L" onclick="setFilter('L',this)">
+    <div class="s-dot"></div><span class="s-cnt" id="cnt-L">–</span><span>Atrasada</span>
+  </div>
+  <div class="s-chip chip-j" data-filter="J" onclick="setFilter('J',this)">
+    <div class="s-dot"></div><span class="s-cnt" id="cnt-J">–</span><span>Concluída</span>
+  </div>
+  <div class="s-chip chip-u" data-filter="U" onclick="setFilter('U',this)">
+    <div class="s-dot"></div><span class="s-cnt" id="cnt-U">–</span><span>N/A</span>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="openModal()">+ Nova Atividade</button>
+  <input class="search-inp" type="text" placeholder="🔍 Buscar…" oninput="applySearch(this.value)">
+  <select class="tema-filter-sel" id="tema-filter-sel" onchange="setTemaFilter(this.value)">
+    <option value="all">Todos os temas</option>
+    <option value="Assistencial">Assistencial</option>
+    <option value="Administrativo">Administrativo</option>
+    <option value="Médico">Médico / Diretoria Médica</option>
+    <option value="TI">TI / Tecnologia</option>
+    <option value="Engenharia">Engenharia / Manutenção</option>
+    <option value="Qualidade">Qualidade / Segurança</option>
+    <option value="RH">RH / Pessoas</option>
+    <option value="Farmácia">Farmácia</option>
+    <option value="Financeiro">Financeiro</option>
+    <option value="Outros">Outros</option>
+  </select>
+  <select class="ame-filter-sel" id="ame-filter-sel" onchange="setAmeFilter(this.value)">
+    <option value="all">Todas as AMEs</option>
+    <option value="frc">AME Franca</option>
+    <option value="scl">AME São Carlos</option>
+    <option value="rp">AME Rib. Preto</option>
+    <option value="cp">AME Campinas</option>
+    <option value="cb">AME Casa Branca</option>
+    <option value="avj">AME Vale Jurumirim</option>
+  </select>
+  <button class="btn btn-outline" onclick="exportarJSON()">⬇ Exportar</button>
+  <div class="save-status" id="save-status">Carregando…</div>
+</div>
+
+<div id="dashboard-panel"></div>
+
+<div class="table-wrap">
+  <table id="main-table">
+    <thead id="table-head"></thead>
+    <tbody id="table-body">
+      <tr><td colspan="9" class="empty-state">Carregando dados…</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="pagination" id="pagination"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2 id="modal-title">Nova Atividade</h2>
+    <div class="form-row" id="modal-ame-row">
+      <label>Unidade (AME)</label>
+      <select id="f-ame">
+        <option value="frc">AME Franca</option>
+        <option value="scl">AME São Carlos</option>
+        <option value="rp">AME Ribeirão Preto</option>
+        <option value="cp">AME Campinas</option>
+        <option value="cb">AME Casa Branca</option>
+        <option value="avj">AME Vale Jurumirim</option>
+      </select>
+    </div>
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Tema / Área</label>
+        <input type="text" id="f-tema" placeholder="Ex: Assistencial, TI…">
+      </div>
+      <div class="form-row">
+        <label>Responsável</label>
+        <input type="text" id="f-resp" placeholder="Nome do responsável">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Atividade / Problema</label>
+      <textarea id="f-ativ" placeholder="Descreva a atividade ou problema…"></textarea>
+    </div>
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Data Inicial</label>
+        <input type="date" id="f-data-ini">
+      </div>
+      <div class="form-row">
+        <label>Prazo</label>
+        <input type="date" id="f-prazo">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Status</label>
+      <select id="f-status">
+        <option value="6">Não iniciada</option>
+        <option value="K">Em andamento</option>
+        <option value="J">Concluída</option>
+        <option value="L">Atrasada</option>
+        <option value="U">Não aplicável</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Observações</label>
+      <textarea id="f-obs" placeholder="Atualizações, histórico…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-success" onclick="salvarItem()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<footer>Grupo Santa Casa de Franca · Cronoata Gerencial · <span id="footer-data">–</span></footer>
+
+<script>
+const AME_TABS = [
+  {key:'dashboard', label:'📊 Painel', isDash:true},
+  {key:'geral', label:'🗂 Todas as AMEs', isGeral:true},
+  {key:'frc',   label:'AME Franca'},
+  {key:'scl',   label:'AME São Carlos'},
+  {key:'rp',    label:'AME Rib. Preto'},
+  {key:'cp',    label:'AME Campinas'},
+  {key:'cb',    label:'AME Casa Branca'},
+  {key:'avj',   label:'AME Vale Jurumirim'},
+];
+const AME_LABELS = {
+  frc:'AME Franca', scl:'AME São Carlos', rp:'AME Rib. Preto',
+  cp:'AME Campinas', cb:'AME Casa Branca', avj:'AME Vale Jurumirim'
+};
+const AME_KEYS = ['frc','scl','rp','cp','cb','avj'];
+const ST_LABELS = {'6':'Não iniciada','K':'Em andamento','J':'Concluída','L':'Atrasada','U':'N/A'};
+const ST_OPTS = Object.entries(ST_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+const PAGE_SIZE = 60;
+
+// ── Tema normalization ───────────────────────────────────────────
+const TEMA_CATS = {
+  Assistencial: t => /assistencial|assitencial|assietencial|assistêncial|asssitencial/i.test(t),
+  Administrativo: t => /administrat|administraç|admnistrativ|admistrativ|administr/i.test(t),
+  Médico: t => /médic|medico|diretoria\s*méd|corpo\s*clínic|diretoria\s*técnica/i.test(t),
+  TI: t => /\bTI\b|tecnologia\s*da\s*informa|matriz\s*TI|matriz\s*tecnologia/i.test(t),
+  Engenharia: t => /engenhar|manutenç|manutençã|infraestrutura|infra\s*estrutura/i.test(t),
+  Qualidade: t => /qualidade|segurança\s*do\s*paciente|\bONA\b|\bNSP\b|\bPGRSS\b|\bVISA\b/i.test(t),
+  RH: t => /\bRH\b|pessoas|pessoal|gestão\s*de\s*pess|gestão\s*de\s*cont/i.test(t),
+  Farmácia: t => /farmácia|farmac|cadeia\s*med/i.test(t),
+  Financeiro: t => /financeiro|finanç/i.test(t),
+};
+function categorizaTema(t){
+  for(const [cat,fn] of Object.entries(TEMA_CATS)) if(fn(t)) return cat;
+  return 'Outros';
+}
+
+// ── State ─────────────────────────────────────────────────────────
+let _data   = null;   // { frc:{items:[]}, scl:{items:[]}, ... }
+let _ameKey = 'dashboard';
+let _filter = 'all';
+let _search = '';
+let _ameFilter  = 'all';
+let _temaFilter = 'all';
+let _page   = 1;
+let _editId = null;
+let _saving = false;
+
+// ── Init ─────────────────────────────────────────────────────────
+async function init(){
+  document.getElementById('footer-data').textContent = new Date().toLocaleString('pt-BR');
+  renderTabs();
+  try {
+    const raw = window.CRONOATA_DATA || await fetch('/cronoata-data.json?t='+Date.now()).then(r=>r.json());
+    _data = {};
+    AME_KEYS.forEach(k => { _data[k] = raw[k] || {items:[]}; });
+    setSaveStatus('idle');
+    setAme('dashboard');
+  } catch(e) {
+    setSaveStatus('err','Erro ao carregar dados');
+    document.getElementById('table-body').innerHTML =
+      '<tr><td colspan="9" class="empty-state" style="color:#c0392b">Não foi possível carregar cronoata-data.json. Verifique o servidor.</td></tr>';
+  }
+}
+
+// ── Items ─────────────────────────────────────────────────────────
+function getItems(){
+  if(!_data) return [];
+  if(_ameKey === 'geral'){
+    const all = [];
+    AME_KEYS.forEach(k => (_data[k]?.items||[]).forEach(i => all.push(i)));
+    return all;
+  }
+  return _data[_ameKey]?.items || [];
+}
+
+function findItem(id){
+  for(const k of AME_KEYS){
+    const item = (_data[k]?.items||[]).find(i=>String(i.id)===String(id));
+    if(item) return {item, ameKey:k};
+  }
+  return null;
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────
+function renderTabs(){
+  // count atrasadas per AME for badges
+  document.getElementById('ame-tabs').innerHTML = AME_TABS.map(t => {
+    let late = 0;
+    if(t.isDash){
+      late = AME_KEYS.reduce((s,k)=>s+(_data?(_data[k]?.items||[]).filter(i=>i.status==='L').length:0),0);
+    } else if(t.isGeral){
+      late = AME_KEYS.reduce((s,k)=>s+(_data?(_data[k]?.items||[]).filter(i=>i.status==='L').length:0),0);
+    } else if(_data?.[t.key]){
+      late = _data[t.key].items.filter(i=>i.status==='L').length;
+    }
+    const badge = late>0 ? `<span class="tab-badge">${late}</span>` : '';
+    return `<div class="ame-tab${t.key===_ameKey?' active':''}" data-key="${t.key}" onclick="setAme('${t.key}')">${t.label}${badge}</div>`;
+  }).join('');
+}
+
+function setAme(key){
+  _ameKey     = key;
+  _filter     = 'all';
+  _search     = '';
+  _ameFilter  = 'all';
+  _temaFilter = 'all';
+  _page       = 1;
+  document.querySelector('.search-inp').value = '';
+  document.getElementById('ame-filter-sel').value  = 'all';
+  document.getElementById('tema-filter-sel').value = 'all';
+  document.getElementById('ame-filter-sel').classList.toggle('visible', key==='geral');
+  document.getElementById('hdr-ame').textContent = AME_TABS.find(t=>t.key===key)?.label || key;
+  document.querySelectorAll('.s-chip').forEach(c=>c.classList.toggle('active',c.dataset.filter==='all'));
+
+  const isDash = key === 'dashboard';
+  document.getElementById('dashboard-panel').style.display   = isDash ? 'block' : 'none';
+  document.querySelector('.table-wrap').style.display        = isDash ? 'none'  : 'block';
+  document.getElementById('pagination').style.display        = isDash ? 'none'  : 'block';
+  document.querySelector('.summary-bar').style.display       = isDash ? 'none'  : 'flex';
+  document.querySelector('.search-inp').style.display        = isDash ? 'none'  : '';
+  document.getElementById('tema-filter-sel').style.display   = isDash ? 'none'  : '';
+
+  renderTabs();
+  if(isDash){
+    renderDashboard();
+  } else {
+    renderSummary();
+    renderTable();
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────
+function getAmeStats(k){
+  const items = _data[k]?.items || [];
+  const st = {total:items.length, L:0, K:0, '6':0, J:0, U:0};
+  items.forEach(i=>{ if(st[i.status]!==undefined) st[i.status]++; });
+  st.pctJ = st.total>0 ? Math.round(st.J/st.total*100) : 0;
+  st.late  = items.filter(i=>i.status==='L').sort((a,b)=>toDateInput(a.prazo).localeCompare(toDateInput(b.prazo)));
+  // Breakdown por categoria de tema
+  const temas = {};
+  items.forEach(i=>{
+    const cat = categorizaTema(i.tema||'');
+    temas[cat] = (temas[cat]||0)+1;
+  });
+  st.temas = Object.entries(temas).sort((a,b)=>b[1]-a[1]);
+  return st;
+}
+
+function renderDashboard(){
+  if(!_data){ document.getElementById('dashboard-panel').innerHTML='<div class="empty-state">Carregando…</div>'; return; }
+  const allStats = {};
+  let totTotal=0, totL=0, totK=0, tot6=0, totJ=0;
+  AME_KEYS.forEach(k=>{
+    allStats[k] = getAmeStats(k);
+    totTotal += allStats[k].total;
+    totL     += allStats[k].L;
+    totK     += allStats[k].K;
+    tot6     += allStats[k]['6'];
+    totJ     += allStats[k].J;
+  });
+
+  // KPIs consolidados
+  const kpis = `<div class="dash-kpis">
+    <div class="dash-kpi"><div class="dkv">${totTotal}</div><div class="dkl">Total</div></div>
+    <div class="dash-kpi dk-k"><div class="dkv">${totK}</div><div class="dkl">Em andamento</div></div>
+    <div class="dash-kpi dk-6"><div class="dkv">${tot6}</div><div class="dkl">Não iniciadas</div></div>
+    <div class="dash-kpi dk-l"><div class="dkv">${totL}</div><div class="dkl">Atrasadas</div></div>
+    <div class="dash-kpi dk-j"><div class="dkv">${totJ}</div><div class="dkl">Concluídas</div></div>
+    <div class="dash-kpi"><div class="dkv">${totTotal>0?Math.round(totJ/totTotal*100):0}%</div><div class="dkl">% Concluído</div></div>
+  </div>`;
+
+  // Cards por AME
+  const cards = AME_KEYS.map(k=>{
+    const s = allStats[k];
+    const hasLate = s.L > 0;
+    const lateList = s.late.slice(0,3).map(i=>
+      `<div class="dac-late-item" title="${esc(i.atividade)}">● ${esc(i.atividade.substring(0,55))}${i.atividade.length>55?'…':''}</div>`
+    ).join('');
+    const temaTop3 = s.temas.slice(0,3).map(([c,n])=>`<span style="font-size:10px;background:#e8eaf6;color:#3949ab;border-radius:6px;padding:1px 6px;margin-right:3px">${c} ${n}</span>`).join('');
+    return `<div class="dash-ame-card ${hasLate?'has-late':'no-late'}" onclick="setAme('${k}')">
+      <div class="dac-header">
+        <div class="dac-name">${AME_LABELS[k]}</div>
+        <span class="dac-badge ${hasLate?'dac-b-late':'dac-b-ok'}">${hasLate?s.L+' atrasada(s)':'✓ OK'}</span>
+      </div>
+      <div class="dac-bar-track"><div class="dac-bar-fill" style="width:${s.pctJ}%;background:${s.pctJ>=70?'#00875a':s.pctJ>=40?'#ff8b00':'#c0392b'}"></div></div>
+      <div style="font-size:10px;color:#888;margin:-4px 0 8px;text-align:right">${s.pctJ}% concluído</div>
+      <div class="dac-stats">
+        <div class="dac-stat ds-l"><div class="dsn">${s.L}</div><div class="dsl">Atrasada</div></div>
+        <div class="dac-stat ds-k"><div class="dsn">${s.K}</div><div class="dsl">Andamento</div></div>
+        <div class="dac-stat ds-6"><div class="dsn">${s['6']}</div><div class="dsl">N. iniciada</div></div>
+        <div class="dac-stat ds-j"><div class="dsn">${s.J}</div><div class="dsl">Concluída</div></div>
+      </div>
+      ${temaTop3?`<div style="margin-bottom:8px">${temaTop3}</div>`:''}
+      ${hasLate
+        ? `<div class="dac-late-title">Atrasadas mais antigas</div>${lateList}`
+        : `<div class="dac-no-late">✓ Nenhuma atividade atrasada</div>`}
+      <button class="dac-view-btn">Ver atividades →</button>
+    </div>`;
+  }).join('');
+
+  // Tabela de atividades críticas (todas atrasadas ordenadas por prazo)
+  const allLate = AME_KEYS.flatMap(k=>
+    (_data[k]?.items||[]).filter(i=>i.status==='L').map(i=>({...i, _ame:k}))
+  ).sort((a,b)=>toDateInput(a.prazo).localeCompare(toDateInput(b.prazo)));
+
+  const lateRows = allLate.slice(0,15).map((i,n)=>`<tr>
+    <td>${n+1}</td>
+    <td><span class="crit-ame-tag ame-${i.ame}">${AME_LABELS[i.ame]||i.ame}</span></td>
+    <td style="color:#555;font-size:11px">${esc(i.tema||'–')}</td>
+    <td>${esc(i.atividade)}</td>
+    <td>${esc(i.responsavel||'–')}</td>
+    <td style="color:#c0392b;font-weight:700">${i.prazo||'–'}</td>
+    <td style="font-size:11px;color:#666">${esc((i.observacoes||'').substring(0,60))}</td>
+  </tr>`).join('');
+
+  const criticas = allLate.length > 0 ? `<div class="dash-criticas">
+    <h3>🚨 Atividades Atrasadas (${allLate.length} total · mostrando 15 mais antigas)</h3>
+    <div style="overflow-x:auto"><table class="crit-table">
+      <thead><tr><th>#</th><th>Unidade</th><th>Tema</th><th>Atividade</th><th>Responsável</th><th>Prazo</th><th>Observação</th></tr></thead>
+      <tbody>${lateRows}</tbody>
+    </table></div>
+  </div>` : '<div style="background:#e8f5e9;padding:14px 18px;border-radius:10px;color:#00875a;font-weight:700;margin-bottom:16px">✓ Nenhuma atividade atrasada em todas as AMEs!</div>';
+
+  document.getElementById('dashboard-panel').innerHTML =
+    kpis +
+    `<div style="font-size:12px;font-weight:700;color:#1a237e;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Acompanhamento por Unidade</div>` +
+    `<div class="dash-ame-grid">${cards}</div>` +
+    criticas;
+}
+
+// ── Summary counts ────────────────────────────────────────────────
+function renderSummary(){
+  const items = getVisibleItems();
+  const counts = {all:items.length,'6':0,K:0,J:0,L:0,U:0};
+  items.forEach(i=>{ if(counts[i.status]!==undefined) counts[i.status]++; });
+  ['all','6','K','J','L','U'].forEach(k=>{
+    const el=document.getElementById('cnt-'+k);
+    if(el) el.textContent=counts[k]??0;
+  });
+  const total = getItems().length;
+  document.getElementById('hdr-counts').textContent =
+    total+' atividades · '+counts.K+' em andamento · '+counts.L+' atrasadas';
+}
+
+// ── Filtered items (before pagination) ───────────────────────────
+function getVisibleItems(){
+  let items = getItems();
+  if(_ameFilter!=='all' && _ameKey==='geral') items = items.filter(i=>i.ame===_ameFilter);
+  if(_temaFilter!=='all') items = items.filter(i=>categorizaTema(i.tema||'')===_temaFilter);
+  if(_filter!=='all') items = items.filter(i=>i.status===_filter);
+  if(_search){
+    const q=_search.toLowerCase();
+    items = items.filter(i=>
+      (i.atividade||'').toLowerCase().includes(q)||
+      (i.responsavel||'').toLowerCase().includes(q)||
+      (i.tema||'').toLowerCase().includes(q)||
+      (i.observacoes||'').toLowerCase().includes(q)||
+      (i.ameLabel||'').toLowerCase().includes(q)
+    );
+  }
+  return items;
+}
+
+// ── Table header ──────────────────────────────────────────────────
+function renderHead(){
+  const isGeral = _ameKey==='geral';
+  document.getElementById('table-head').innerHTML = `<tr>
+    <th class="c">#</th>
+    ${isGeral?'<th>Unidade</th>':''}
+    <th>Tema</th>
+    <th>Atividade</th>
+    <th>Responsável</th>
+    <th class="c">Prazo</th>
+    <th class="c">Status</th>
+    <th>Observações</th>
+    <th class="c">Ações</th>
+  </tr>`;
+}
+
+// ── Table ─────────────────────────────────────────────────────────
+function renderTable(){
+  renderHead();
+  const isGeral = _ameKey==='geral';
+  const cols = isGeral ? 9 : 8;
+  const items = getVisibleItems();
+  const total = items.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if(_page > totalPages) _page = 1;
+
+  const pageItems = items.slice((_page-1)*PAGE_SIZE, _page*PAGE_SIZE);
+  const tbody = document.getElementById('table-body');
+
+  if(!pageItems.length){
+    tbody.innerHTML=`<tr><td colspan="${cols}" class="empty-state">Nenhuma atividade encontrada.</td></tr>`;
+    renderPagination(total, totalPages);
+    return;
+  }
+
+  const startNum = (_page-1)*PAGE_SIZE;
+  tbody.innerHTML = pageItems.map((item,idx) => buildRow(item, startNum+idx+1, isGeral)).join('');
+  renderPagination(total, totalPages);
+}
+
+function buildRow(item, num, isGeral){
+  const rowCls = item.status==='L'?'st-l':item.status==='J'?'st-j':'';
+  const stOpts = Object.entries(ST_LABELS).map(([v,l])=>
+    `<option value="${v}"${v===item.status?' selected':''}>${l}</option>`
+  ).join('');
+  return `<tr data-id="${item.id}" class="${rowCls}">
+    <td class="num-col">${num}</td>
+    ${isGeral?`<td class="ame-col"><span class="ame-tag ame-${item.ame}">${item.ameLabel||item.ame}</span></td>`:''}
+    <td class="tema-col"><div class="editable" contenteditable="true" data-field="tema" data-id="${item.id}" onblur="updateField(this)">${esc(item.tema)}</div></td>
+    <td><div class="editable" contenteditable="true" data-field="atividade" data-id="${item.id}" onblur="updateField(this)" style="min-width:160px">${esc(item.atividade)}</div></td>
+    <td class="resp-col"><div class="editable" contenteditable="true" data-field="responsavel" data-id="${item.id}" onblur="updateField(this)">${esc(item.responsavel)}</div></td>
+    <td class="date-col"><input type="date" class="status-sel" style="width:100%" value="${toDateInput(item.prazo)}" onchange="updateDateField(this,'prazo','${item.id}')"></td>
+    <td class="status-col"><select class="status-sel" onchange="updateStatus(this,'${item.id}')">${stOpts}</select></td>
+    <td class="obs-col"><div class="editable" contenteditable="true" data-field="observacoes" data-id="${item.id}" onblur="updateField(this)">${esc(item.observacoes)}</div></td>
+    <td class="c"><button class="act-btn act-del" onclick="deletarItem('${item.id}')" title="Excluir">✕</button></td>
+  </tr>`;
+}
+
+// ── Pagination ────────────────────────────────────────────────────
+function renderPagination(total, totalPages){
+  const el = document.getElementById('pagination');
+  if(totalPages<=1){ el.innerHTML=''; return; }
+  const start = (_page-1)*PAGE_SIZE+1;
+  const end   = Math.min(_page*PAGE_SIZE, total);
+  let html = `<span class="pg-info">Exibindo ${start}–${end} de ${total}</span>`;
+  const maxBtns = 8;
+  let pStart = Math.max(1, _page-3), pEnd = Math.min(totalPages, pStart+maxBtns-1);
+  if(pEnd-pStart < maxBtns-1) pStart = Math.max(1, pEnd-maxBtns+1);
+  if(pStart>1) html+=`<button class="pg-btn" onclick="goPage(1)">«</button>`;
+  for(let p=pStart;p<=pEnd;p++){
+    html+=`<button class="pg-btn${p===_page?' active':''}" onclick="goPage(${p})">${p}</button>`;
+  }
+  if(pEnd<totalPages) html+=`<button class="pg-btn" onclick="goPage(${totalPages})">»</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p){
+  _page = p;
+  renderTable();
+  window.scrollTo(0,0);
+}
+
+// ── Filters ───────────────────────────────────────────────────────
+function setFilter(f, el){
+  _filter='all'===f?'all':f; _page=1;
+  document.querySelectorAll('.s-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderSummary();
+  renderTable();
+}
+function applySearch(v){ _search=v.toLowerCase(); _page=1; renderSummary(); renderTable(); }
+function setAmeFilter(v){ _ameFilter=v; _page=1; renderSummary(); renderTable(); }
+function setTemaFilter(v){ _temaFilter=v; _page=1; renderSummary(); renderTable(); }
+
+// ── Field updates ─────────────────────────────────────────────────
+function updateField(el){
+  const id=el.dataset.id, field=el.dataset.field, val=el.innerText.trim();
+  const found=findItem(id);
+  if(found && found.item[field]!==val){ found.item[field]=val; autoSave(); }
+}
+function updateStatus(sel, id){
+  const found=findItem(id);
+  if(found){
+    found.item.status=sel.value;
+    const row=sel.closest('tr');
+    row.className=found.item.status==='L'?'st-l':found.item.status==='J'?'st-j':'';
+    renderSummary(); renderTabs(); autoSave();
+  }
+}
+function updateDateField(inp, field, id){
+  const found=findItem(id);
+  if(found){ found.item[field]=inp.value?new Date(inp.value).toLocaleDateString('pt-BR'):''; autoSave(); }
+}
+function toDateInput(str){
+  if(!str) return '';
+  const p=str.split('/');
+  return p.length===3?`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`:'';
+}
+
+// ── Auto-save ─────────────────────────────────────────────────────
+let _saveTimer=null;
+function autoSave(){ setSaveStatus('saving','Salvando…'); clearTimeout(_saveTimer); _saveTimer=setTimeout(salvarNoServidor,1500); }
+async function salvarNoServidor(){
+  if(_saving) return; _saving=true;
+  try{
+    const r=await fetch('/api/salvar-cronoata',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_data)});
+    const res=await r.json();
+    if(res.ok) setSaveStatus('saved','✓ Salvo '+new Date().toLocaleTimeString('pt-BR'));
+    else setSaveStatus('err','Erro: '+res.erro);
+  }catch(e){ setSaveStatus('err','Erro de rede'); }
+  _saving=false;
+}
+function setSaveStatus(type,msg){
+  const el=document.getElementById('save-status');
+  const defaults={idle:'Dados carregados',saving:'Salvando…',saved:'✓ Salvo',err:'Erro ao salvar'};
+  el.textContent=msg||defaults[type]||'';
+  el.className='save-status '+(type==='saving'?'saving':type==='saved'?'saved':type==='err'?'err':'');
+}
+
+// ── Modal ─────────────────────────────────────────────────────────
+function openModal(id){
+  _editId=id||null;
+  const found=id?findItem(id):null;
+  const item=found?.item;
+  const isGeral=_ameKey==='geral';
+  document.getElementById('modal-title').textContent=item?'Editar Atividade':'Nova Atividade';
+  document.getElementById('modal-ame-row').style.display=(item&&!isGeral)?'none':'block';
+  document.getElementById('f-ame').value=item?.ame||(_ameKey!=='geral'?_ameKey:'frc');
+  document.getElementById('f-tema').value=item?.tema||'';
+  document.getElementById('f-resp').value=item?.responsavel||'';
+  document.getElementById('f-ativ').value=item?.atividade||'';
+  document.getElementById('f-data-ini').value=item?.dataInicial?toDateInput(item.dataInicial):'';
+  document.getElementById('f-prazo').value=item?.prazo?toDateInput(item.prazo):'';
+  document.getElementById('f-status').value=item?.status||'6';
+  document.getElementById('f-obs').value=item?.observacoes||'';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); _editId=null; }
+
+function salvarItem(){
+  const ameKey    = document.getElementById('f-ame').value;
+  const tema      = document.getElementById('f-tema').value.trim();
+  const responsavel=document.getElementById('f-resp').value.trim();
+  const atividade = document.getElementById('f-ativ').value.trim();
+  const dataIni   = document.getElementById('f-data-ini').value;
+  const prazoRaw  = document.getElementById('f-prazo').value;
+  const status    = document.getElementById('f-status').value;
+  const observacoes=document.getElementById('f-obs').value.trim();
+  if(!atividade){ alert('Preencha a Atividade.'); return; }
+  const dataInicial=dataIni?new Date(dataIni).toLocaleDateString('pt-BR'):'';
+  const prazo=prazoRaw?new Date(prazoRaw).toLocaleDateString('pt-BR'):'';
+  if(_editId){
+    const found=findItem(_editId);
+    if(found) Object.assign(found.item,{tema,responsavel,atividade,dataInicial,prazo,status,observacoes});
+  } else {
+    // Usar AME do dropdown quando em modo dashboard ou geral
+    const target = (_ameKey!=='geral' && _ameKey!=='dashboard') ? _ameKey : ameKey;
+    if(!_data[target]) _data[target]={items:[]};
+    _data[target].items.push({
+      id:Date.now(), ame:target, ameLabel:AME_LABELS[target],
+      tema, atividade, responsavel, dataInicial, prazo, status, observacoes, num:null
+    });
+  }
+  closeModal(); renderTabs();
+  if(_ameKey==='dashboard'){ renderDashboard(); } else { renderSummary(); renderTable(); }
+  autoSave();
+}
+
+// ── Delete ────────────────────────────────────────────────────────
+function deletarItem(id){
+  if(!confirm('Excluir esta atividade?')) return;
+  for(const k of AME_KEYS){
+    const arr=_data[k]?.items||[];
+    const idx=arr.findIndex(i=>String(i.id)===String(id));
+    if(idx!==-1){ arr.splice(idx,1); break; }
+  }
+  renderTabs();
+  if(_ameKey==='dashboard'){ renderDashboard(); } else { renderSummary(); renderTable(); }
+  autoSave();
+}
+
+// ── Export ────────────────────────────────────────────────────────
+function exportarJSON(){
+  const blob=new Blob([JSON.stringify(_data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`cronoata-${_ameKey}-${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json`;
+  a.click();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
+
+init();
+</script>
+</body>
+</html>

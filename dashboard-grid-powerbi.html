@@ -1,0 +1,1460 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório Gerencial – Grupo Santa Casa de Franca</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="dados-embutidos.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222}
+.header{background:linear-gradient(135deg,#003366 0%,#005a9e 100%);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.header h1{font-size:20px;font-weight:700;letter-spacing:.3px}
+.header-meta{display:flex;gap:24px;flex-wrap:wrap}
+.meta-item{text-align:center}
+.meta-label{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px}
+.meta-value{font-size:18px;font-weight:700}
+.tabs{background:#fff;border-bottom:2px solid #e0e6ef;display:flex;flex-wrap:wrap;padding:0 16px}
+.tab{padding:12px 18px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#666;white-space:nowrap;transition:all .2s}
+.tab:hover{color:#005a9e;background:#f5f8ff}
+.tab.active{color:#005a9e;border-bottom-color:#005a9e;background:#f5f8ff}
+.content{display:none;padding:20px;max-width:1600px;margin:0 auto}
+.content.active{display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #005a9e}
+.kpi.green{border-left-color:#00875a}
+.kpi.red{border-left-color:#de350b}
+.kpi.orange{border-left-color:#ff8b00}
+.kpi.purple{border-left-color:#6554c0}
+.kpi.teal{border-left-color:#008080}
+.kpi-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.kpi-value{font-size:22px;font-weight:700;color:#222}
+.kpi-sub{font-size:11px;color:#888;margin-top:3px}
+.kpi-sub.pos{color:#00875a}
+.kpi-sub.neg{color:#de350b}
+.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.charts-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-box{background:#fff;border-radius:10px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.chart-box.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:700;color:#003366;margin-bottom:14px;text-transform:uppercase;letter-spacing:.3px}
+.chart-wrap{position:relative;height:260px}
+.chart-wrap.tall{height:320px}
+.chart-wrap.sm{height:200px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#003366;color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:12px;white-space:nowrap}
+th.right,td.right{text-align:right}
+th.center,td.center{text-align:center}
+td{padding:7px 10px;border-bottom:1px solid #edf0f4;white-space:nowrap}
+tr:nth-child(even) td{background:#f7f9fc}
+tr.total td{background:#e8edf5;font-weight:700;color:#003366}
+tr.subtotal td{background:#f0f4fb;font-weight:600}
+tr.group td{background:#003366;color:#fff;font-weight:700}
+.pos{color:#00875a}
+.neg{color:#de350b}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-ame{background:#e3f0ff;color:#005a9e}
+.badge-hosp{background:#e6f5ec;color:#00875a}
+.badge-ok{background:#e6f5ec;color:#00875a}
+.badge-alert{background:#fff3cd;color:#856404}
+.badge-bad{background:#fde8e4;color:#de350b}
+.section-title{font-size:15px;font-weight:700;color:#003366;margin:20px 0 12px;padding-bottom:6px;border-bottom:2px solid #e0e6ef}
+.cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.cards-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.unit-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:4px solid #005a9e}
+.unit-card h3{font-size:13px;font-weight:700;color:#003366;margin-bottom:10px}
+.unit-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #f0f0f0}
+.unit-row:last-child{border-bottom:none}
+.unit-label{color:#666}
+.unit-val{font-weight:600}
+.note{font-size:11px;color:#888;font-style:italic;margin-top:8px}
+.av{color:#888;font-size:11px}
+@media(max-width:900px){.charts-2,.charts-3{grid-template-columns:1fr}.cards-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📊 Relatório Gerencial – Grupo Santa Casa de Misericórdia de Franca</h1>
+    <div style="font-size:12px;opacity:.8;margin-top:4px">Março / 2026 &nbsp;|&nbsp; Fonte: Relatório Gerencial 03/2026 + Fluxos de Caixa</div>
+  </div>
+  <div class="header-meta">
+    <div class="meta-item"><div class="meta-label">Período</div><div class="meta-value">Mar/2026</div></div>
+    <div class="meta-item"><div class="meta-label">Instituições</div><div class="meta-value">7</div></div>
+    <div class="meta-item"><div class="meta-label">Entradas Grupo</div><div class="meta-value">R$ 42,1M</div></div>
+    <div class="meta-item"><div class="meta-label">Resultado</div><div class="meta-value" style="color:#7fffb0">R$ 5,4M</div></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('geral')">🏠 Visão Geral</div>
+  <div class="tab" onclick="showTab('drp')">📋 Hospital – DRP</div>
+  <div class="tab" onclick="showTab('unidades')">🏥 Unidades de Negócio</div>
+  <div class="tab" onclick="showTab('ames')">🏢 AMEs</div>
+  <div class="tab" onclick="showTab('convenios')">🤝 Convênios</div>
+  <div class="tab" onclick="showTab('doacoes')">❤️ Central de Doações</div>
+  <div class="tab" onclick="showTab('caixa')">💰 Fluxo de Caixa</div>
+  <div class="tab" onclick="showTab('balanco')">⚖️ Balanço Patrimonial</div>
+  <div class="tab" onclick="showTab('especialidades')">🔬 Especialidades</div>
+  <div class="tab" onclick="showTab('indicadores')">📋 Indicadores</div>
+</div>
+
+<!-- ===== TAB 1: VISÃO GERAL ===== -->
+<div id="tab-geral" class="content active">
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-label">Entradas Totais – Mar/26</div><div class="kpi-value">R$ 42.100.171</div><div class="kpi-sub">7 instituições consolidadas</div></div>
+    <div class="kpi orange"><div class="kpi-label">Saídas Totais – Mar/26</div><div class="kpi-value">R$ 36.710.281</div><div class="kpi-sub">Folha + Insumos + Honorários</div></div>
+    <div class="kpi green"><div class="kpi-label">Resultado – Mar/26</div><div class="kpi-value pos">R$ 5.389.891</div><div class="kpi-sub pos">Margem: 12,80%</div></div>
+    <div class="kpi"><div class="kpi-label">Resultado Acumulado Jan–Mar</div><div class="kpi-value pos">R$ 9.562.966</div><div class="kpi-sub pos">Jan+Fev+Mar consolidado</div></div>
+    <div class="kpi purple"><div class="kpi-label">AMEs – Resultado Mar/26</div><div class="kpi-value pos">R$ 998.397</div><div class="kpi-sub">6 AMEs | 2 em déficit</div></div>
+    <div class="kpi teal"><div class="kpi-label">Hospital – Resultado Mar/26</div><div class="kpi-value pos">R$ 4.391.494</div><div class="kpi-sub">Fluxo de caixa</div></div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-box">
+      <div class="chart-title">Resultado por Instituição – Março/2026</div>
+      <div class="chart-wrap"><canvas id="ch-resultado-inst"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Evolução Mensal Consolidada – Jan a Abr/2026</div>
+      <div class="chart-wrap"><canvas id="ch-evolucao"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-box" style="margin-bottom:20px">
+    <div class="chart-title">Receita × Despesa por Instituição – Março/2026</div>
+    <div class="chart-wrap tall"><canvas id="ch-recdesp"></canvas></div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-title">Comparativo Institucional – Março/2026</div>
+    <table>
+      <tr><th>Instituição</th><th>Tipo</th><th class="right">Entradas</th><th class="right">Saídas</th><th class="right">Resultado</th><th class="right">Margem</th><th class="center">Status</th></tr>
+      <tr><td>Santa Casa de Franca</td><td><span class="badge badge-hosp">Hospital</span></td><td class="right">R$ 29.923.908</td><td class="right">R$ 25.532.414</td><td class="right pos">R$ 4.391.494</td><td class="right pos">14,68%</td><td class="center"><span class="badge badge-ok">✓ Positivo</span></td></tr>
+      <tr><td>AME Campinas</td><td><span class="badge badge-ame">AME</span></td><td class="right">R$ 3.529.230</td><td class="right">R$ 3.171.039</td><td class="right pos">R$ 358.191</td><td class="right pos">10,15%</td><td class="center"><span class="badge badge-ok">✓ Positivo</span></td></tr>
+      <tr><td>AME Ribeirão Preto</td><td><span class="badge badge-ame">AME</span></td><td class="right">R$ 2.704.160</td><td class="right">R$ 2.412.944</td><td class="right pos">R$ 291.216</td><td class="right pos">10,77%</td><td class="center"><span class="badge badge-ok">✓ Positivo</span></td></tr>
+      <tr><td>AME Jurumirim</td><td><span class="badge badge-ame">AME</span></td><td class="right">R$ 1.908.764</td><td class="right">R$ 1.534.689</td><td class="right pos">R$ 374.075</td><td class="right pos">19,60%</td><td class="center"><span class="badge badge-ok">✓ Positivo</span></td></tr>
+      <tr><td>AME Franca</td><td><span class="badge badge-ame">AME</span></td><td class="right">R$ 1.917.496</td><td class="right">R$ 1.902.328</td><td class="right pos">R$ 15.168</td><td class="right pos">0,79%</td><td class="center"><span class="badge badge-alert">⚠ Apertado</span></td></tr>
+      <tr><td>AME São Carlos</td><td><span class="badge badge-ame">AME</span></td><td class="right">R$ 1.062.689</td><td class="right">R$ 1.066.883</td><td class="right neg">-R$ 4.194</td><td class="right neg">-0,39%</td><td class="center"><span class="badge badge-bad">✗ Déficit</span></td></tr>
+      <tr><td>AME Casa Branca</td><td><span class="badge badge-ame">AME</span></td><td class="right">R$ 1.053.924</td><td class="right">R$ 1.089.984</td><td class="right neg">-R$ 36.060</td><td class="right neg">-3,42%</td><td class="center"><span class="badge badge-bad">✗ Déficit</span></td></tr>
+      <tr class="total"><td colspan="2">TOTAL GRUPO</td><td class="right">R$ 42.100.171</td><td class="right">R$ 36.710.281</td><td class="right pos">R$ 5.389.891</td><td class="right pos">12,80%</td><td></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 2: DRP HOSPITAL ===== -->
+<div id="tab-drp" class="content">
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-label">Receita SUS</div><div class="kpi-value">R$ 8.990.643</div><div class="kpi-sub neg">-10% vs orçado</div></div>
+    <div class="kpi"><div class="kpi-label">Receita Convênios/Particular</div><div class="kpi-value">R$ 3.217.413</div><div class="kpi-sub pos">+6% vs orçado</div></div>
+    <div class="kpi purple"><div class="kpi-label">Tabela Paulista</div><div class="kpi-value">R$ 5.790.024</div><div class="kpi-sub">≈ zero variação</div></div>
+    <div class="kpi orange"><div class="kpi-label">Custo Assistencial</div><div class="kpi-value neg">-R$ 20.898.000</div><div class="kpi-sub neg">-111% da ROL</div></div>
+    <div class="kpi red"><div class="kpi-label">EBITDA (KPIH)</div><div class="kpi-value neg">-R$ 1.430.761</div><div class="kpi-sub neg">-8% da ROL</div></div>
+    <div class="kpi red"><div class="kpi-label">Resultado Líquido (KPIH)</div><div class="kpi-value neg">-R$ 1.108.298</div><div class="kpi-sub neg">-6% da ROL</div></div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-box">
+      <div class="chart-title">Composição da Receita – Mar/2026</div>
+      <div class="chart-wrap"><canvas id="ch-receita-comp"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Real vs Orçado – Receitas (R$)</div>
+      <div class="chart-wrap"><canvas id="ch-real-orc"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">DRP – Demonstrativo de Resultado do Período (Hospital – exceto AMEs)</div>
+  <div class="chart-box">
+    <table>
+      <tr><th>Linha DRP</th><th class="right">Real Mar/25</th><th class="center">AV%</th><th class="right">Real Mar/26</th><th class="center">AV%</th><th class="right">Orç Mar/26</th><th class="center">AV%</th><th class="right">Variação</th><th class="center">AH%</th></tr>
+      <tr class="group"><td colspan="9">RECEITAS</td></tr>
+      <tr class="subtotal"><td>▸ RECEITA LÍQUIDA – SUS</td><td class="right">9.078.174</td><td class="center av">45%</td><td class="right">8.990.643</td><td class="center av">40%</td><td class="right">9.992.854</td><td class="center av">46%</td><td class="right neg">-1.002.211</td><td class="center neg">-10%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(+) Receita MAC</td><td class="right">5.826.208</td><td class="center av">29%</td><td class="right">4.907.242</td><td class="center av">22%</td><td class="right">6.552.081</td><td class="center av">30%</td><td class="right neg">-1.644.839</td><td class="center neg">-25%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(+) Receita FAEC</td><td class="right">1.242.386</td><td class="center av">6%</td><td class="right">1.833.562</td><td class="center av">8%</td><td class="right">1.431.193</td><td class="center av">7%</td><td class="right pos">+402.369</td><td class="center pos">+28%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(+) Receita Incentivos</td><td class="right">2.009.580</td><td class="center av">10%</td><td class="right">2.249.838</td><td class="center av">10%</td><td class="right">2.009.580</td><td class="center av">9%</td><td class="right pos">+240.258</td><td class="center pos">+12%</td></tr>
+      <tr class="subtotal"><td>▸ RECEITA CONVÊNIOS/PARTICULAR</td><td class="right">2.515.737</td><td class="center av">13%</td><td class="right">3.217.413</td><td class="center av">14%</td><td class="right">3.022.411</td><td class="center av">14%</td><td class="right pos">+195.002</td><td class="center pos">+6%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(+) Convênios</td><td class="right">2.104.693</td><td class="center av">11%</td><td class="right">2.718.401</td><td class="center av">12%</td><td class="right">2.522.900</td><td class="center av">12%</td><td class="right pos">+195.501</td><td class="center pos">+8%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(+) Particulares</td><td class="right">117.310</td><td class="center av">1%</td><td class="right">229.811</td><td class="center av">1%</td><td class="right">184.305</td><td class="center av">1%</td><td class="right pos">+45.506</td><td class="center pos">+25%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(+) Receita CMD</td><td class="right">293.734</td><td class="center av">1%</td><td class="right">269.201</td><td class="center av">1%</td><td class="right">315.206</td><td class="center av">1%</td><td class="right neg">-46.005</td><td class="center neg">-15%</td></tr>
+      <tr class="subtotal"><td>▸ CONTRATO COLABORAÇÃO (AMEs)</td><td class="right">840.783</td><td class="center av">4%</td><td class="right">469.444</td><td class="center av">2%</td><td class="right">441.999</td><td class="center av">2%</td><td class="right pos">+27.445</td><td class="center pos">+6%</td></tr>
+      <tr class="subtotal"><td>▸ DOAÇÕES, SUBVENÇÕES E COMPLEMENTAÇÕES</td><td class="right">1.453.238</td><td class="center av">7%</td><td class="right">3.635.535</td><td class="center av">16%</td><td class="right">2.020.060</td><td class="center av">9%</td><td class="right pos">+1.615.475</td><td class="center pos">+80%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Subvenções Investimento</td><td class="right">298.083</td><td class="center av">1%</td><td class="right">322.463</td><td class="center av">1%</td><td class="right">315.690</td><td class="center av">1%</td><td class="right pos">+6.773</td><td class="center pos">+2%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Subvenções Custeio</td><td class="right">575.137</td><td class="center av">3%</td><td class="right">2.478.214</td><td class="center av">11%</td><td class="right">1.119.077</td><td class="center av">5%</td><td class="right pos">+1.359.137</td><td class="center pos">+121%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Receitas com Doação</td><td class="right">580.019</td><td class="center av">3%</td><td class="right">834.858</td><td class="center av">4%</td><td class="right">585.293</td><td class="center av">3%</td><td class="right pos">+249.565</td><td class="center pos">+43%</td></tr>
+      <tr class="subtotal"><td>▸ COMPLEMENTAÇÃO ESTADUAL (TABELA PAULISTA)</td><td class="right">5.791.097</td><td class="center av">29%</td><td class="right">5.790.024</td><td class="center av">26%</td><td class="right">5.790.024</td><td class="center av">27%</td><td class="right">≈ 0</td><td class="center">0%</td></tr>
+      <tr class="group"><td colspan="9">DESEMPENHO ECONÔMICO (KPIH)</td></tr>
+      <tr><td>Receita Operacional Líquida</td><td class="right">18.572.198</td><td class="center av">100%</td><td class="right">18.812.167</td><td class="center av">100%</td><td class="right">19.578.866</td><td class="center av">100%</td><td class="right neg">-766.699</td><td class="center neg">-4%</td></tr>
+      <tr><td>(-) Custo Assistencial</td><td class="right neg">-18.672.020</td><td class="center av">-101%</td><td class="right neg">-20.897.940</td><td class="center av">-111%</td><td class="right neg">-20.106.487</td><td class="center av">-103%</td><td class="right neg">-791.453</td><td class="center neg">+4%</td></tr>
+      <tr><td>(-) Despesas Operacionais</td><td class="right neg">-2.359.558</td><td class="center av">-13%</td><td class="right neg">-3.133.568</td><td class="center av">-17%</td><td class="right neg">-2.737.459</td><td class="center av">-14%</td><td class="right neg">-396.110</td><td class="center neg">+14%</td></tr>
+      <tr><td>(+) Subvenções Governamentais Custeio</td><td class="right pos">575.137</td><td class="center av">3%</td><td class="right pos">2.478.214</td><td class="center av">13%</td><td class="right pos">1.119.077</td><td class="center av">6%</td><td class="right pos">+1.359.137</td><td class="center pos">+121%</td></tr>
+      <tr class="subtotal"><td>EBITDA AJUSTADO</td><td class="right neg">-1.884.244</td><td class="center av">-10%</td><td class="right neg">-2.741.127</td><td class="center av">-15%</td><td class="right neg">-2.146.003</td><td class="center av">-11%</td><td class="right neg">-595.124</td><td class="center neg">+28%</td></tr>
+      <tr><td>(+) Outras Receitas / Despesas</td><td class="right pos">2.270.005</td><td class="center av">12%</td><td class="right pos">1.310.366</td><td class="center av">7%</td><td class="right pos">959.716</td><td class="center av">5%</td><td class="right pos">+350.650</td><td class="center pos">+37%</td></tr>
+      <tr class="subtotal"><td>EBITDA</td><td class="right pos">385.762</td><td class="center av">2%</td><td class="right neg">-1.430.761</td><td class="center av">-8%</td><td class="right neg">-1.186.287</td><td class="center av">-6%</td><td class="right neg">-244.474</td><td class="center neg">+21%</td></tr>
+      <tr><td>(+) Subvenções de Investimento</td><td class="right pos">298.083</td><td class="center av">2%</td><td class="right pos">322.463</td><td class="center av">2%</td><td class="right pos">315.690</td><td class="center av">2%</td><td class="right pos">+6.773</td><td class="center pos">+2%</td></tr>
+      <tr class="total"><td>RESULTADO LÍQUIDO</td><td class="right pos">683.845</td><td class="center av">4%</td><td class="right neg">-1.108.298</td><td class="center av">-6%</td><td class="right neg">-870.596</td><td class="center av">-4%</td><td class="right neg">-237.702</td><td class="center neg">+27%</td></tr>
+    </table>
+    <p class="note">* DRP Hospital exclui AMEs. Fonte: Relatório Gerencial 03/2026, p.4-5 e p.13 (KPIH).</p>
+  </div>
+</div>
+
+<!-- ===== TAB 3: UNIDADES DE NEGÓCIO ===== -->
+<div id="tab-unidades" class="content">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Receita Total Grupo (KPIH)</div><div class="kpi-value">R$ 23.386.240</div><div class="kpi-sub">6 unidades operacionais</div></div>
+    <div class="kpi orange"><div class="kpi-label">Pessoal Não Médico</div><div class="kpi-value">R$ 5.659.029</div><div class="kpi-sub">24,2% da receita</div></div>
+    <div class="kpi red"><div class="kpi-label">Pessoal Médico (HM)</div><div class="kpi-value">R$ 5.393.751</div><div class="kpi-sub">23,1% da receita</div></div>
+    <div class="kpi purple"><div class="kpi-label">Mat/Med Paciente</div><div class="kpi-value">R$ 4.599.358</div><div class="kpi-sub">19,7% da receita</div></div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-box">
+      <div class="chart-title">Receita Líquida por Unidade de Negócio</div>
+      <div class="chart-wrap"><canvas id="ch-unid-rec"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Estrutura de Custos por Unidade</div>
+      <div class="chart-wrap"><canvas id="ch-unid-custo"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">Resultado por Unidade de Negócio – Março/2026 (Sistema KPIH)</div>
+  <div class="chart-box">
+    <table>
+      <tr><th>Unidade</th><th class="right">Receita Líquida</th><th class="right">Pessoal NM</th><th class="right">Pessoal M (HM)</th><th class="right">Mat/Med</th><th class="right">Mat Consumo</th><th class="right">Custos Gerais</th><th class="right">Rateios</th></tr>
+      <tr><td>🏥 Santa Casa (Hospital Geral)</td><td class="right pos">8.739.046</td><td class="right">2.833.196</td><td class="right">2.883.236</td><td class="right">1.826.771</td><td class="right">229.971</td><td class="right">415.522</td><td class="right">3.005.001</td></tr>
+      <tr><td>❤️ Hospital do Coração</td><td class="right pos">5.228.626</td><td class="right">1.260.952</td><td class="right">1.290.297</td><td class="right">897.830</td><td class="right">63.374</td><td class="right">379.592</td><td class="right">1.484.040</td></tr>
+      <tr><td>🎗️ Hospital do Câncer</td><td class="right pos">2.412.241</td><td class="right">186.783</td><td class="right">323.165</td><td class="right">981.845</td><td class="right">40.695</td><td class="right">269.436</td><td class="right">–</td></tr>
+      <tr><td>🔬 SADT</td><td class="right pos">2.766.297</td><td class="right">750.190</td><td class="right">560.323</td><td class="right">570.370</td><td class="right">36.265</td><td class="right">601.634</td><td class="right">–</td></tr>
+      <tr><td>💧 Hemodiálise</td><td class="right pos">1.298.154</td><td class="right">210.097</td><td class="right">119.456</td><td class="right">319.118</td><td class="right">16.944</td><td class="right">81.180</td><td class="right">–</td></tr>
+      <tr><td>🦽 Reabilitação Física</td><td class="right pos">85.890</td><td class="right">300.780</td><td class="right">10.532</td><td class="right">3.409</td><td class="right">1.955</td><td class="right">10.733</td><td class="right">120.629</td></tr>
+      <tr><td>📊 Não Operacional</td><td class="right">2.855.985</td><td class="right">117.032</td><td class="right">206.742</td><td class="right">16</td><td class="right">4.590</td><td class="right">18.089</td><td class="right">–</td></tr>
+      <tr class="total"><td>TOTAL GERAL</td><td class="right">23.386.240</td><td class="right">5.659.029</td><td class="right">5.393.751</td><td class="right">4.599.358</td><td class="right">393.793</td><td class="right">1.776.186</td><td class="right">–</td></tr>
+    </table>
+    <p class="note">Fonte: Sistema KPIH de custos hospitalares. Rateios dos setores adm/auxiliares distribuídos pelos setores produtivos.</p>
+  </div>
+</div>
+
+<!-- ===== TAB 4: AMEs ===== -->
+<div id="tab-ames" class="content">
+
+  <!-- Sub-navegação AMEs -->
+  <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #003366">
+    <button onclick="aSubTab('fin')" id="sub-fin" style="padding:10px 22px;font-size:13px;font-weight:700;background:#003366;color:#fff;border:none;cursor:pointer;border-radius:6px 6px 0 0">💰 Análise Financeira</button>
+    <button onclick="aSubTab('qtd')" id="sub-qtd" style="padding:10px 22px;font-size:13px;font-weight:700;background:#e8edf5;color:#003366;border:none;cursor:pointer;border-radius:6px 6px 0 0;margin-left:4px">📊 Análise de Quantidade</button>
+  </div>
+
+  <!-- ---- SUB-ABA: FINANCEIRO ---- -->
+  <div id="ame-fin">
+    <div class="kpi-row">
+      <div class="kpi green"><div class="kpi-label">AME Campinas – Mar/26</div><div class="kpi-value pos">+R$ 358.191</div><div class="kpi-sub pos">Margem 10,15%</div></div>
+      <div class="kpi red"><div class="kpi-label">AME Casa Branca – Mar/26</div><div class="kpi-value neg">-R$ 36.060</div><div class="kpi-sub neg">Margem -3,42%</div></div>
+      <div class="kpi orange"><div class="kpi-label">AME Franca – Mar/26</div><div class="kpi-value pos">+R$ 15.168</div><div class="kpi-sub">Margem 0,79%</div></div>
+      <div class="kpi green"><div class="kpi-label">AME Jurumirim – Mar/26</div><div class="kpi-value pos">+R$ 374.075</div><div class="kpi-sub pos">Margem 19,60%</div></div>
+      <div class="kpi green"><div class="kpi-label">AME Ribeirão Preto – Mar/26</div><div class="kpi-value pos">+R$ 291.216</div><div class="kpi-sub pos">Margem 10,77%</div></div>
+      <div class="kpi red"><div class="kpi-label">AME São Carlos – Mar/26</div><div class="kpi-value neg">-R$ 4.194</div><div class="kpi-sub neg">Margem -0,39%</div></div>
+    </div>
+
+    <div class="charts-2">
+      <div class="chart-box">
+        <div class="chart-title">Evolução Resultado por AME – Jan a Abr/2026</div>
+        <div class="chart-wrap tall"><canvas id="ch-ame-evolucao"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Composição de Despesas por Categoria – Março/2026</div>
+        <div class="chart-wrap tall"><canvas id="ch-ame-custos"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-title">Demonstrativo Financeiro Detalhado – Março/2026 (Metas Financeiras)</div>
+    <div class="chart-box">
+      <table>
+        <tr><th>Categoria de Despesa</th><th class="right">Campinas</th><th class="right">Casa Branca</th><th class="right">Franca</th><th class="right">Jurumirim</th><th class="right">Rib. Preto</th><th class="right">São Carlos</th><th class="right">TOTAL</th></tr>
+        <tr class="subtotal"><td>RECEITA TOTAL</td><td class="right pos">3.529.230</td><td class="right pos">1.053.924</td><td class="right pos">1.917.496</td><td class="right pos">1.908.764</td><td class="right pos">2.704.160</td><td class="right pos">1.062.689</td><td class="right pos">12.176.263</td></tr>
+        <tr><td>&nbsp;&nbsp;Contrato Gestão / Custeio</td><td class="right">3.503.884</td><td class="right">1.036.762</td><td class="right">1.839.052</td><td class="right">1.845.678</td><td class="right">2.634.891</td><td class="right">1.047.685</td><td class="right">11.907.952</td></tr>
+        <tr><td>&nbsp;&nbsp;Complemento Piso Enfermagem</td><td class="right">0</td><td class="right">11.717</td><td class="right">57.227</td><td class="right">40.471</td><td class="right">19.750</td><td class="right">606</td><td class="right">129.771</td></tr>
+        <tr><td>&nbsp;&nbsp;Receitas Financeiras</td><td class="right">24.049</td><td class="right">5.445</td><td class="right">15.214</td><td class="right">20.788</td><td class="right">47.295</td><td class="right">14.349</td><td class="right">127.140</td></tr>
+        <tr><td>&nbsp;&nbsp;Outras Receitas</td><td class="right">1.297</td><td class="right">0</td><td class="right">6.002</td><td class="right">1.827</td><td class="right">2.224</td><td class="right">49</td><td class="right">11.399</td></tr>
+        <tr class="subtotal"><td>DESPESA TOTAL</td><td class="right neg">3.171.039</td><td class="right neg">1.089.984</td><td class="right neg">1.902.328</td><td class="right neg">1.534.689</td><td class="right neg">2.412.944</td><td class="right neg">1.066.883</td><td class="right neg">11.177.867</td></tr>
+        <tr class="subtotal"><td>&nbsp;&nbsp;▸ Pessoal CLT</td><td class="right neg">1.065.937</td><td class="right neg">514.592</td><td class="right neg">617.072</td><td class="right neg">515.241</td><td class="right neg">736.614</td><td class="right neg">347.335</td><td class="right neg">3.796.791</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Ordenados</td><td class="right">567.002</td><td class="right">272.378</td><td class="right">324.117</td><td class="right">271.753</td><td class="right">431.529</td><td class="right">220.606</td><td class="right">2.087.385</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Encargos Sociais</td><td class="right">213.236</td><td class="right">101.266</td><td class="right">124.129</td><td class="right">111.465</td><td class="right">140.749</td><td class="right">73.193</td><td class="right">764.038</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Benefícios</td><td class="right">168.601</td><td class="right">30.736</td><td class="right">79.473</td><td class="right">62.545</td><td class="right">32.688</td><td class="right">28.337</td><td class="right">402.380</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Rescisões</td><td class="right">66.364</td><td class="right">70.107</td><td class="right">3.080</td><td class="right">4.385</td><td class="right">72.445</td><td class="right">4.509</td><td class="right">220.890</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Férias</td><td class="right">50.735</td><td class="right">29.520</td><td class="right">30.063</td><td class="right">26.572</td><td class="right">42.617</td><td class="right">19.971</td><td class="right">199.478</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Piso Enfermagem (Ord.)</td><td class="right">0</td><td class="right">10.584</td><td class="right">56.210</td><td class="right">38.521</td><td class="right">16.587</td><td class="right">719</td><td class="right">122.621</td></tr>
+        <tr class="subtotal"><td>&nbsp;&nbsp;▸ Serviços Terceirizados</td><td class="right neg">1.556.364</td><td class="right neg">445.912</td><td class="right neg">905.824</td><td class="right neg">799.133</td><td class="right neg">1.275.791</td><td class="right neg">600.227</td><td class="right neg">5.583.251</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Assistenciais (PJ)</td><td class="right">1.126.103</td><td class="right">354.114</td><td class="right">820.294</td><td class="right">622.830</td><td class="right">1.084.541</td><td class="right">467.555</td><td class="right">4.475.437</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Administrativos</td><td class="right">430.261</td><td class="right">91.797</td><td class="right">85.530</td><td class="right">176.303</td><td class="right">191.250</td><td class="right">132.672</td><td class="right">1.107.813</td></tr>
+        <tr class="subtotal"><td>&nbsp;&nbsp;▸ Materiais</td><td class="right neg">321.345</td><td class="right neg">71.086</td><td class="right neg">202.253</td><td class="right neg">75.743</td><td class="right neg">173.468</td><td class="right neg">57.678</td><td class="right neg">901.573</td></tr>
+        <tr class="subtotal"><td>&nbsp;&nbsp;▸ Utilidade Pública</td><td class="right neg">116.439</td><td class="right neg">61.742</td><td class="right neg">33.676</td><td class="right neg">46.066</td><td class="right neg">47.437</td><td class="right neg">26.628</td><td class="right neg">331.988</td></tr>
+        <tr class="total"><td>RESULTADO</td><td class="right pos">358.191</td><td class="right neg">-36.060</td><td class="right pos">15.168</td><td class="right pos">374.075</td><td class="right pos">291.216</td><td class="right neg">-4.194</td><td class="right pos">998.396</td></tr>
+        <tr class="total"><td>MARGEM %</td><td class="right pos">10,15%</td><td class="right neg">-3,42%</td><td class="right pos">0,79%</td><td class="right pos">19,60%</td><td class="right pos">10,77%</td><td class="right neg">-0,39%</td><td class="right pos">8,20%</td></tr>
+      </table>
+      <p class="note">Fonte: Metas Financeiras – Demonstrativo do Fluxo de Caixa (Gestão em Saúde, 11/05/2026). AME Franca: novo contrato R$ 2.196.196,41 a partir de Maio/2026.</p>
+    </div>
+
+    <div class="section-title">Evolução Financeira Jan–Abr/2026</div>
+    <div class="chart-box">
+      <table>
+        <tr><th>AME</th><th class="right">Jan/26</th><th class="right">Fev/26</th><th class="right">Mar/26</th><th class="right">Abr/26</th><th class="right">Contrato/mês</th></tr>
+        <tr class="group"><td colspan="6">RECEITAS TOTAIS</td></tr>
+        <tr><td>AME Campinas</td><td class="right">3.522.841</td><td class="right">3.520.526</td><td class="right pos">3.529.230</td><td class="right">4.512.867</td><td class="right">3.503.884</td></tr>
+        <tr><td>AME Casa Branca</td><td class="right">1.054.637</td><td class="right">1.054.591</td><td class="right pos">1.053.924</td><td class="right">1.051.843</td><td class="right">1.036.762</td></tr>
+        <tr><td>AME Franca</td><td class="right">1.917.088</td><td class="right">1.907.663</td><td class="right pos">1.917.496</td><td class="right">1.911.556</td><td class="right">1.839.052 ¹</td></tr>
+        <tr><td>AME Jurumirim</td><td class="right">1.901.233</td><td class="right">1.898.862</td><td class="right pos">1.908.764</td><td class="right">1.913.663</td><td class="right">1.845.678</td></tr>
+        <tr><td>AME Ribeirão Preto</td><td class="right">2.694.695</td><td class="right">2.690.765</td><td class="right pos">2.704.160</td><td class="right">3.446.373</td><td class="right">2.634.891</td></tr>
+        <tr><td>AME São Carlos</td><td class="right">1.063.474</td><td class="right">1.059.579</td><td class="right pos">1.062.689</td><td class="right">1.063.179</td><td class="right">1.047.685</td></tr>
+        <tr class="group"><td colspan="6">RESULTADOS</td></tr>
+        <tr><td>AME Campinas</td><td class="right pos">223.413</td><td class="right pos">417.943</td><td class="right pos">358.191</td><td class="right pos">1.021.856</td><td></td></tr>
+        <tr><td>AME Casa Branca</td><td class="right neg">-256.515</td><td class="right pos">113.467</td><td class="right neg">-36.060</td><td class="right neg">-20.750</td><td></td></tr>
+        <tr><td>AME Franca</td><td class="right neg">-163.270</td><td class="right pos">43.797</td><td class="right pos">15.168</td><td class="right neg">-107.066</td><td></td></tr>
+        <tr><td>AME Jurumirim</td><td class="right pos">188.205</td><td class="right pos">368.550</td><td class="right pos">374.075</td><td class="right pos">141.903</td><td></td></tr>
+        <tr><td>AME Ribeirão Preto</td><td class="right pos">231.929</td><td class="right pos">199.696</td><td class="right pos">291.216</td><td class="right pos">821.130</td><td></td></tr>
+        <tr><td>AME São Carlos</td><td class="right neg">-78.442</td><td class="right neg">-20.590</td><td class="right neg">-4.194</td><td class="right neg">-103.717</td><td></td></tr>
+        <tr class="total"><td>TOTAL AMEs</td><td class="right pos">145.320</td><td class="right pos">1.122.863</td><td class="right pos">998.396</td><td class="right pos">1.753.356</td><td></td></tr>
+      </table>
+      <p class="note">¹ AME Franca: contrato R$ 1.839.052 até Abr/26, passa para R$ 2.196.196,41 a partir de Maio/26.</p>
+    </div>
+
+    <!-- ===== ANÁLISE PREDITIVA Mai/Jun 2026 ===== -->
+    <div class="section-title" style="color:#6554c0">📈 Análise Preditiva – Previsão Maio e Junho/2026</div>
+    <div style="background:#f5f0ff;border:1px solid #6554c0;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#3d1e7c">
+      <strong>Metodologia:</strong> Receita = média mensal Jan–Mar (excluindo meses com aditivos extraordinários de Campinas e Ribeirão Preto em Abr/26). Despesa = média Jan–Abr. AME Franca: novo contrato R$ 2.196.196,41 aplicado a partir de Maio/26.
+      <strong>Controles:</strong> Pessoal CLT ≤ 35% do contrato | Materiais ≤ 8% do contrato.
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi green"><div class="kpi-label">Campinas – Prev. Resultado/mês</div><div class="kpi-value pos">+R$ 258.184</div><div class="kpi-sub neg">Materiais 9,1% ⚠ acima de 8%</div></div>
+      <div class="kpi red"><div class="kpi-label">Casa Branca – Prev. Resultado/mês</div><div class="kpi-value neg">-R$ 49.964</div><div class="kpi-sub neg">Pessoal 46,6%! muito acima de 35%</div></div>
+      <div class="kpi green"><div class="kpi-label">Franca – Prev. Resultado/mês</div><div class="kpi-value pos">+R$ 304.301</div><div class="kpi-sub pos">Novo contrato +R$ 357k/mês a partir de Mai</div></div>
+      <div class="kpi green"><div class="kpi-label">Jurumirim – Prev. Resultado/mês</div><div class="kpi-value pos">+R$ 268.183</div><div class="kpi-sub pos">Pessoal 28,0% ✓ | Materiais 6,3% ✓</div></div>
+      <div class="kpi green"><div class="kpi-label">Rib. Preto – Prev. Resultado/mês</div><div class="kpi-value pos">+R$ 198.534</div><div class="kpi-sub pos">Pessoal 26,4% ✓ | Materiais 6,9% ✓</div></div>
+      <div class="kpi red"><div class="kpi-label">São Carlos – Prev. Resultado/mês</div><div class="kpi-value neg">-R$ 51.736</div><div class="kpi-sub neg">Pessoal 34,6% ⚠ próximo de 35%</div></div>
+    </div>
+
+    <div class="charts-2">
+      <div class="chart-box">
+        <div class="chart-title">Resultado Previsto – Semestre Jan–Jun/2026 (R$)</div>
+        <div class="chart-wrap"><canvas id="ch-pred-sem"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Controle Orçamentário – % Pessoal e % Materiais vs Teto (Mai/Jun prev.)</div>
+        <div class="chart-wrap"><canvas id="ch-pred-budget"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-title" style="color:#6554c0">Previsão Detalhada – Maio e Junho/2026</div>
+    <div class="chart-box">
+      <table>
+        <tr>
+          <th>AME</th>
+          <th class="right">Receita Prev. Mai</th><th class="right">Receita Prev. Jun</th>
+          <th class="right">Despesa Prev. Mai</th><th class="right">Despesa Prev. Jun</th>
+          <th class="right">Resultado Prev. Mai</th><th class="right">Resultado Prev. Jun</th>
+          <th class="right">Resultado Semestral Total</th>
+          <th class="center">% Pessoal/Contrato</th>
+          <th class="center">% Materiais/Contrato</th>
+          <th class="center">Budget Status</th>
+        </tr>
+        <tr>
+          <td>AME Campinas</td>
+          <td class="right">3.524.199</td><td class="right">3.524.199</td>
+          <td class="right neg">3.266.016</td><td class="right neg">3.266.016</td>
+          <td class="right pos">258.184</td><td class="right pos">258.184</td>
+          <td class="right pos">2.537.769</td>
+          <td class="center"><span class="badge badge-ok">30,1% ✓</span></td>
+          <td class="center"><span class="badge badge-bad">9,1% ✗</span></td>
+          <td class="center"><span class="badge badge-alert">⚠ Materiais</span></td>
+        </tr>
+        <tr>
+          <td>AME Casa Branca</td>
+          <td class="right">1.053.749</td><td class="right">1.053.749</td>
+          <td class="right neg">1.103.713</td><td class="right neg">1.103.713</td>
+          <td class="right neg">-49.964</td><td class="right neg">-49.964</td>
+          <td class="right neg">-299.787</td>
+          <td class="center"><span class="badge badge-bad">46,6% ✗</span></td>
+          <td class="center"><span class="badge badge-ok">6,5% ✓</span></td>
+          <td class="center"><span class="badge badge-bad">✗ Pessoal RISCO</span></td>
+        </tr>
+        <tr>
+          <td>AME Franca <span style="font-size:10px;color:#6554c0">★ Novo contrato</span></td>
+          <td class="right pos">2.270.595</td><td class="right pos">2.270.595</td>
+          <td class="right neg">1.966.294</td><td class="right neg">1.966.294</td>
+          <td class="right pos">304.301</td><td class="right pos">304.301</td>
+          <td class="right pos">397.229</td>
+          <td class="center"><span class="badge badge-ok">28,6% ✓</span></td>
+          <td class="center"><span class="badge badge-bad">8,6% ✗</span></td>
+          <td class="center"><span class="badge badge-alert">⚠ Materiais</span></td>
+        </tr>
+        <tr>
+          <td>AME Jurumirim</td>
+          <td class="right">1.905.631</td><td class="right">1.905.631</td>
+          <td class="right neg">1.637.447</td><td class="right neg">1.637.447</td>
+          <td class="right pos">268.183</td><td class="right pos">268.183</td>
+          <td class="right pos">1.609.100</td>
+          <td class="center"><span class="badge badge-ok">28,0% ✓</span></td>
+          <td class="center"><span class="badge badge-ok">6,3% ✓</span></td>
+          <td class="center"><span class="badge badge-ok">✓ OK</span></td>
+        </tr>
+        <tr>
+          <td>AME Ribeirão Preto</td>
+          <td class="right">2.696.540</td><td class="right">2.696.540</td>
+          <td class="right neg">2.498.006</td><td class="right neg">2.498.006</td>
+          <td class="right pos">198.534</td><td class="right pos">198.534</td>
+          <td class="right pos">1.941.039</td>
+          <td class="center"><span class="badge badge-ok">26,4% ✓</span></td>
+          <td class="center"><span class="badge badge-ok">6,9% ✓</span></td>
+          <td class="center"><span class="badge badge-ok">✓ OK</span></td>
+        </tr>
+        <tr>
+          <td>AME São Carlos</td>
+          <td class="right">1.062.230</td><td class="right">1.062.230</td>
+          <td class="right neg">1.113.966</td><td class="right neg">1.113.966</td>
+          <td class="right neg">-51.736</td><td class="right neg">-51.736</td>
+          <td class="right neg">-310.414</td>
+          <td class="center"><span class="badge badge-alert">34,6% ⚠</span></td>
+          <td class="center"><span class="badge badge-ok">5,2% ✓</span></td>
+          <td class="center"><span class="badge badge-alert">⚠ Pessoal lim.</span></td>
+        </tr>
+        <tr class="total">
+          <td>TOTAL AMEs – 1º Semestre</td>
+          <td class="right pos">12.512.944</td><td class="right pos">12.512.944</td>
+          <td class="right neg">11.585.442</td><td class="right neg">11.585.442</td>
+          <td class="right pos">927.502</td><td class="right pos">927.502</td>
+          <td class="right pos">5.874.936</td>
+          <td class="center">–</td><td class="center">–</td><td class="center">–</td>
+        </tr>
+      </table>
+      <p class="note">
+        Alertas prioritários: ① Casa Branca: Pessoal em 46,6% do contrato — necessidade de revisão de quadro de funcionários urgente.
+        ② Casa Branca e São Carlos: resultado semestral negativo previsto — requer plano de ajuste.
+        ③ Campinas e Franca: Materiais acima de 8% — monitorar estoques e compras.
+        ④ Franca: novo contrato de R$ 2.196.196/mês torna o semestre positivo (R$ +397k) — impacto positivo a partir de Mai/26.
+      </p>
+    </div>
+
+    <!-- Quantidade: projeção Mai/Jun já incorporada na tabela semestral acima -->
+    <div class="section-title" style="color:#6554c0">SADT Interno – Ônus da Unidade (Proporcional às Consultas)</div>
+    <div class="chart-box">
+      <table>
+        <tr>
+          <th>AME</th>
+          <th class="right">Cons.Méd Prev.Mai</th><th class="right">Cons.Méd Prev.Jun</th>
+          <th class="right">Proj. Sem. (45)</th>
+          <th class="right">Meta Mín 90%</th><th class="right">Contratual Sem.</th>
+          <th class="right">% 271</th><th class="center">Status 271</th>
+          <th class="right">SADT Int./Cons ²</th>
+          <th class="right">SADT Ext. Proj.Sem</th><th class="right">% SADT Ext.</th><th class="center">Status SADT</th>
+        </tr>
+        <tr>
+          <td>AME Campinas</td><td class="right">7.379</td><td class="right">7.379</td><td class="right pos">44.273</td><td class="right">33.512</td><td class="right">37.236</td><td class="right pos">118,9%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td>
+          <td class="right">0,074</td><td class="right pos">18.089</td><td class="right pos">92,1%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td>
+        </tr>
+        <tr>
+          <td>AME Casa Branca</td><td class="right">4.057</td><td class="right">4.057</td><td class="right" style="color:#ff8b00">24.342</td><td class="right">24.554</td><td class="right">27.282</td><td class="right" style="color:#ff8b00">89,2%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td>
+          <td class="right">0,024</td><td class="right pos">5.262</td><td class="right pos">98,5%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td>
+        </tr>
+        <tr>
+          <td>AME Franca</td><td class="right">6.119</td><td class="right">6.119</td><td class="right pos">36.712</td><td class="right">35.694</td><td class="right">39.660</td><td class="right pos">92,6%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td>
+          <td class="right">0,063</td><td class="right" style="color:#ff8b00">6.531</td><td class="right" style="color:#ff8b00">89,8%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td>
+        </tr>
+        <tr>
+          <td>AME Jurumirim</td><td class="right">4.583</td><td class="right">4.583</td><td class="right neg">27.498</td><td class="right">34.798</td><td class="right">38.664</td><td class="right neg">71,1%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td>
+          <td class="right">0,041</td><td class="right" style="color:#ff8b00">9.429</td><td class="right" style="color:#ff8b00">84,2%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td>
+        </tr>
+        <tr>
+          <td>AME Ribeirão Preto</td><td class="right">6.472</td><td class="right">6.472</td><td class="right" style="color:#ff8b00">38.830</td><td class="right">40.176</td><td class="right">44.640</td><td class="right" style="color:#ff8b00">87,0%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td>
+          <td class="right">0,065</td><td class="right pos">13.979</td><td class="right pos">90,4%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td>
+        </tr>
+        <tr>
+          <td>AME São Carlos</td><td class="right">3.047</td><td class="right">3.047</td><td class="right pos">18.283</td><td class="right">16.200</td><td class="right">18.000</td><td class="right pos">101,6%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td>
+          <td class="right">0,044</td><td class="right pos">7.688</td><td class="right pos">93,5%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td>
+        </tr>
+      </table>
+      <p class="note">
+        ² SADT Interno = Anestesiologia (índice por consulta médica realizada — ônus da unidade). Fonte: metas detalhadas Jan–Abr/2026.<br>
+        SADT Externo = Apoio Diagnóstico contratado (Lab · Radiologia · US · TC · RM · Endoscopia · Diagnósticos Especializados). Projeção semestral = acumulado Jan–Abr × 1,5. Meta mínima: 90% do contratual semestral.<br>
+        ⚠ SADT Externo: Franca 89,8% e Jurumirim 84,2% em risco de desconto contratual — verificar ritmo de realização para Mai/Jun.
+      </p>
+    </div>
+  </div>
+
+  <!-- ---- SUB-ABA: QUANTIDADE ---- -->
+  <div id="ame-qtd" style="display:none">
+
+    <!-- Legenda de metas -->
+    <div style="background:#fff;border-radius:8px;padding:12px 18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;gap:24px;flex-wrap:wrap;font-size:12px">
+      <strong style="color:#003366">Período: 1º Semestre 2026 (Jan–Jun) &nbsp;|&nbsp; Meses disponíveis: Jan–Abr (4/6)</strong>
+      <span style="color:#00875a">● Projeção ≥ Meta Mínima → SEM DESCONTO</span>
+      <span style="color:#ff8b00">● Projeção abaixo da meta → ATENÇÃO</span>
+      <span style="color:#de350b">● Projeção &lt; 90% da meta mínima → RISCO DE DESCONTO</span>
+      <span style="background:#e8edf5;padding:2px 8px;border-radius:4px">Consultas Méd: 90% &nbsp;|&nbsp; CMA/cma: 95% &nbsp;|&nbsp; Não Médicas/Proc.Terp: 90% &nbsp;|&nbsp; SADT Externo: 90%</span>
+      <span style="background:#fff3e0;padding:2px 8px;border-radius:4px;color:#e65100">🔬 SADT = Lab · Radiologia · US · TC · RM · Endoscopia · Diagnóst. Especializados</span>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi green"><div class="kpi-label">Campinas – Situação Geral</div><div class="kpi-value pos">✓ OK</div><div class="kpi-sub pos">Consultas 119% · CMA 101% · SADT 92%</div></div>
+      <div class="kpi red"><div class="kpi-label">Casa Branca – Situação Geral</div><div class="kpi-value neg">✗ RISCO</div><div class="kpi-sub neg">Consultas 89% · cma 70% · NMed 89%</div></div>
+      <div class="kpi orange"><div class="kpi-label">Franca – Situação Geral</div><div class="kpi-value" style="color:#ff8b00">⚠ ATENÇÃO</div><div class="kpi-sub neg">SADT 89,8% (abaixo do mínimo)</div></div>
+      <div class="kpi red"><div class="kpi-label">Jurumirim – Situação Geral</div><div class="kpi-value neg">✗ RISCO</div><div class="kpi-sub neg">Consultas 71% (CRÍTICO) · CMA 88% · SADT 84%</div></div>
+      <div class="kpi red"><div class="kpi-label">Ribeirão Preto – Situação Geral</div><div class="kpi-value neg">✗ RISCO</div><div class="kpi-sub neg">Consultas 87% · cma 76%</div></div>
+      <div class="kpi red"><div class="kpi-label">São Carlos – Situação Geral</div><div class="kpi-value neg">✗ RISCO</div><div class="kpi-sub neg">cma 61% (CRÍTICO)</div></div>
+    </div>
+
+    <div class="charts-2">
+      <div class="chart-box">
+        <div class="chart-title">Projeção Semestral vs Meta Mínima – Consultas Médicas (meta 90%)</div>
+        <div class="chart-wrap tall"><canvas id="ch-qtd-consultas"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Projeção Semestral vs Meta Mínima – CMA (Cirurgia Maior) + cma (cirurgia menor) – meta 95%</div>
+        <div class="chart-wrap tall"><canvas id="ch-qtd-cumprimento"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-title">Análise Semestral 1º Sem/2026 – Produção × Metas Contratuais (Jan–Jun/2026)</div>
+    <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#664d03">
+      <strong>Como ler:</strong> "Projeção" = Acumulado Jan–Abr × 1,5 (extrapolação para o semestre completo). "Meta Mínima" = porcentagem mínima do contratual para não ter desconto. Semestre = meta mensal × 6 meses.
+    </div>
+    <div class="chart-box" style="overflow-x:auto">
+      <style>
+        .c45-hdr td{background:#e8edf5;color:#003366;font-weight:600;font-size:11px;padding:3px 14px}
+        .c46-hdr td{background:#e8f5e9;color:#1b5e20;font-weight:600;font-size:11px;padding:3px 14px}
+        .sadt-hdr td{background:#fff3e0;color:#e65100;font-weight:600;font-size:11px;padding:3px 14px}
+      </style>
+      <table>
+        <tr>
+          <th style="min-width:240px">AME / Tipo de Produção</th>
+          <th class="right">Real Jan</th><th class="right">Real Fev</th><th class="right">Real Mar</th><th class="right">Real Abr</th>
+          <th class="right">Acum</th>
+          <th class="right">Proj. Sem.</th>
+          <th class="right" style="background:#ffc107;color:#000;white-space:nowrap">Meta Mín (90%/95%)</th>
+          <th class="right" style="background:#003366;white-space:nowrap">Contratual 1ºSem</th>
+          <th class="right">% Cont.</th>
+          <th class="center">Status</th>
+          <th class="right" style="background:#fde8e4;color:#7a1010">Δ Volume</th>
+          <th class="right" style="background:#fde8e4;color:#7a1010;white-space:nowrap">Ritmo Mai/Jun</th>
+        </tr>
+        <!-- CAMPINAS -->
+        <tr class="group"><td colspan="13">AME CAMPINAS</td></tr>
+        <tr class="c45-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;45 – Atividade Ambulatorial – Especialidades Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;271 – Consultas Médicas (meta 90%)</td><td class="right">7.173</td><td class="right">6.555</td><td class="right">8.419</td><td class="right">7.368</td><td class="right">29.515</td><td class="right pos">44.273</td><td class="right" style="background:#fff8e1">33.512</td><td class="right" style="background:#e8edf5;color:#003366">37.236</td><td class="right pos">118,9%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+10.761</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;CMA Maior (Cirurgia Maior Ambulatorial) (meta 95%)</td><td class="right">680</td><td class="right">650</td><td class="right">844</td><td class="right">653</td><td class="right">2.827</td><td class="right pos">4.241</td><td class="right" style="background:#fff8e1">3.990</td><td class="right" style="background:#e8edf5;color:#003366">4.200</td><td class="right pos">101,0%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+251</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;cma menor (Cirurgia Menor Ambulatorial) (meta 95%)</td><td class="right">661</td><td class="right">689</td><td class="right">901</td><td class="right">711</td><td class="right">2.962</td><td class="right pos">4.443</td><td class="right" style="background:#fff8e1">3.420</td><td class="right" style="background:#e8edf5;color:#003366">3.600</td><td class="right pos">123,4%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+1.023</td><td class="right">–</td></tr>
+        <tr class="c46-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;46 – Atividade Ambulatorial – Especialidades Não Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Não-Médica + Proc. (meta 90%)</td><td class="right">3.813</td><td class="right">3.200</td><td class="right">3.817</td><td class="right">3.353</td><td class="right">14.183</td><td class="right pos">21.275</td><td class="right" style="background:#fff8e1">15.854</td><td class="right" style="background:#e8edf5;color:#003366">17.616</td><td class="right pos">120,8%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+5.421</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Procedimentos Terapêuticos – sessões (meta 90%)</td><td class="right">1.605</td><td class="right">1.154</td><td class="right">1.810</td><td class="right">1.634</td><td class="right">6.203</td><td class="right pos">9.305</td><td class="right" style="background:#fff8e1">8.640</td><td class="right" style="background:#e8edf5;color:#003366">9.600</td><td class="right pos">97,0%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+665</td><td class="right">–</td></tr>
+        <tr class="sadt-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;SADT – Apoio Diagnóstico Externo (Lab · Imagem · Endoscopia · Diagnósticos Especializados)</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Total SADT Externo (meta 90%)</td><td class="right">2.870</td><td class="right">2.889</td><td class="right">3.153</td><td class="right">3.147</td><td class="right">12.059</td><td class="right pos">18.089</td><td class="right" style="background:#fff8e1">17.680</td><td class="right" style="background:#e8edf5;color:#003366">19.644</td><td class="right pos">92,1%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+409</td><td class="right">–</td></tr>
+        <!-- CASA BRANCA -->
+        <tr class="group"><td colspan="13">AME CASA BRANCA</td></tr>
+        <tr class="c45-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;45 – Atividade Ambulatorial – Especialidades Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;271 – Consultas Médicas (meta 90%)</td><td class="right">3.495</td><td class="right">3.685</td><td class="right">4.950</td><td class="right">4.098</td><td class="right">16.228</td><td class="right" style="color:#ff8b00">24.342</td><td class="right" style="background:#fff8e1">24.554</td><td class="right" style="background:#e8edf5;color:#003366">27.282</td><td class="right" style="color:#ff8b00">89,2%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td><td class="right neg">-212</td><td class="right neg">4.163/mês <span style="font-size:10px">(+106)</span></td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;CMA Maior (Cirurgia Maior Ambulatorial) (meta 95%)</td><td class="right">78</td><td class="right">71</td><td class="right">96</td><td class="right">66</td><td class="right">311</td><td class="right" style="color:#ff8b00">467</td><td class="right" style="background:#fff8e1">485</td><td class="right" style="background:#e8edf5;color:#003366">510</td><td class="right" style="color:#ff8b00">91,6%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td><td class="right neg">-18</td><td class="right neg">87/mês <span style="font-size:10px">(+9)</span></td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;cma menor (Cirurgia Menor Ambulatorial) (meta 95%)</td><td class="right">123</td><td class="right">92</td><td class="right">143</td><td class="right">205</td><td class="right">563</td><td class="right neg">845</td><td class="right" style="background:#fff8e1">1.140</td><td class="right" style="background:#e8edf5;color:#003366">1.200</td><td class="right neg">70,4%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td><td class="right neg">-295</td><td class="right neg">289/mês <span style="font-size:10px">(+148)</span></td></tr>
+        <tr class="c46-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;46 – Atividade Ambulatorial – Especialidades Não Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Não-Médica + Proc. (meta 90%)</td><td class="right">845</td><td class="right">712</td><td class="right">1.112</td><td class="right">770</td><td class="right">3.439</td><td class="right pos">5.159</td><td class="right" style="background:#fff8e1">3.591</td><td class="right" style="background:#e8edf5;color:#003366">3.990</td><td class="right pos">129,3%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+1.568</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Procedimentos Terapêuticos – sessões (meta 90%)</td><td class="right">388</td><td class="right">352</td><td class="right">377</td><td class="right">477</td><td class="right">1.594</td><td class="right neg">2.391</td><td class="right" style="background:#fff8e1">4.050</td><td class="right" style="background:#e8edf5;color:#003366">4.500</td><td class="right neg">53,1%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td><td class="right neg">-1.659</td><td class="right neg">1.228/mês <span style="font-size:10px">(+829)</span></td></tr>
+        <tr class="sadt-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;SADT – Apoio Diagnóstico Externo</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Total SADT Externo (meta 90%)</td><td class="right">707</td><td class="right">860</td><td class="right">960</td><td class="right">981</td><td class="right">3.508</td><td class="right pos">5.262</td><td class="right" style="background:#fff8e1">4.806</td><td class="right" style="background:#e8edf5;color:#003366">5.340</td><td class="right pos">98,5%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+456</td><td class="right">–</td></tr>
+        <!-- FRANCA -->
+        <tr class="group"><td colspan="13">AME FRANCA</td></tr>
+        <tr class="c45-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;45 – Atividade Ambulatorial – Especialidades Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;271 – Consultas Médicas (meta 90%)</td><td class="right">6.183</td><td class="right">5.580</td><td class="right">6.828</td><td class="right">5.883</td><td class="right">24.474</td><td class="right pos">36.711</td><td class="right" style="background:#fff8e1">35.694</td><td class="right" style="background:#e8edf5;color:#003366">39.660</td><td class="right pos">92,6%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+1.017</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;CMA Maior (Cirurgia Maior Ambulatorial) (meta 95%)</td><td class="right">405</td><td class="right">422</td><td class="right">386</td><td class="right">391</td><td class="right">1.604</td><td class="right pos">2.406</td><td class="right" style="background:#fff8e1">2.155</td><td class="right" style="background:#e8edf5;color:#003366">2.268</td><td class="right pos">106,1%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+251</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;cma menor (Cirurgia Menor Ambulatorial) (meta 95%)</td><td class="right">325</td><td class="right">261</td><td class="right">287</td><td class="right">261</td><td class="right">1.134</td><td class="right pos">1.701</td><td class="right" style="background:#fff8e1">1.436</td><td class="right" style="background:#e8edf5;color:#003366">1.512</td><td class="right pos">112,5%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+265</td><td class="right">–</td></tr>
+        <tr class="c46-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;46 – Atividade Ambulatorial – Especialidades Não Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Não-Médica + Proc. (meta 90%)</td><td class="right">2.167</td><td class="right">2.138</td><td class="right">1.987</td><td class="right">1.725</td><td class="right">8.017</td><td class="right pos">12.026</td><td class="right" style="background:#fff8e1">9.180</td><td class="right" style="background:#e8edf5;color:#003366">10.200</td><td class="right pos">117,9%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+2.846</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Procedimentos Terapêuticos – sessões (meta 90%)</td><td class="right">658</td><td class="right">767</td><td class="right">1.027</td><td class="right">850</td><td class="right">3.302</td><td class="right neg">4.953</td><td class="right" style="background:#fff8e1">7.020</td><td class="right" style="background:#e8edf5;color:#003366">7.800</td><td class="right neg">63,5%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td><td class="right neg">-2.067</td><td class="right neg">1.859/mês <span style="font-size:10px">(+1.033)</span></td></tr>
+        <tr class="sadt-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;SADT – Apoio Diagnóstico Externo</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Total SADT Externo (meta 90%)</td><td class="right">1.042</td><td class="right">976</td><td class="right">1.223</td><td class="right">1.113</td><td class="right">4.354</td><td class="right" style="color:#ff8b00">6.531</td><td class="right" style="background:#fff8e1">6.545</td><td class="right" style="background:#e8edf5;color:#003366">7.272</td><td class="right" style="color:#ff8b00">89,8%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td><td class="right neg">-14</td><td class="right neg">1.096/mês <span style="font-size:10px">(+7)</span></td></tr>
+        <!-- JURUMIRIM -->
+        <tr class="group"><td colspan="13">AME VALE DO JURUMIRIM</td></tr>
+        <tr class="c45-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;45 – Atividade Ambulatorial – Especialidades Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;271 – Consultas Médicas (meta 90%)</td><td class="right">3.946</td><td class="right">3.750</td><td class="right">5.624</td><td class="right">5.012</td><td class="right">18.332</td><td class="right neg">27.498</td><td class="right" style="background:#fff8e1">34.798</td><td class="right" style="background:#e8edf5;color:#003366">38.664</td><td class="right neg">71,1%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td><td class="right neg">-7.300</td><td class="right neg">8.233/mês <span style="font-size:10px">(+3.650!)</span></td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;CMA Maior (Cirurgia Maior Ambulatorial) (meta 95%)</td><td class="right">297</td><td class="right">198</td><td class="right">338</td><td class="right">275</td><td class="right">1.108</td><td class="right" style="color:#ff8b00">1.662</td><td class="right" style="background:#fff8e1">1.796</td><td class="right" style="background:#e8edf5;color:#003366">1.890</td><td class="right" style="color:#ff8b00">87,9%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td><td class="right neg">-134</td><td class="right neg">344/mês <span style="font-size:10px">(+67)</span></td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;cma menor (Cirurgia Menor Ambulatorial) (meta 95%)</td><td class="right">322</td><td class="right">291</td><td class="right">536</td><td class="right">385</td><td class="right">1.534</td><td class="right pos">2.301</td><td class="right" style="background:#fff8e1">1.892</td><td class="right" style="background:#e8edf5;color:#003366">1.992</td><td class="right pos">115,5%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+409</td><td class="right">–</td></tr>
+        <tr class="c46-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;46 – Atividade Ambulatorial – Especialidades Não Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Não-Médica + Proc. (meta 90%)</td><td class="right">2.681</td><td class="right">2.303</td><td class="right">4.370</td><td class="right">3.754</td><td class="right">13.108</td><td class="right pos">19.662</td><td class="right" style="background:#fff8e1">15.768</td><td class="right" style="background:#e8edf5;color:#003366">17.520</td><td class="right pos">112,2%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+3.894</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Procedimentos Terapêuticos – sessões (meta 90%)</td><td class="right">294</td><td class="right">361</td><td class="right">451</td><td class="right">524</td><td class="right">1.630</td><td class="right pos">2.445</td><td class="right" style="background:#fff8e1">2.268</td><td class="right" style="background:#e8edf5;color:#003366">2.520</td><td class="right pos">97,0%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+177</td><td class="right">–</td></tr>
+        <tr class="sadt-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;SADT – Apoio Diagnóstico Externo</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Total SADT Externo (meta 90%)</td><td class="right">1.550</td><td class="right">1.556</td><td class="right">1.701</td><td class="right">1.479</td><td class="right">6.286</td><td class="right" style="color:#ff8b00">9.429</td><td class="right" style="background:#fff8e1">10.082</td><td class="right" style="background:#e8edf5;color:#003366">11.202</td><td class="right" style="color:#ff8b00">84,2%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td><td class="right neg">-653</td><td class="right neg">1.898/mês <span style="font-size:10px">(+326)</span></td></tr>
+        <!-- RIBEIRÃO PRETO -->
+        <tr class="group"><td colspan="13">AME RIBEIRÃO PRETO</td></tr>
+        <tr class="c45-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;45 – Atividade Ambulatorial – Especialidades Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;271 – Consultas Médicas (meta 90%)</td><td class="right">6.368</td><td class="right">5.855</td><td class="right">7.113</td><td class="right">6.550</td><td class="right">25.886</td><td class="right" style="color:#ff8b00">38.829</td><td class="right" style="background:#fff8e1">40.176</td><td class="right" style="background:#e8edf5;color:#003366">44.640</td><td class="right" style="color:#ff8b00">87,0%</td><td class="center"><span class="badge badge-alert">⚠ Atenção</span></td><td class="right neg">-1.347</td><td class="right neg">7.145/mês <span style="font-size:10px">(+673)</span></td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;CMA Maior (Cirurgia Maior Ambulatorial) (meta 95%)</td><td class="right">484</td><td class="right">470</td><td class="right">489</td><td class="right">500</td><td class="right">1.943</td><td class="right pos">2.915</td><td class="right" style="background:#fff8e1">2.668</td><td class="right" style="background:#e8edf5;color:#003366">2.808</td><td class="right pos">103,8%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+247</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;cma menor (Cirurgia Menor Ambulatorial) (meta 95%)</td><td class="right">213</td><td class="right">234</td><td class="right">204</td><td class="right">195</td><td class="right">846</td><td class="right neg">1.269</td><td class="right" style="background:#fff8e1">1.596</td><td class="right" style="background:#e8edf5;color:#003366">1.680</td><td class="right neg">75,5%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td><td class="right neg">-327</td><td class="right neg">375/mês <span style="font-size:10px">(+163)</span></td></tr>
+        <tr class="c46-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;46 – Atividade Ambulatorial – Especialidades Não Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Não-Médica + Proc. (meta 90%)</td><td class="right">2.548</td><td class="right">2.978</td><td class="right">3.918</td><td class="right">2.852</td><td class="right">12.296</td><td class="right pos">18.444</td><td class="right" style="background:#fff8e1">15.687</td><td class="right" style="background:#e8edf5;color:#003366">17.430</td><td class="right pos">105,8%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+3.014</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Procedimentos Terapêuticos – sessões (meta 90%)</td><td class="right">497</td><td class="right">609</td><td class="right">619</td><td class="right">445</td><td class="right">2.170</td><td class="right pos">3.255</td><td class="right" style="background:#fff8e1">2.700</td><td class="right" style="background:#e8edf5;color:#003366">3.000</td><td class="right pos">108,5%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+555</td><td class="right">–</td></tr>
+        <tr class="sadt-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;SADT – Apoio Diagnóstico Externo</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Total SADT Externo (meta 90%)</td><td class="right">2.293</td><td class="right">2.128</td><td class="right">2.804</td><td class="right">2.094</td><td class="right">9.319</td><td class="right pos">13.979</td><td class="right" style="background:#fff8e1">13.916</td><td class="right" style="background:#e8edf5;color:#003366">15.462</td><td class="right pos">90,4%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+63</td><td class="right">–</td></tr>
+        <!-- SÃO CARLOS -->
+        <tr class="group"><td colspan="13">AME SÃO CARLOS</td></tr>
+        <tr class="c45-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;45 – Atividade Ambulatorial – Especialidades Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;271 – Consultas Médicas (meta 90%)</td><td class="right">2.756</td><td class="right">2.678</td><td class="right">3.719</td><td class="right">3.036</td><td class="right">12.189</td><td class="right pos">18.284</td><td class="right" style="background:#fff8e1">16.200</td><td class="right" style="background:#e8edf5;color:#003366">18.000</td><td class="right pos">101,6%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+2.084</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;CMA Maior (Cirurgia Maior Ambulatorial) (meta 95%)</td><td class="right">63</td><td class="right">86</td><td class="right">83</td><td class="right">60</td><td class="right">292</td><td class="right pos">438</td><td class="right" style="background:#fff8e1">371</td><td class="right" style="background:#e8edf5;color:#003366">390</td><td class="right pos">112,3%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+67</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;cma menor (Cirurgia Menor Ambulatorial) (meta 95%)</td><td class="right">79</td><td class="right">92</td><td class="right">108</td><td class="right">87</td><td class="right">366</td><td class="right neg">549</td><td class="right" style="background:#fff8e1">855</td><td class="right" style="background:#e8edf5;color:#003366">900</td><td class="right neg">61,0%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td><td class="right neg">-306</td><td class="right neg">245/mês <span style="font-size:10px">(+153)</span></td></tr>
+        <tr class="c46-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;46 – Atividade Ambulatorial – Especialidades Não Médicas</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Não-Médica + Proc. (meta 90%)</td><td class="right">873</td><td class="right">820</td><td class="right">967</td><td class="right">801</td><td class="right">3.461</td><td class="right pos">5.192</td><td class="right" style="background:#fff8e1">4.320</td><td class="right" style="background:#e8edf5;color:#003366">4.800</td><td class="right pos">108,2%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+872</td><td class="right">–</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Procedimentos Terapêuticos – sessões (meta 90%)</td><td class="right">47</td><td class="right">40</td><td class="right">56</td><td class="right">69</td><td class="right">212</td><td class="right neg">318</td><td class="right" style="background:#fff8e1">432</td><td class="right" style="background:#e8edf5;color:#003366">480</td><td class="right neg">66,3%</td><td class="center"><span class="badge badge-bad">✗ RISCO</span></td><td class="right neg">-114</td><td class="right neg">110/mês <span style="font-size:10px">(+57)</span></td></tr>
+        <tr class="sadt-hdr"><td colspan="13">&nbsp;&nbsp;&nbsp;SADT – Apoio Diagnóstico Externo</td></tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Total SADT Externo (meta 90%)</td><td class="right">1.393</td><td class="right">1.262</td><td class="right">1.228</td><td class="right">1.242</td><td class="right">5.125</td><td class="right pos">7.688</td><td class="right" style="background:#fff8e1">7.403</td><td class="right" style="background:#e8edf5;color:#003366">8.226</td><td class="right pos">93,5%</td><td class="center"><span class="badge badge-ok">✓ OK</span></td><td class="right pos">+285</td><td class="right">–</td></tr>
+      </table>
+      <p class="note">
+        Fonte: Metas de Quantidade SES/SP – Relatório Contratado × Realizado (Gestão em Saúde, 11/05/2026). 1º Semestre Jan–Jun/2026 (4/6 meses realizados).<br>
+        <strong style="color:#003366">45 – Especialidades Médicas:</strong> 271 Consultas Médicas + CMA (Cirurgia Maior) + cma (cirurgia menor). Meta mínima: Consultas 90% | CMA/cma 95%.<br>
+        <strong style="color:#1b5e20">46 – Especialidades Não Médicas:</strong> Não-Médica + Proc. (fisioterapia, psicologia, serviço social, etc.) + Procedimentos Terapêuticos (sessões). Meta mínima: 90% para ambos.<br>
+        <strong>Δ Volume:</strong> Projeção Semestral − Meta Mínima (positivo = folga; negativo = risco de desconto contratual). &nbsp;
+        <strong>Ritmo Mai/Jun:</strong> (Meta Mín − Acum) ÷ 2; entre parênteses = incremento adicional sobre a média histórica.<br>
+        ⚠ Proc.Terapêuticos em RISCO: Casa Branca 53% · Franca 64% · São Carlos 66% — estavam mascarados pelo bom desempenho das Não-Médica + Proc. no subtotal Code 46.<br>
+        ⚠ SADT Externo em ATENÇÃO: Jurumirim 84,2% · Franca 89,8% — risco de desconto contratual por insuficiência de apoio diagnóstico.<br>
+        Fonte: Metas de Quantidade SES/SP – Arquivos gerados em 11/05/2026. OCI: contrato encerrado em 2025.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 5: CONVÊNIOS ===== -->
+<div id="tab-convenios" class="content">
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-label">Total Convênios – Mar/26</div><div class="kpi-value">R$ 2.997.865</div><div class="kpi-sub pos">+22,3% vs Jan/26</div></div>
+    <div class="kpi"><div class="kpi-label">IAMSPE (SC + HC)</div><div class="kpi-value">R$ 1.302.596</div><div class="kpi-sub">43,5% do total</div></div>
+    <div class="kpi purple"><div class="kpi-label">Unimed</div><div class="kpi-value">R$ 469.334</div><div class="kpi-sub">15,7% do total</div></div>
+    <div class="kpi orange"><div class="kpi-label">Prefeituras (total)</div><div class="kpi-value">R$ 298.845</div><div class="kpi-sub">6 municípios</div></div>
+    <div class="kpi teal"><div class="kpi-label">AMEs como Convênio</div><div class="kpi-value">R$ 533.702</div><div class="kpi-sub">6 AMEs referenciando HSC</div></div>
+    <div class="kpi"><div class="kpi-label">CMD – Particular</div><div class="kpi-value">R$ 269.201</div><div class="kpi-sub">9,0% do total</div></div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-box">
+      <div class="chart-title">Top 10 Convênios – Março/2026</div>
+      <div class="chart-wrap tall"><canvas id="ch-conv-top"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Evolução Receita Total Convênios – Jan a Mar/2026</div>
+      <div class="chart-wrap tall"><canvas id="ch-conv-evolucao"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">Evolução Receitas de Convênios por Pagador</div>
+  <div class="chart-box">
+    <table>
+      <tr><th>Convênio / Pagador</th><th class="right">Jan/2026</th><th class="right">Fev/2026</th><th class="right">Mar/2026</th><th class="right">Variação Jan→Mar</th></tr>
+      <tr class="group"><td colspan="4">PREFEITURAS MUNICIPAIS</td></tr>
+      <tr><td>PM Franca</td><td class="right">186.226</td><td class="right">192.094</td><td class="right">216.066</td><td class="right pos">+16,0%</td></tr>
+      <tr><td>PM Cristais Paulista</td><td class="right">32.585</td><td class="right">30.230</td><td class="right">38.552</td><td class="right pos">+18,3%</td></tr>
+      <tr><td>PM Ribeirão Corrente</td><td class="right">6.130</td><td class="right">8.727</td><td class="right">12.393</td><td class="right pos">+102,2%</td></tr>
+      <tr><td>PM Rifaina</td><td class="right">26.075</td><td class="right">25.822</td><td class="right">–</td><td class="right neg">–</td></tr>
+      <tr><td>PM São José da Bela Vista</td><td class="right">21.598</td><td class="right">21.658</td><td class="right">29.750</td><td class="right pos">+37,7%</td></tr>
+      <tr><td>PM Restinga</td><td class="right">1.166</td><td class="right">1.738</td><td class="right">2.083</td><td class="right pos">+78,7%</td></tr>
+      <tr class="group"><td colspan="4">AMEs (REFERENCIAMENTO AO HOSPITAL)</td></tr>
+      <tr><td>AME Campinas</td><td class="right">121.997</td><td class="right">159.475</td><td class="right">138.891</td><td class="right pos">+13,8%</td></tr>
+      <tr><td>AME Franca</td><td class="right">58.958</td><td class="right">65.356</td><td class="right">61.659</td><td class="right pos">+4,6%</td></tr>
+      <tr><td>AME Casa Branca</td><td class="right">68.656</td><td class="right">90.386</td><td class="right">84.206</td><td class="right pos">+22,7%</td></tr>
+      <tr><td>AME Vale do Jurumirim</td><td class="right">73.376</td><td class="right">84.913</td><td class="right">77.701</td><td class="right pos">+5,9%</td></tr>
+      <tr><td>AME São Carlos</td><td class="right">68.727</td><td class="right">95.748</td><td class="right">70.426</td><td class="right pos">+2,5%</td></tr>
+      <tr><td>AME Ribeirão Preto</td><td class="right">159.032</td><td class="right">134.701</td><td class="right">101.025</td><td class="right neg">-36,5%</td></tr>
+      <tr class="group"><td colspan="4">PLANOS DE SAÚDE</td></tr>
+      <tr><td>IAMSPE – Santa Casa</td><td class="right">899.966</td><td class="right">899.995</td><td class="right">1.259.996</td><td class="right pos">+40,0%</td></tr>
+      <tr><td>IAMSPE – Hospital do Coração</td><td class="right">34.200</td><td class="right">36.300</td><td class="right">42.600</td><td class="right pos">+24,6%</td></tr>
+      <tr><td>Unimed</td><td class="right">205.052</td><td class="right">267.064</td><td class="right">469.334</td><td class="right pos">+128,9%</td></tr>
+      <tr><td>Benevida</td><td class="right">1.342</td><td class="right">2.649</td><td class="right">5.352</td><td class="right pos">+298,8%</td></tr>
+      <tr class="group"><td colspan="4">OUTROS</td></tr>
+      <tr><td>Santa Casa de São Joaquim da Barra</td><td class="right">115.036</td><td class="right">41.977</td><td class="right">100.887</td><td class="right neg">-12,3%</td></tr>
+      <tr><td>CMD – Particular</td><td class="right">292.906</td><td class="right">279.867</td><td class="right">269.201</td><td class="right neg">-8,1%</td></tr>
+      <tr><td>Pró Clínica Médica</td><td class="right">4.923</td><td class="right">4.248</td><td class="right">15.967</td><td class="right pos">+224,4%</td></tr>
+      <tr><td>Demais</td><td class="right">606</td><td class="right">5.138</td><td class="right">782</td><td class="right pos">+29,1%</td></tr>
+      <tr class="total"><td>TOTAL CONVÊNIOS</td><td class="right">2.384.332</td><td class="right">2.449.126</td><td class="right">2.997.865</td><td class="right pos">+25,7%</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 6: CENTRAL DE DOAÇÕES ===== -->
+<div id="tab-doacoes" class="content">
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-label">Receita Mar/26</div><div class="kpi-value">R$ 378.951</div><div class="kpi-sub pos">vs R$ 381.789 Mar/25</div></div>
+    <div class="kpi orange"><div class="kpi-label">Resultado Mar/26</div><div class="kpi-value pos">R$ 176.233</div><div class="kpi-sub">Margem 47%</div></div>
+    <div class="kpi"><div class="kpi-label">Despesas + Rateios Mar/26</div><div class="kpi-value neg">-R$ 202.718</div><div class="kpi-sub">53% da receita</div></div>
+    <div class="kpi teal"><div class="kpi-label">Acum Jan–Mar/26</div><div class="kpi-value pos">R$ 503.229</div><div class="kpi-sub">Receita: R$ 1.042.874</div></div>
+    <div class="kpi purple"><div class="kpi-label">Melhor Mês (histórico)</div><div class="kpi-value">Dez/25</div><div class="kpi-sub">Receita R$ 458.495 | Res R$ 264.619</div></div>
+    <div class="kpi"><div class="kpi-label">Margem Média 2025</div><div class="kpi-value">48%</div><div class="kpi-sub">vs 55% em 2021</div></div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-box">
+      <div class="chart-title">Resultado Mensal – 2025 vs 2026</div>
+      <div class="chart-wrap"><canvas id="ch-doa-mensal"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Histórico Anual – Receita vs Resultado (2015–2026)</div>
+      <div class="chart-wrap"><canvas id="ch-doa-hist"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">Central de Doações – Detalhamento Mensal 2026 vs 2025</div>
+  <div class="chart-box">
+    <table>
+      <tr><th>Mês</th><th class="right">Receita 2025</th><th class="right">Resultado 2025</th><th class="center">Margem 25</th><th class="right">Receita 2026</th><th class="right">Despesas 2026</th><th class="right">Rateios 2026</th><th class="right">Resultado 2026</th><th class="center">Margem 26</th></tr>
+      <tr><td>Janeiro</td><td class="right">332.071</td><td class="right pos">169.060</td><td class="center">51%</td><td class="right">337.594</td><td class="right neg">-102.422</td><td class="right neg">-53.298</td><td class="right pos">181.874</td><td class="center pos">54%</td></tr>
+      <tr><td>Fevereiro</td><td class="right">329.615</td><td class="right pos">145.402</td><td class="center">44%</td><td class="right">326.330</td><td class="right neg">-109.953</td><td class="right neg">-71.254</td><td class="right pos">145.122</td><td class="center pos">44%</td></tr>
+      <tr><td>Março</td><td class="right">381.789</td><td class="right pos">185.626</td><td class="center">49%</td><td class="right">378.951</td><td class="right neg">-117.533</td><td class="right neg">-85.185</td><td class="right pos">176.233</td><td class="center pos">47%</td></tr>
+      <tr><td>Abril</td><td class="right">346.447</td><td class="right pos">153.949</td><td class="center">44%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Maio</td><td class="right">351.883</td><td class="right pos">161.583</td><td class="center">46%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Junho</td><td class="right">356.929</td><td class="right pos">166.414</td><td class="center">47%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Julho</td><td class="right">335.549</td><td class="right pos">185.165</td><td class="center">55%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Agosto</td><td class="right">359.396</td><td class="right pos">184.165</td><td class="center">51%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Setembro</td><td class="right">382.745</td><td class="right pos">168.733</td><td class="center">44%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Outubro</td><td class="right">366.233</td><td class="right pos">178.911</td><td class="center">49%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Novembro</td><td class="right">370.997</td><td class="right pos">148.982</td><td class="center">40%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr><td>Dezembro</td><td class="right">458.495</td><td class="right pos">264.619</td><td class="center">58%</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="right">–</td><td class="center">–</td></tr>
+      <tr class="total"><td>TOTAL / ACUM</td><td class="right">4.372.150</td><td class="right pos">2.112.609</td><td class="center">48%</td><td class="right">1.042.874</td><td class="right neg">-329.908</td><td class="right neg">-209.737</td><td class="right pos">503.229</td><td class="center pos">48%</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 7: FLUXO DE CAIXA ===== -->
+<div id="tab-caixa" class="content">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Saldo Inicial – Mar/26</div><div class="kpi-value">R$ 24.315.205</div><div class="kpi-sub">(Saldo Final Fev/26)</div></div>
+    <div class="kpi green"><div class="kpi-label">Entradas – Mar/26</div><div class="kpi-value pos">R$ 29.923.908</div><div class="kpi-sub pos">+106,8% vs Fev/26</div></div>
+    <div class="kpi orange"><div class="kpi-label">Saídas – Mar/26</div><div class="kpi-value neg">-R$ 25.532.414</div><div class="kpi-sub neg">+10,9% vs Fev/26</div></div>
+    <div class="kpi green"><div class="kpi-label">Saldo Final – Mar/26</div><div class="kpi-value pos">R$ 28.706.700</div><div class="kpi-sub pos">+R$ 4.391.494</div></div>
+    <div class="kpi red"><div class="kpi-label">Maior Saída</div><div class="kpi-value">Folha</div><div class="kpi-sub neg">R$ 9.817.667 (38,5%)</div></div>
+    <div class="kpi purple"><div class="kpi-label">Insumos + Honorários</div><div class="kpi-value neg">R$ 10.705.885</div><div class="kpi-sub neg">41,9% das saídas</div></div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-box">
+      <div class="chart-title">Composição das Entradas – Hospital Mar/2026</div>
+      <div class="chart-wrap tall"><canvas id="ch-cx-entradas"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Composição das Saídas – Hospital Mar/2026</div>
+      <div class="chart-wrap tall"><canvas id="ch-cx-saidas"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">Demonstração de Fluxo de Caixa – Hospital – Fev vs Mar/2026</div>
+  <div class="chart-box">
+    <table>
+      <tr><th>Categoria</th><th class="right">Fev/2026</th><th class="right">Mar/2026</th><th class="right">Variação</th></tr>
+      <tr class="subtotal"><td>SALDO INICIAL</td><td class="right">32.874.468</td><td class="right">24.315.205</td><td class="right neg">-8.559.263</td></tr>
+      <tr class="group"><td colspan="4">ENTRADAS</td></tr>
+      <tr><td>++ Contrato SUS</td><td class="right">6.867.736</td><td class="right pos">21.907.796</td><td class="right pos">+219%</td></tr>
+      <tr><td>++ Convênio</td><td class="right">2.311.441</td><td class="right">2.497.352</td><td class="right pos">+8%</td></tr>
+      <tr><td>++ Particular</td><td class="right">189.261</td><td class="right">250.056</td><td class="right pos">+32%</td></tr>
+      <tr><td>++ Doações / Contribuições</td><td class="right">319.456</td><td class="right">367.311</td><td class="right pos">+15%</td></tr>
+      <tr><td>++ Educação</td><td class="right">145.209</td><td class="right">194.509</td><td class="right pos">+34%</td></tr>
+      <tr><td>++ Subvenções</td><td class="right">602.875</td><td class="right">1.052.875</td><td class="right pos">+75%</td></tr>
+      <tr><td>++ Receitas Financeiras</td><td class="right">235.973</td><td class="right">270.563</td><td class="right pos">+15%</td></tr>
+      <tr><td>++ Piso da Enfermagem</td><td class="right">887.037</td><td class="right">899.121</td><td class="right pos">+1%</td></tr>
+      <tr><td>++ Serviços Adm. OSS</td><td class="right">333.271</td><td class="right">401.355</td><td class="right pos">+20%</td></tr>
+      <tr><td>++ Termo de Colaboração (AMEs)</td><td class="right">957.113</td><td class="right">478.556</td><td class="right neg">-50%</td></tr>
+      <tr><td>++ Alienação de Bens</td><td class="right">17.500</td><td class="right">142.500</td><td class="right pos">+714%</td></tr>
+      <tr><td>++ Demais entradas</td><td class="right">603.910</td><td class="right">462.924</td><td class="right neg">-23%</td></tr>
+      <tr class="subtotal"><td>TOTAL ENTRADAS</td><td class="right">14.466.781</td><td class="right pos">29.923.908</td><td class="right pos">+107%</td></tr>
+      <tr class="group"><td colspan="4">SAÍDAS</td></tr>
+      <tr><td>+ Folha de Pagamento</td><td class="right neg">9.301.838</td><td class="right neg">9.817.667</td><td class="right neg">+6%</td></tr>
+      <tr><td>+ Insumos (Med/Mat/OPME)</td><td class="right neg">4.731.842</td><td class="right neg">5.683.383</td><td class="right neg">+20%</td></tr>
+      <tr><td>+ Honorários Médicos</td><td class="right neg">5.255.913</td><td class="right neg">5.022.501</td><td class="right pos">-4%</td></tr>
+      <tr><td>+ Água / Energia / Telefone</td><td class="right neg">657.350</td><td class="right neg">249.473</td><td class="right pos">-62%</td></tr>
+      <tr><td>+ Serviços Terceiros</td><td class="right neg">277.233</td><td class="right neg">486.056</td><td class="right neg">+75%</td></tr>
+      <tr><td>+ Serviços Assistenciais</td><td class="right neg">412.290</td><td class="right neg">509.205</td><td class="right neg">+24%</td></tr>
+      <tr><td>+ Conservação / Locações</td><td class="right neg">613.247</td><td class="right neg">643.873</td><td class="right neg">+5%</td></tr>
+      <tr><td>+ Empréstimos Bancários</td><td class="right neg">507.143</td><td class="right neg">507.547</td><td class="right">≈0%</td></tr>
+      <tr><td>+ Imobilizado</td><td class="right neg">74.861</td><td class="right neg">395.841</td><td class="right neg">+429%</td></tr>
+      <tr><td>+ Recursos Estaduais</td><td class="right">–</td><td class="right neg">1.111.595</td><td class="right neg">novo</td></tr>
+      <tr><td>+ Demais saídas</td><td class="right neg">1.193.326</td><td class="right neg">1.101.272</td><td class="right pos">-8%</td></tr>
+      <tr class="subtotal"><td>TOTAL SAÍDAS</td><td class="right neg">23.026.043</td><td class="right neg">25.532.414</td><td class="right neg">+11%</td></tr>
+      <tr class="total"><td>SALDO FINAL</td><td class="right">24.315.205</td><td class="right pos">28.706.700</td><td class="right pos">+4.391.494</td></tr>
+    </table>
+    <p class="note">¹ Fev/26: não houve recebimento da produção SUS – regularizado em Mar/26 (Tabela Paulista 3º Termo Aditivo R$ 5.790.023,89 + FÃECs R$ 809.028,34).</p>
+  </div>
+</div>
+
+<!-- ===== TAB 8: BALANÇO ===== -->
+<div id="tab-balanco" class="content">
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-label">Ativo Total – Mar/26</div><div class="kpi-value">R$ 187.355.382</div><div class="kpi-sub pos">+R$ 18,5M vs Dez/25</div></div>
+    <div class="kpi"><div class="kpi-label">Ativo Circulante</div><div class="kpi-value">R$ 85.226.989</div><div class="kpi-sub">45,5% do ativo total</div></div>
+    <div class="kpi orange"><div class="kpi-label">Passivo Circulante</div><div class="kpi-value neg">R$ 66.138.173</div><div class="kpi-sub neg">+R$ 22M vs Dez/25</div></div>
+    <div class="kpi purple"><div class="kpi-label">Liquidez Corrente</div><div class="kpi-value">1,29</div><div class="kpi-sub pos">AC / PC (saudável &gt; 1)</div></div>
+    <div class="kpi red"><div class="kpi-label">Patrimônio Líquido</div><div class="kpi-value neg">-R$ 865.855</div><div class="kpi-sub neg">Déficit técnico</div></div>
+    <div class="kpi teal"><div class="kpi-label">Contas a Receber</div><div class="kpi-value">R$ 31.018.007</div><div class="kpi-sub">16,6% do ativo</div></div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-box">
+      <div class="chart-title">Evolução Ativo Total vs Passivo Total – Dez/25 a Mar/26</div>
+      <div class="chart-wrap"><canvas id="ch-bal-evolucao"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Composição Ativo Circulante – Mar/2026</div>
+      <div class="chart-wrap"><canvas id="ch-bal-ac"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">Demonstração do Resultado do Exercício (DRE) – Anual 2023 · 2024 · 2025</div>
+  <div class="chart-box" style="overflow-x:auto">
+    <table>
+      <tr><th style="text-align:left">Rubrica</th><th class="right">2023</th><th class="right">2024</th><th class="right">2025</th><th class="right">Var 25/24</th></tr>
+      <tr class="group"><td colspan="5">RECEITAS</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Receita de Convênio SUS (MAC + FAEC)</td><td class="right">106.655.788</td><td class="right">104.846.764</td><td class="right pos">119.129.729</td><td class="right pos">+13,6%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Doações e Subvenções</td><td class="right">61.198.693</td><td class="right">33.278.646</td><td class="right">30.733.937</td><td class="right neg">-7,6%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Receita Demais Convênios</td><td class="right">21.455.397</td><td class="right">25.146.208</td><td class="right pos">29.046.587</td><td class="right pos">+15,5%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Receita de Particulares</td><td class="right">1.187.120</td><td class="right">1.661.859</td><td class="right pos">2.030.340</td><td class="right pos">+22,2%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Receita Ensino e Pesquisa</td><td class="right">3.163.101</td><td class="right">2.855.477</td><td class="right">2.387.425</td><td class="right neg">-16,4%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Receita Parcerias + Outros</td><td class="right">6.584.336</td><td class="right">2.337.725</td><td class="right">1.811.793</td><td class="right neg">-22,5%</td></tr>
+      <tr class="subtotal"><td>▸ RECEITA OPERACIONAL LÍQUIDA</td><td class="right">200.180.190</td><td class="right">170.048.284</td><td class="right pos">185.083.530</td><td class="right pos">+8,8%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(-) Custos dos Serviços Assistenciais</td><td class="right neg">180.332.300</td><td class="right neg">196.162.630</td><td class="right neg">230.003.630</td><td class="right neg">+17,2%</td></tr>
+      <tr class="subtotal"><td>▸ SUPERÁVIT BRUTO</td><td class="right pos">19.847.890</td><td class="right neg">-26.114.346</td><td class="right neg">-44.920.100</td><td class="right neg">▲custo</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;(-) Despesas Administrativas + Pessoal</td><td class="right neg">24.676.404</td><td class="right neg">29.950.922</td><td class="right neg">32.980.133</td><td class="right neg">+10,1%</td></tr>
+      <tr class="subtotal"><td>▸ SUPERÁVIT OPERACIONAL</td><td class="right neg">-4.828.514</td><td class="right neg">-56.065.268</td><td class="right neg">-77.900.233</td><td class="right neg">–</td></tr>
+      <tr class="group"><td colspan="5">OUTRAS RECEITAS (compensam déficit operacional)</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Incremento Teto MAC (SUS Federal)</td><td class="right">9.259.423</td><td class="right">8.818.942</td><td class="right pos">1.953.062</td><td class="right neg">-77,9%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Tabela SUS Paulista (SES/SP)</td><td class="right">—</td><td class="right">62.243.064</td><td class="right pos">71.722.264</td><td class="right pos">+15,2%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Reversão de Contingências</td><td class="right">3.146.538</td><td class="right">1.577.921</td><td class="right">3.167.310</td><td class="right pos">+100,7%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Outras Receitas</td><td class="right">5.419.937</td><td class="right">8.069.279</td><td class="right">7.834.349</td><td class="right neg">-2,9%</td></tr>
+      <tr class="subtotal"><td>▸ TOTAL OUTRAS RECEITAS</td><td class="right">16.275.092</td><td class="right">78.266.194</td><td class="right pos">82.319.948</td><td class="right pos">+5,2%</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Resultado Financeiro</td><td class="right neg">-647.439</td><td class="right">476.911</td><td class="right pos">1.238.861</td><td class="right pos">+159%</td></tr>
+      <tr class="total"><td>SUPERÁVIT DO EXERCÍCIO</td><td class="right pos">10.799.139</td><td class="right pos">22.677.837</td><td class="right pos">5.658.576</td><td class="right neg">-75,0%</td></tr>
+    </table>
+    <p class="note">Fonte: Demonstrações Financeiras Individuais auditadas — Fundação Santa Casa de Misericórdia de Franca (hospital). Redução do superávit 2025 reflexo do aumento de custos assistenciais (+17,2%) parcialmente compensado pela Tabela Paulista (+R$ 71,7M) e crescimento da receita SUS (+13,6%). Incremento MAC caiu 77,9% (R$ 8,8M → R$ 1,9M) — impacto significativo em 2025.</p>
+  </div>
+
+  <div class="section-title">Balanço Patrimonial – Evolução Dez/2025 a Mar/2026 (Individual — Hospital)</div>
+  <div class="chart-box">
+    <table>
+      <tr><th>Rubrica</th><th class="right">Dez/2025 ★</th><th class="right">Jan/2026</th><th class="right">Fev/2026</th><th class="right">Mar/2026</th></tr>
+      <tr class="group"><td colspan="5">ATIVO</td></tr>
+      <tr class="subtotal"><td>ATIVO TOTAL</td><td class="right">168.813.259</td><td class="right">179.735.467</td><td class="right">183.822.229</td><td class="right pos">187.355.382</td></tr>
+      <tr class="subtotal"><td>▸ ATIVO CIRCULANTE</td><td class="right">64.421.165</td><td class="right">76.719.203</td><td class="right">81.070.998</td><td class="right pos">85.226.989</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Caixa e Equivalentes (sem restrição)</td><td class="right">29.158</td><td class="right">32.079</td><td class="right">40.704</td><td class="right pos">94.646</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Aplicações Financeiras (sem restrição)</td><td class="right">8.432.214</td><td class="right">8.999.533</td><td class="right">3.325.422</td><td class="right pos">16.663.474</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Aplicações Financeiras (com restrição)</td><td class="right">14.438.409</td><td class="right">22.727.098</td><td class="right">19.818.752</td><td class="right">17.795.470</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Contas a Receber</td><td class="right">29.749.184</td><td class="right">29.127.168</td><td class="right">37.816.987</td><td class="right">31.018.007</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Convênios Públicos (Custeio a Receber)</td><td class="right">991.880</td><td class="right">6.619.677</td><td class="right">10.724.584</td><td class="right neg">12.008.526</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Estoques</td><td class="right">9.450.878</td><td class="right">7.027.620</td><td class="right">7.246.457</td><td class="right">7.147.445</td></tr>
+      <tr class="subtotal"><td>▸ ATIVO NÃO CIRCULANTE</td><td class="right">104.392.094</td><td class="right">103.016.264</td><td class="right">102.751.231</td><td class="right">102.128.393</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Imobilizado (sem + com restrição)</td><td class="right">100.623.054</td><td class="right">98.790.656</td><td class="right">98.260.267</td><td class="right">97.879.097</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Convênios Públicos (Investimento)</td><td class="right">2.508.220</td><td class="right">1.543.311</td><td class="right">1.793.311</td><td class="right">1.543.311</td></tr>
+      <tr class="group"><td colspan="5">PASSIVO</td></tr>
+      <tr class="subtotal"><td>PASSIVO TOTAL</td><td class="right neg">87.017.780</td><td class="right neg">97.651.720</td><td class="right neg">102.152.886</td><td class="right neg">108.138.173</td></tr>
+      <tr class="subtotal"><td>▸ PASSIVO CIRCULANTE</td><td class="right neg">44.072.841</td><td class="right neg">55.422.286</td><td class="right neg">59.928.470</td><td class="right neg">66.138.173</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Fornecedores</td><td class="right">6.538.889</td><td class="right">6.989.877</td><td class="right">7.303.958</td><td class="right neg">7.490.306</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Obrigações Trabalhistas e Sociais</td><td class="right">6.770.567</td><td class="right">6.284.144</td><td class="right">6.610.396</td><td class="right">6.538.138</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Provisão de Férias e Encargos</td><td class="right">8.429.261</td><td class="right">8.886.746</td><td class="right">9.554.035</td><td class="right neg">10.568.269</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Honorários Médicos a Pagar</td><td class="right">5.224.339</td><td class="right">5.210.518</td><td class="right">4.911.880</td><td class="right neg">9.858.533</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Convênios Públicos a Realizar (Custeio)</td><td class="right">2.366.056</td><td class="right">20.400.780</td><td class="right">24.041.316</td><td class="right neg">24.094.409</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Empréstimos e Financiamentos</td><td class="right">4.378.671</td><td class="right">3.910.057</td><td class="right">3.437.181</td><td class="right pos">2.956.966</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Provisão Honorários / Outros Passivos</td><td class="right">10.365.058</td><td class="right">4.740.164</td><td class="right">4.069.704</td><td class="right neg">4.631.552</td></tr>
+      <tr class="subtotal"><td>▸ PASSIVO NÃO CIRCULANTE</td><td class="right">42.944.939</td><td class="right">42.229.434</td><td class="right">42.224.416</td><td class="right">~42.000.000</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Empréstimos LP / Contingências / Outros</td><td class="right">6.813.151</td><td class="right">–</td><td class="right">–</td><td class="right">–</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Subvenção p/ Investimento / Doações</td><td class="right">28.842.260</td><td class="right">–</td><td class="right">–</td><td class="right">–</td></tr>
+      <tr class="total"><td>PATRIMÔNIO LÍQUIDO ★</td><td class="right pos">81.795.479</td><td class="right pos">82.083.747</td><td class="right pos">81.669.343</td><td class="right pos">~79.217.209</td></tr>
+    </table>
+    <p class="note">★ Dez/2025: dados das Demonstrações Financeiras Individuais auditadas, assinadas em 23/01/2026. PL de R$ 81.795.479 = Fundo Social acumulado (superávit de R$ 5.658.576 transferido ao Fundo Social). Jan–Mar/2026: dados do Relatório Gerencial mensal; PL Jan/26 estimado = PL Dez/25 + resultado mensal. PASSIVO NÃO CIRCULANTE Mar/26 estimado (~R$ 42M); dado parcialmente truncado na fonte do relatório mensal.</p>
+  </div>
+
+  <div class="section-title">Balanço Patrimonial Consolidado (Hospital + 6 AMEs) – Dez/2025 auditado</div>
+  <div class="chart-box" style="overflow-x:auto">
+    <table>
+      <tr><th style="text-align:left">Rubrica</th><th class="right">2023</th><th class="right">2024</th><th class="right">2025</th></tr>
+      <tr class="group"><td colspan="4">ATIVO</td></tr>
+      <tr class="subtotal"><td>ATIVO TOTAL</td><td class="right">329.884.681</td><td class="right">355.138.587</td><td class="right">343.292.804</td></tr>
+      <tr class="subtotal"><td>▸ Ativo Circulante</td><td class="right">231.051.195</td><td class="right">225.061.193</td><td class="right">203.733.023</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Contrato de Gestão a Realizar (AMEs)</td><td class="right">124.071.525</td><td class="right">140.768.063</td><td class="right neg">122.758.093</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Contas a Receber</td><td class="right">15.808.383</td><td class="right">30.060.365</td><td class="right pos">34.395.955</td></tr>
+      <tr class="subtotal"><td>▸ Ativo Não Circulante</td><td class="right">98.833.486</td><td class="right">130.077.394</td><td class="right">139.559.781</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Imobilizado (total)</td><td class="right">94.171.200</td><td class="right">123.212.705</td><td class="right pos">132.672.286</td></tr>
+      <tr class="group"><td colspan="4">PASSIVO</td></tr>
+      <tr class="subtotal"><td>▸ Passivo Circulante</td><td class="right neg">204.541.325</td><td class="right neg">196.424.581</td><td class="right neg">180.926.631</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Contrato Gestão Custeio (AMEs)</td><td class="right neg">127.510.525</td><td class="right neg">137.752.175</td><td class="right neg">115.863.429</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;Provisão Honorários Médicos</td><td class="right neg">8.318.865</td><td class="right neg">9.295.774</td><td class="right neg">9.582.678</td></tr>
+      <tr class="subtotal"><td>▸ Passivo Não Circulante</td><td class="right neg">68.202.798</td><td class="right neg">78.795.502</td><td class="right neg">72.912.372</td></tr>
+      <tr class="total"><td>PATRIMÔNIO LÍQUIDO CONSOLIDADO</td><td class="right pos">57.140.558</td><td class="right pos">79.918.504</td><td class="right pos">89.453.801</td></tr>
+    </table>
+    <p class="note">Consolidado inclui Hospital (Santa Casa) + 6 AMEs gerenciados. Superávit consolidado 2025: R$ 9.535.297 (hospital: R$ 5.658.576 + AMEs: ~R$ 3.877.721). PL cresceu +11,9% em 2025. Fonte: DFs Consolidadas auditadas, assinadas em 28/01/2026.</p>
+  </div>
+</div>
+
+<!-- ===== TAB 9: ESPECIALIDADES ===== -->
+<div id="tab-especialidades" class="content">
+  <!-- Content built dynamically by buildEspTab() on first click -->
+</div>
+
+<!-- ===== TAB 10: INDICADORES DE DESEMPENHO ===== -->
+<div id="tab-indicadores" class="content">
+  <!-- built dynamically by buildIndicadoresTab() -->
+</div>
+
+<script>
+function aSubTab(id){
+  document.getElementById('ame-fin').style.display = id==='fin'?'block':'none';
+  document.getElementById('ame-qtd').style.display = id==='qtd'?'block':'none';
+  document.getElementById('sub-fin').style.background = id==='fin'?'#003366':'#e8edf5';
+  document.getElementById('sub-fin').style.color = id==='fin'?'#fff':'#003366';
+  document.getElementById('sub-qtd').style.background = id==='qtd'?'#003366':'#e8edf5';
+  document.getElementById('sub-qtd').style.color = id==='qtd'?'#fff':'#003366';
+  if(id==='qtd'&&!rendered['ames-qtd']){
+    rendered['ames-qtd']=true;
+    setTimeout(()=>renderCharts('ames'),50);
+  }
+}
+function showTab(id){
+  document.querySelectorAll('.content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='especialidades'){ buildEspTab(); return; }
+  if(id==='indicadores'){ buildIndicadoresTab(); return; }
+  setTimeout(()=>renderCharts(id),50);
+}
+const rendered={};
+function renderCharts(tab){
+  if(rendered[tab])return;
+  rendered[tab]=true;
+  const fmt=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v);
+  const fmtK=v=>'R$ '+(v>=1e6?(v/1e6).toFixed(1)+'M':(v/1e3).toFixed(0)+'K');
+  const MESES=['Jan/26','Fev/26','Mar/26','Abr/26'];
+  const CORES=['#003366','#0070c0','#00a3e0','#00875a','#ff8b00','#de350b','#6554c0','#008080','#003d99','#cc6600'];
+
+  if(tab==='geral'){
+    // Resultado por instituição
+    new Chart(document.getElementById('ch-resultado-inst'),{type:'bar',data:{
+      labels:['Santa Casa','AME Campinas','AME Jurumirim','AME Rib. Preto','AME Franca','AME São Carlos','AME Casa Branca'],
+      datasets:[{label:'Resultado Mar/26',data:[4391494,358191,374075,291216,15168,-4194,-36060],
+        backgroundColor:v=>v.raw>=0?'#00875a':'#de350b',
+        backgroundColor:['#00875a','#0070c0','#0070c0','#0070c0','#ff8b00','#de350b','#de350b']}]
+    },options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmtK(v)}}},responsive:true,maintainAspectRatio:false}});
+
+    // Evolução mensal consolidada
+    new Chart(document.getElementById('ch-evolucao'),{type:'bar',data:{
+      labels:MESES,
+      datasets:[
+        {label:'Entradas',data:[46600435,26598766,42100171,39369716],backgroundColor:'rgba(0,112,192,0.7)',stack:'a'},
+        {label:'Saídas',data:[-34991560,-34034566,-36710281,-37265947],backgroundColor:'rgba(222,53,11,0.7)',stack:'b'},
+        {type:'line',label:'Resultado',data:[11608875,-7435800,5389891,2103769],borderColor:'#003366',backgroundColor:'transparent',pointBackgroundColor:'#003366',tension:.3,yAxisID:'y'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+
+    // Receita x Despesa
+    new Chart(document.getElementById('ch-recdesp'),{type:'bar',data:{
+      labels:['Santa Casa','AME Campinas','AME Rib. Preto','AME Jurumirim','AME Franca','AME São Carlos','AME Casa Branca'],
+      datasets:[
+        {label:'Entradas',data:[29923908,3529230,2704160,1908764,1917496,1062689,1053924],backgroundColor:'rgba(0,112,192,0.8)'},
+        {label:'Saídas',data:[25532414,3171039,2412944,1534689,1902328,1066883,1089984],backgroundColor:'rgba(222,53,11,0.8)'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  if(tab==='drp'){
+    // Composição receita - donut
+    new Chart(document.getElementById('ch-receita-comp'),{type:'doughnut',data:{
+      labels:['SUS (MAC+FAEC+Inc)','Convênios/Particular','Tabela Paulista','Subvenções Custeio','Doações','Contrato Colaboração'],
+      datasets:[{data:[8990643,3217413,5790024,2478214,834858,469444],
+        backgroundColor:['#003366','#0070c0','#6554c0','#00875a','#ff8b00','#00a3e0']}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11}}}}}});
+
+    // Real vs Orçado
+    new Chart(document.getElementById('ch-real-orc'),{type:'bar',data:{
+      labels:['SUS','Convênios','Tabela Paulista','Subvenções','Doações','Colaboração'],
+      datasets:[
+        {label:'Real Mar/26',data:[8990643,3217413,5790024,3635535,834858,469444],backgroundColor:'rgba(0,51,102,0.8)'},
+        {label:'Orçado Mar/26',data:[9992854,3022411,5790024,2020060,585293,441999],backgroundColor:'rgba(0,112,192,0.5)'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  if(tab==='unidades'){
+    const unids=['Santa Casa','H. Coração','H. Câncer','SADT','Hemodiálise','Reab. Física'];
+    new Chart(document.getElementById('ch-unid-rec'),{type:'bar',data:{
+      labels:unids,
+      datasets:[{label:'Receita Líquida',data:[8739046,5228626,2412241,2766297,1298154,85890],backgroundColor:CORES}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+
+    new Chart(document.getElementById('ch-unid-custo'),{type:'bar',data:{
+      labels:unids,
+      datasets:[
+        {label:'Pessoal NM',data:[2833196,1260952,186783,750190,210097,300780],backgroundColor:'rgba(0,51,102,0.85)',stack:'s'},
+        {label:'Pessoal M (HM)',data:[2883236,1290297,323165,560323,119456,10532],backgroundColor:'rgba(0,112,192,0.85)',stack:'s'},
+        {label:'Mat/Med',data:[1826771,897830,981845,570370,319118,3409],backgroundColor:'rgba(222,53,11,0.8)',stack:'s'},
+        {label:'Custos Gerais',data:[415522,379592,269436,601634,81180,10733],backgroundColor:'rgba(255,139,0,0.8)',stack:'s'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  if(tab==='ames'){
+    // Preditivo: adicionar após renderização
+    const AMES_PRED=['Campinas','Casa Branca','Franca','Jurumirim','Rib.Preto','São Carlos'];
+    const semPrev=[2537769,-299787,397229,1609100,1941039,-310414];
+    new Chart(document.getElementById('ch-pred-sem'),{type:'bar',data:{
+      labels:AMES_PRED,
+      datasets:[{label:'Resultado Semestral Previsto (Jan–Jun)',
+        data:semPrev,
+        backgroundColor:semPrev.map(v=>v>=0?'rgba(0,135,90,0.8)':'rgba(222,53,11,0.8)'),
+        borderRadius:4}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>'R$ '+(v/1e6).toFixed(1)+'M'}}}}});
+
+    const pctPes=[30.1,46.6,28.6,28.0,26.4,34.6];
+    const pctMat=[9.1,6.5,8.6,6.3,6.9,5.2];
+    new Chart(document.getElementById('ch-pred-budget'),{type:'bar',data:{
+      labels:AMES_PRED,
+      datasets:[
+        {label:'% Pessoal CLT',data:pctPes,backgroundColor:pctPes.map(v=>v>35?'rgba(222,53,11,0.85)':v>31.5?'rgba(255,139,0,0.85)':'rgba(0,135,90,0.85)')},
+        {label:'% Materiais',data:pctMat,backgroundColor:pctMat.map(v=>v>8?'rgba(222,53,11,0.6)':v>7.2?'rgba(255,139,0,0.6)':'rgba(0,112,192,0.6)')},
+        {type:'line',label:'Teto Pessoal 35%',data:[35,35,35,35,35,35],borderColor:'#de350b',borderDash:[6,3],pointRadius:0,fill:false,yAxisID:'y'},
+        {type:'line',label:'Teto Materiais 8%',data:[8,8,8,8,8,8],borderColor:'#ff8b00',borderDash:[6,3],pointRadius:0,fill:false,yAxisID:'y'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{max:55,ticks:{callback:v=>v+'%'}}}}});
+
+    // Financeiro
+    new Chart(document.getElementById('ch-ame-evolucao'),{type:'line',data:{
+      labels:MESES,
+      datasets:[
+        {label:'AME Campinas',data:[223413,417943,358191,1021856],borderColor:'#003366',tension:.3,fill:false},
+        {label:'AME Casa Branca',data:[-256515,113467,-36060,-20750],borderColor:'#de350b',tension:.3,fill:false},
+        {label:'AME Franca',data:[-163270,43797,15168,-107066],borderColor:'#ff8b00',tension:.3,fill:false},
+        {label:'AME Jurumirim',data:[188205,368550,374075,141903],borderColor:'#00875a',tension:.3,fill:false},
+        {label:'AME Rib. Preto',data:[231929,199696,291216,821130],borderColor:'#6554c0',tension:.3,fill:false},
+        {label:'AME São Carlos',data:[-78442,-20590,-4194,-103717],borderColor:'#008080',borderDash:[5,5],tension:.3,fill:false}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+
+    new Chart(document.getElementById('ch-ame-custos'),{type:'bar',data:{
+      labels:['Campinas','Casa Branca','Franca','Jurumirim','Rib. Preto','São Carlos'],
+      datasets:[
+        {label:'Pessoal CLT',data:[1065937,514592,617072,515241,736614,347335],backgroundColor:'rgba(0,51,102,0.85)',stack:'s'},
+        {label:'Serv. Assistenciais',data:[1126103,354114,820294,622830,1084541,467555],backgroundColor:'rgba(0,112,192,0.85)',stack:'s'},
+        {label:'Serv. Administrativos',data:[430261,91797,85530,176303,191250,132672],backgroundColor:'rgba(0,163,224,0.8)',stack:'s'},
+        {label:'Materiais',data:[321345,71086,202253,75743,173468,57678],backgroundColor:'rgba(222,53,11,0.8)',stack:'s'},
+        {label:'Utilidades Públicas',data:[116439,61742,33676,46066,47437,26628],backgroundColor:'rgba(255,139,0,0.8)',stack:'s'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>fmtK(v)}}}}});
+
+    // Quantidade – Projeção semestral vs Metas Mínimas
+    const AMES=['Campinas','Casa Branca','Franca','Jurumirim','Rib. Preto','São Carlos'];
+    // Consultas Médicas: semestre=×6, min90%, projeção=acum×1.5
+    const semConsult=[37236,27282,39660,38664,44640,18000];
+    const minConsult=[33512,24554,35694,34798,40176,16200];
+    const projConsult=[44273,24342,36711,27498,38829,18284];
+    new Chart(document.getElementById('ch-qtd-consultas'),{type:'bar',data:{
+      labels:AMES,
+      datasets:[
+        {label:'Meta Contratual 1ºSem (100%)',data:semConsult,backgroundColor:'rgba(0,51,102,0.25)',borderColor:'#003366',borderWidth:2,type:'bar'},
+        {label:'Meta Mínima 90%',data:minConsult,backgroundColor:'rgba(255,139,0,0.15)',borderColor:'#ff8b00',borderWidth:2,type:'bar'},
+        {label:'Projeção Semestral',data:projConsult,backgroundColor:projConsult.map((v,i)=>v>=minConsult[i]?'rgba(0,135,90,0.8)':v>=minConsult[i]*0.9?'rgba(255,139,0,0.8)':'rgba(222,53,11,0.8)'),type:'bar'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>v.toLocaleString('pt-BR')}}}}});
+
+    // CMA (Cirurgia Maior Ambulatorial) + cma (cirurgia menor ambulatorial): semestre=×6, min95%
+    const semCmaA=[4200,510,2268,1890,2808,390], minCmaA=[3990,485,2155,1796,2668,371], projCmaA=[4241,467,2406,1662,2915,438];
+    const semCmaE=[3600,1200,1512,1992,1680,900], minCmaE=[3420,1140,1436,1892,1596,855], projCmaE=[4443,845,1701,2301,1269,549];
+    new Chart(document.getElementById('ch-qtd-cumprimento'),{type:'bar',data:{
+      labels:AMES,
+      datasets:[
+        {label:'CMA Maior – Projeção',data:projCmaA,backgroundColor:projCmaA.map((v,i)=>v>=minCmaA[i]?'rgba(0,135,90,0.8)':v>=minCmaA[i]*0.9?'rgba(255,139,0,0.8)':'rgba(222,53,11,0.8)'),stack:'a'},
+        {label:'CMA Maior – Meta Mín 95%',data:minCmaA,backgroundColor:'rgba(0,51,102,0.15)',borderColor:'#003366',borderWidth:1,stack:'b'},
+        {label:'cma Menor – Projeção',data:projCmaE,backgroundColor:projCmaE.map((v,i)=>v>=minCmaE[i]?'rgba(0,100,200,0.7)':v>=minCmaE[i]*0.9?'rgba(200,100,0,0.7)':'rgba(180,0,0,0.7)'),stack:'c'},
+        {label:'cma Menor – Meta Mín 95%',data:minCmaE,backgroundColor:'rgba(100,100,100,0.15)',borderColor:'#666',borderWidth:1,stack:'d'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>v.toLocaleString('pt-BR')}}}}});
+  }
+
+  if(tab==='convenios'){
+    new Chart(document.getElementById('ch-conv-top'),{type:'bar',data:{
+      labels:['IAMSPE SC','Unimed','CMD Particular','PM Franca','AME Campinas','AME Rib. Preto','S.C. S.Joaquim','AME Casa Branca','AME S.Carlos','AME Jurumirim'],
+      datasets:[{label:'Mar/26',data:[1259996,469334,269201,216066,138891,101025,100887,84206,70426,77701],
+        backgroundColor:CORES}]
+    },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>fmtK(v)}}}}});
+
+    new Chart(document.getElementById('ch-conv-evolucao'),{type:'line',data:{
+      labels:['Jan/26','Fev/26','Mar/26'],
+      datasets:[
+        {label:'IAMSPE SC',data:[899966,899995,1259996],borderColor:'#003366',tension:.3,fill:false},
+        {label:'Unimed',data:[205052,267064,469334],borderColor:'#0070c0',tension:.3,fill:false},
+        {label:'CMD Particular',data:[292906,279867,269201],borderColor:'#ff8b00',tension:.3,fill:false},
+        {label:'AMEs (total)',data:[550746,630578,533702],borderColor:'#00875a',tension:.3,fill:false},
+        {label:'Prefeituras',data:[273580,280040,298845],borderColor:'#6554c0',tension:.3,fill:false}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  if(tab==='doacoes'){
+    const m25=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const rec25=[332071,329615,381789,346447,351883,356929,335549,359396,382745,366233,370997,458495];
+    const res25=[169060,145402,185626,153949,161583,166414,185165,184165,168733,178911,148982,264619];
+    new Chart(document.getElementById('ch-doa-mensal'),{type:'bar',data:{
+      labels:m25,
+      datasets:[
+        {label:'Receita 2025',data:rec25,backgroundColor:'rgba(0,112,192,0.5)'},
+        {label:'Receita 2026',data:[337594,326330,378951,...Array(9).fill(null)],backgroundColor:'rgba(0,51,102,0.8)'},
+        {type:'line',label:'Resultado 2025',data:res25,borderColor:'#ff8b00',pointRadius:3,fill:false,tension:.3,yAxisID:'y'},
+        {type:'line',label:'Resultado 2026',data:[181874,145122,176233,...Array(9).fill(null)],borderColor:'#00875a',pointRadius:4,fill:false,tension:.3,yAxisID:'y'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+
+    new Chart(document.getElementById('ch-doa-hist'),{type:'bar',data:{
+      labels:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'],
+      datasets:[
+        {label:'Receita Anual',data:[3351196,3399042,3548534,3691159,3781906,3890038,4177656,4470913,4328858,4337064,4372150],backgroundColor:'rgba(0,112,192,0.6)'},
+        {type:'line',label:'Resultado Anual',data:[1830153,1829524,1928225,2002189,2101205,2231461,2416032,2710628,2368806,2144953,2112609],borderColor:'#003366',fill:false,tension:.3,pointRadius:4}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  if(tab==='caixa'){
+    new Chart(document.getElementById('ch-cx-entradas'),{type:'doughnut',data:{
+      labels:['Contrato SUS','Piso Enfermagem','Convênio','Subvenções','Serviços Adm. OSS','Particular','Educação','Doações','Rec. Financeiras','Demais'],
+      datasets:[{data:[21907796,899121,2497352,1052875,401355,250056,194509,367311,270563,83870],
+        backgroundColor:['#003366','#0070c0','#00a3e0','#00875a','#6554c0','#ff8b00','#008080','#de350b','#cc6600','#999']}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}}}}});
+
+    new Chart(document.getElementById('ch-cx-saidas'),{type:'doughnut',data:{
+      labels:['Folha Pagamento','Insumos','Honorários Médicos','Rec. Estaduais','Empréstimos','Conservação/Loc.','Serv. Assistenciais','Serv. Terceiros','Imobilizado','Demais'],
+      datasets:[{data:[9817667,5683383,5022501,1111595,507547,643873,509205,486056,395841,354746],
+        backgroundColor:['#003366','#de350b','#0070c0','#6554c0','#ff8b00','#008080','#00875a','#00a3e0','#cc6600','#999']}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}}}}});
+  }
+
+  if(tab==='balanco'){
+    new Chart(document.getElementById('ch-bal-evolucao'),{type:'line',data:{
+      labels:['Dez/25','Jan/26','Fev/26','Mar/26'],
+      datasets:[
+        {label:'Ativo Total',data:[168813259,179735467,183822229,187355382],borderColor:'#003366',fill:false,tension:.3,pointRadius:5},
+        {label:'Passivo Total',data:[163154683,179447199,183948365,188221237],borderColor:'#de350b',fill:false,tension:.3,pointRadius:5},
+        {label:'Passivo Circulante',data:[44072841,55422286,59928470,66138173],borderColor:'#ff8b00',fill:false,tension:.3,borderDash:[5,5],pointRadius:4},
+        {label:'Ativo Circulante',data:[64421165,76719203,81070998,85226989],borderColor:'#00875a',fill:false,tension:.3,borderDash:[5,5],pointRadius:4}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+
+    new Chart(document.getElementById('ch-bal-ac'),{type:'doughnut',data:{
+      labels:['Aplicações s/ restrição','Aplicações c/ restrição','Contas a Receber','Conv. Públicos Custeio','Estoques','Adiantamentos','Despesas Antecipadas','Caixa'],
+      datasets:[{data:[16663474,17795470,31018007,12008526,7147445,139286,351385,103397],
+        backgroundColor:['#003366','#0070c0','#00875a','#6554c0','#ff8b00','#008080','#de350b','#00a3e0']}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}}}}});
+  }
+}
+// ── Especialidades data (embedded from metas detalhadas) ──────────────────────
+const ESP_DATA = {"AME CAMPINAS":{"totalGeral":43698,"sadtTotal":2170,"ratioPct":"5.0","especialidades":[{"nome":"Enfermeiro","isSadt":false,"total":12654,"jan":3243,"fev":2784,"mar":3509,"abr":3118,"projMai":3251,"projJun":3286,"agendamentos":13160,"realizados":12654,"pctComparecimento":96},{"nome":"Oftalmologia","isSadt":false,"total":9138,"jan":1848,"fev":1995,"mar":2766,"abr":2529,"projMai":2988,"projJun":3269,"agendamentos":10020,"realizados":9138,"pctComparecimento":91},{"nome":"Dermatologia","isSadt":false,"total":3829,"jan":837,"fev":848,"mar":1180,"abr":964,"projMai":1136,"projJun":1207,"agendamentos":4835,"realizados":3829,"pctComparecimento":79},{"nome":"Ortopedia","isSadt":false,"total":3661,"jan":883,"fev":847,"mar":994,"abr":937,"projMai":993,"projJun":1023,"agendamentos":4451,"realizados":3661,"pctComparecimento":82},{"nome":"Otorrinolaringologia","isSadt":false,"total":2461,"jan":609,"fev":590,"mar":654,"abr":608,"projMai":631,"projJun":637,"agendamentos":2997,"realizados":2461,"pctComparecimento":82},{"nome":"Anestesiologia","isSadt":true,"total":2170,"jan":710,"fev":406,"mar":556,"abr":498,"projMai":421,"projJun":372,"agendamentos":2321,"realizados":2170,"pctComparecimento":93},{"nome":"Cirurgia Geral","isSadt":false,"total":1566,"jan":454,"fev":401,"mar":383,"abr":328,"projMai":293,"projJun":253,"agendamentos":1747,"realizados":1566,"pctComparecimento":90},{"nome":"Urologia","isSadt":false,"total":1456,"jan":347,"fev":346,"mar":509,"abr":254,"projMai":335,"projJun":323,"agendamentos":1735,"realizados":1456,"pctComparecimento":84},{"nome":"Cirurgia Vascular","isSadt":false,"total":948,"jan":276,"fev":219,"mar":220,"abr":233,"projMai":205,"projJun":192,"agendamentos":1055,"realizados":948,"pctComparecimento":90},{"nome":"Fisioterapeuta","isSadt":false,"total":930,"jan":422,"fev":321,"mar":121,"abr":66,"projMai":0,"projJun":0,"agendamentos":1290,"realizados":930,"pctComparecimento":72},{"nome":"Pneumologia","isSadt":false,"total":922,"jan":296,"fev":183,"mar":250,"abr":193,"projMai":170,"projJun":146,"agendamentos":1134,"realizados":922,"pctComparecimento":81},{"nome":"Proctologia","isSadt":false,"total":761,"jan":166,"fev":164,"mar":279,"abr":152,"projMai":209,"projJun":216,"agendamentos":894,"realizados":761,"pctComparecimento":85},{"nome":"Gastroenterologia","isSadt":false,"total":614,"jan":120,"fev":117,"mar":152,"abr":225,"projMai":241,"projJun":276,"agendamentos":765,"realizados":614,"pctComparecimento":80},{"nome":"Mastologia","isSadt":false,"total":532,"jan":143,"fev":114,"mar":135,"abr":140,"projMai":136,"projJun":137,"agendamentos":616,"realizados":532,"pctComparecimento":86},{"nome":"Nutricionista","isSadt":false,"total":526,"jan":121,"fev":71,"mar":187,"abr":147,"projMai":180,"projJun":199,"agendamentos":640,"realizados":526,"pctComparecimento":82},{"nome":"Reumatologia","isSadt":false,"total":509,"jan":141,"fev":126,"mar":166,"abr":76,"projMai":89,"projJun":73,"agendamentos":570,"realizados":509,"pctComparecimento":89},{"nome":"Cardiologia","isSadt":false,"total":432,"jan":235,"fev":113,"mar":12,"abr":72,"projMai":0,"projJun":0,"agendamentos":529,"realizados":432,"pctComparecimento":82},{"nome":"Cirurgia Plástica","isSadt":false,"total":213,"jan":48,"fev":57,"mar":58,"abr":50,"projMai":55,"projJun":56,"agendamentos":240,"realizados":213,"pctComparecimento":89},{"nome":"Ginecologia","isSadt":false,"total":176,"jan":22,"fev":0,"mar":69,"abr":85,"projMai":122,"projJun":153,"agendamentos":204,"realizados":176,"pctComparecimento":86},{"nome":"Endocrinologia","isSadt":false,"total":127,"jan":38,"fev":29,"mar":36,"abr":24,"projMai":23,"projJun":20,"agendamentos":147,"realizados":127,"pctComparecimento":86},{"nome":"Psicólogo","isSadt":false,"total":73,"jan":27,"fev":24,"mar":0,"abr":22,"projMai":19,"projJun":17,"agendamentos":74,"realizados":73,"pctComparecimento":99}]},"AME CASA BRANCA":{"totalGeral":19667,"sadtTotal":397,"ratioPct":"2.0","especialidades":[{"nome":"Enfermeiro","isSadt":false,"total":2364,"jan":566,"fev":445,"mar":793,"abr":560,"projMai":674,"projJun":707,"agendamentos":2447,"realizados":2364,"pctComparecimento":97},{"nome":"Acupuntura","isSadt":false,"total":2300,"jan":555,"fev":487,"mar":671,"abr":587,"projMai":645,"projJun":673,"agendamentos":2673,"realizados":2300,"pctComparecimento":86},{"nome":"Ortopedia","isSadt":false,"total":1933,"jan":534,"fev":457,"mar":547,"abr":395,"projMai":402,"projJun":369,"agendamentos":2220,"realizados":1933,"pctComparecimento":87},{"nome":"Oftalmologia","isSadt":false,"total":1564,"jan":380,"fev":348,"mar":423,"abr":413,"projMai":435,"projJun":452,"agendamentos":1840,"realizados":1564,"pctComparecimento":85},{"nome":"Cardiologia","isSadt":false,"total":1420,"jan":387,"fev":337,"mar":457,"abr":239,"projMai":274,"projJun":242,"agendamentos":1631,"realizados":1420,"pctComparecimento":87},{"nome":"Dermatologia","isSadt":false,"total":1213,"jan":260,"fev":190,"mar":315,"abr":448,"projMai":476,"projJun":544,"agendamentos":1423,"realizados":1213,"pctComparecimento":85},{"nome":"Urologia","isSadt":false,"total":999,"jan":271,"fev":230,"mar":236,"abr":262,"projMai":245,"projJun":242,"agendamentos":1103,"realizados":999,"pctComparecimento":91},{"nome":"Endocrinologia","isSadt":false,"total":943,"jan":172,"fev":240,"mar":266,"abr":265,"projMai":312,"projJun":343,"agendamentos":1082,"realizados":943,"pctComparecimento":87},{"nome":"Hematologia","isSadt":false,"total":924,"jan":199,"fev":253,"mar":312,"abr":160,"projMai":217,"projJun":211,"agendamentos":1052,"realizados":924,"pctComparecimento":88},{"nome":"Nutricionista","isSadt":false,"total":658,"jan":188,"fev":167,"mar":212,"abr":91,"projMai":103,"projJun":78,"agendamentos":815,"realizados":658,"pctComparecimento":81},{"nome":"Pneumologia","isSadt":false,"total":638,"jan":0,"fev":141,"mar":290,"abr":207,"projMai":279,"projJun":312,"agendamentos":738,"realizados":638,"pctComparecimento":86},{"nome":"Cirurgia Vascular","isSadt":false,"total":634,"jan":120,"fev":168,"mar":230,"abr":116,"projMai":171,"projJun":176,"agendamentos":733,"realizados":634,"pctComparecimento":86},{"nome":"Proctologia","isSadt":false,"total":628,"jan":160,"fev":195,"mar":192,"abr":81,"projMai":97,"projJun":73,"agendamentos":712,"realizados":628,"pctComparecimento":88},{"nome":"Neurologia","isSadt":false,"total":576,"jan":74,"fev":151,"mar":183,"abr":168,"projMai":223,"projJun":254,"agendamentos":663,"realizados":576,"pctComparecimento":87},{"nome":"Mastologia","isSadt":false,"total":491,"jan":127,"fev":101,"mar":145,"abr":118,"projMai":127,"projJun":129,"agendamentos":545,"realizados":491,"pctComparecimento":90},{"nome":"Gastroenterologia","isSadt":false,"total":457,"jan":18,"fev":63,"mar":207,"abr":169,"projMai":264,"projJun":323,"agendamentos":538,"realizados":457,"pctComparecimento":85},{"nome":"Reumatologia","isSadt":false,"total":413,"jan":59,"fev":130,"mar":129,"abr":95,"projMai":130,"projJun":141,"agendamentos":439,"realizados":413,"pctComparecimento":94},{"nome":"Anestesiologia","isSadt":true,"total":397,"jan":103,"fev":101,"mar":96,"abr":97,"projMai":94,"projJun":91,"agendamentos":481,"realizados":397,"pctComparecimento":83},{"nome":"Alergia / Imunologia","isSadt":false,"total":345,"jan":0,"fev":0,"mar":147,"abr":198,"projMai":249,"projJun":300,"agendamentos":459,"realizados":345,"pctComparecimento":75},{"nome":"Endocrinologia Infantil","isSadt":false,"total":321,"jan":67,"fev":85,"mar":96,"abr":73,"projMai":88,"projJun":90,"agendamentos":357,"realizados":321,"pctComparecimento":90},{"nome":"Psicólogo","isSadt":false,"total":270,"jan":59,"fev":79,"mar":79,"abr":53,"projMai":63,"projJun":61,"agendamentos":321,"realizados":270,"pctComparecimento":84},{"nome":"Fisioterapeuta","isSadt":false,"total":147,"jan":32,"fev":21,"mar":28,"abr":66,"projMai":64,"projJun":75,"agendamentos":192,"realizados":147,"pctComparecimento":77},{"nome":"Neurologia Infantil","isSadt":false,"total":32,"jan":9,"fev":8,"mar":8,"abr":7,"projMai":7,"projJun":6,"agendamentos":40,"realizados":32,"pctComparecimento":80}]},"AME FRANCA":{"totalGeral":32491,"sadtTotal":1544,"ratioPct":"4.8","especialidades":[{"nome":"Enfermeiro","isSadt":false,"total":6229,"jan":1711,"fev":1624,"mar":1567,"abr":1327,"projMai":1255,"projJun":1134,"agendamentos":6392,"realizados":6229,"pctComparecimento":97},{"nome":"Oftalmologia","isSadt":false,"total":4601,"jan":1212,"fev":1100,"mar":1239,"abr":1050,"projMai":1064,"projJun":1029,"agendamentos":4925,"realizados":4601,"pctComparecimento":93},{"nome":"Ortopedia","isSadt":false,"total":3235,"jan":916,"fev":695,"mar":925,"abr":699,"projMai":704,"projJun":661,"agendamentos":3641,"realizados":3235,"pctComparecimento":89},{"nome":"Dermatologia","isSadt":false,"total":2865,"jan":750,"fev":631,"mar":793,"abr":691,"projMai":713,"projJun":711,"agendamentos":3489,"realizados":2865,"pctComparecimento":82},{"nome":"Urologia","isSadt":false,"total":2372,"jan":593,"fev":573,"mar":631,"abr":575,"projMai":594,"projJun":594,"agendamentos":2612,"realizados":2372,"pctComparecimento":91},{"nome":"Cirurgia Geral","isSadt":false,"total":1892,"jan":415,"fev":476,"mar":581,"abr":420,"projMai":503,"projJun":515,"agendamentos":2129,"realizados":1892,"pctComparecimento":89},{"nome":"Cardiologia","isSadt":false,"total":1709,"jan":363,"fev":420,"mar":489,"abr":437,"projMai":500,"projJun":529,"agendamentos":1860,"realizados":1709,"pctComparecimento":92},{"nome":"Anestesiologia","isSadt":true,"total":1544,"jan":301,"fev":298,"mar":405,"abr":540,"projMai":592,"projJun":674,"agendamentos":1720,"realizados":1544,"pctComparecimento":90},{"nome":"Neurologia","isSadt":false,"total":1367,"jan":416,"fev":284,"mar":347,"abr":320,"projMai":286,"projJun":263,"agendamentos":1616,"realizados":1367,"pctComparecimento":85},{"nome":"Cirurgia Vascular","isSadt":false,"total":945,"jan":250,"fev":210,"mar":259,"abr":226,"projMai":231,"projJun":228,"agendamentos":1048,"realizados":945,"pctComparecimento":90},{"nome":"Pneumologia","isSadt":false,"total":917,"jan":183,"fev":228,"mar":265,"abr":241,"projMai":282,"projJun":303,"agendamentos":1043,"realizados":917,"pctComparecimento":88},{"nome":"Reumatologia","isSadt":false,"total":769,"jan":212,"fev":131,"mar":222,"abr":204,"projMai":209,"projJun":216,"agendamentos":844,"realizados":769,"pctComparecimento":91},{"nome":"Nutricionista","isSadt":false,"total":680,"jan":169,"fev":185,"mar":119,"abr":207,"projMai":182,"projJun":187,"agendamentos":778,"realizados":680,"pctComparecimento":87},{"nome":"Endocrinologia","isSadt":false,"total":570,"jan":141,"fev":127,"mar":164,"abr":138,"projMai":150,"projJun":152,"agendamentos":638,"realizados":570,"pctComparecimento":89},{"nome":"Farmacêutico","isSadt":false,"total":528,"jan":157,"fev":169,"mar":130,"abr":72,"projMai":59,"projJun":29,"agendamentos":528,"realizados":528,"pctComparecimento":100},{"nome":"Otorrinolaringologia","isSadt":false,"total":457,"jan":74,"fev":156,"mar":136,"abr":91,"projMai":122,"projJun":125,"agendamentos":544,"realizados":457,"pctComparecimento":84},{"nome":"Neurologia Infantil","isSadt":false,"total":373,"jan":129,"fev":61,"mar":116,"abr":67,"projMai":61,"projJun":47,"agendamentos":434,"realizados":373,"pctComparecimento":86},{"nome":"Fisioterapeuta","isSadt":false,"total":354,"jan":88,"fev":93,"mar":101,"abr":72,"projMai":79,"projJun":75,"agendamentos":439,"realizados":354,"pctComparecimento":81},{"nome":"Endocrinologia Infantil","isSadt":false,"total":299,"jan":86,"fev":64,"mar":84,"abr":65,"projMai":64,"projJun":60,"agendamentos":328,"realizados":299,"pctComparecimento":91},{"nome":"Proctologia","isSadt":false,"total":236,"jan":64,"fev":60,"mar":74,"abr":38,"projMai":43,"projJun":37,"agendamentos":264,"realizados":236,"pctComparecimento":89},{"nome":"Nefrologia","isSadt":false,"total":215,"jan":56,"fev":46,"mar":59,"abr":54,"projMai":56,"projJun":56,"agendamentos":223,"realizados":215,"pctComparecimento":96},{"nome":"Fonoaudiólogo","isSadt":false,"total":117,"jan":11,"fev":36,"mar":39,"abr":31,"projMai":45,"projJun":51,"agendamentos":128,"realizados":117,"pctComparecimento":91},{"nome":"Psicólogo","isSadt":false,"total":109,"jan":31,"fev":31,"mar":31,"abr":16,"projMai":16,"projJun":12,"agendamentos":135,"realizados":109,"pctComparecimento":81},{"nome":"Pneumologia Infantil","isSadt":false,"total":87,"jan":18,"fev":15,"mar":33,"abr":21,"projMai":29,"projJun":31,"agendamentos":107,"realizados":87,"pctComparecimento":81},{"nome":"Ginecologia","isSadt":false,"total":21,"jan":4,"fev":5,"mar":6,"abr":6,"projMai":7,"projJun":8,"agendamentos":23,"realizados":21,"pctComparecimento":91}]},"AME RIBEIRAO PRETO":{"totalGeral":38182,"sadtTotal":1687,"ratioPct":"4.4","especialidades":[{"nome":"Enfermeiro","isSadt":false,"total":10640,"jan":2132,"fev":2644,"mar":3461,"abr":2403,"projMai":3068,"projJun":3231,"agendamentos":10946,"realizados":10640,"pctComparecimento":97},{"nome":"Oftalmologia","isSadt":false,"total":6785,"jan":1535,"fev":1907,"mar":1988,"abr":1355,"projMai":1582,"projJun":1536,"agendamentos":7830,"realizados":6785,"pctComparecimento":87},{"nome":"Ortopedia","isSadt":false,"total":3076,"jan":794,"fev":693,"mar":833,"abr":756,"projMai":776,"projJun":778,"agendamentos":3604,"realizados":3076,"pctComparecimento":85},{"nome":"Dermatologia","isSadt":false,"total":1995,"jan":462,"fev":422,"mar":569,"abr":542,"projMai":596,"projJun":634,"agendamentos":2658,"realizados":1995,"pctComparecimento":75},{"nome":"Urologia","isSadt":false,"total":1906,"jan":594,"fev":253,"mar":474,"abr":585,"projMai":525,"projJun":544,"agendamentos":2354,"realizados":1906,"pctComparecimento":81},{"nome":"Cardiologia","isSadt":false,"total":1825,"jan":476,"fev":420,"mar":529,"abr":400,"projMai":427,"projJun":415,"agendamentos":2101,"realizados":1825,"pctComparecimento":87},{"nome":"Anestesiologia","isSadt":true,"total":1687,"jan":458,"fev":402,"mar":387,"abr":440,"projMai":405,"projJun":398,"agendamentos":2061,"realizados":1687,"pctComparecimento":82},{"nome":"Otorrinolaringologia","isSadt":false,"total":1272,"jan":281,"fev":232,"mar":247,"abr":512,"projMai":495,"projJun":566,"agendamentos":1641,"realizados":1272,"pctComparecimento":78},{"nome":"Cirurgia Vascular","isSadt":false,"total":1204,"jan":290,"fev":248,"mar":376,"abr":290,"projMai":333,"projJun":346,"agendamentos":1431,"realizados":1204,"pctComparecimento":84},{"nome":"Cirurgia Geral","isSadt":false,"total":1060,"jan":291,"fev":191,"mar":239,"abr":339,"projMai":313,"projJun":332,"agendamentos":1295,"realizados":1060,"pctComparecimento":82},{"nome":"Neurologia","isSadt":false,"total":1008,"jan":268,"fev":191,"mar":266,"abr":283,"projMai":282,"projJun":294,"agendamentos":1251,"realizados":1008,"pctComparecimento":81},{"nome":"Cirurgia Plástica","isSadt":false,"total":702,"jan":121,"fev":140,"mar":265,"abr":176,"projMai":248,"projJun":277,"agendamentos":829,"realizados":702,"pctComparecimento":85},{"nome":"Nutricionista","isSadt":false,"total":688,"jan":116,"fev":117,"mar":248,"abr":207,"projMai":273,"projJun":313,"agendamentos":866,"realizados":688,"pctComparecimento":79},{"nome":"Pneumologia","isSadt":false,"total":681,"jan":128,"fev":101,"mar":191,"abr":261,"projMai":293,"projJun":341,"agendamentos":827,"realizados":681,"pctComparecimento":82},{"nome":"Farmacêutico","isSadt":false,"total":619,"jan":172,"fev":123,"mar":134,"abr":190,"projMai":171,"projJun":178,"agendamentos":622,"realizados":619,"pctComparecimento":100},{"nome":"Nefrologia","isSadt":false,"total":580,"jan":172,"fev":134,"mar":169,"abr":105,"projMai":104,"projJun":87,"agendamentos":669,"realizados":580,"pctComparecimento":87},{"nome":"Reumatologia","isSadt":false,"total":545,"jan":113,"fev":131,"mar":168,"abr":133,"projMai":161,"projJun":170,"agendamentos":604,"realizados":545,"pctComparecimento":90},{"nome":"Proctologia","isSadt":false,"total":494,"jan":157,"fev":108,"mar":107,"abr":122,"projMai":97,"projJun":86,"agendamentos":589,"realizados":494,"pctComparecimento":84},{"nome":"Endocrinologia","isSadt":false,"total":335,"jan":80,"fev":100,"mar":66,"abr":89,"projMai":82,"projJun":81,"agendamentos":389,"realizados":335,"pctComparecimento":86},{"nome":"Alergia / Imunologia","isSadt":false,"total":292,"jan":80,"fev":62,"mar":58,"abr":92,"projMai":81,"projJun":84,"agendamentos":382,"realizados":292,"pctComparecimento":76},{"nome":"Gastroenterologia","isSadt":false,"total":225,"jan":47,"fev":76,"mar":102,"abr":0,"projMai":130,"projJun":158,"agendamentos":281,"realizados":225,"pctComparecimento":80},{"nome":"Fisioterapeuta","isSadt":false,"total":218,"jan":94,"fev":51,"mar":44,"abr":29,"projMai":4,"projJun":0,"agendamentos":326,"realizados":218,"pctComparecimento":67},{"nome":"Cirurgia Cabeça e Pescoço","isSadt":false,"total":214,"jan":21,"fev":44,"mar":79,"abr":70,"projMai":99,"projJun":117,"agendamentos":266,"realizados":214,"pctComparecimento":80},{"nome":"Psicólogo","isSadt":false,"total":70,"jan":18,"fev":23,"mar":10,"abr":19,"projMai":15,"projJun":14,"agendamentos":111,"realizados":70,"pctComparecimento":63},{"nome":"Terapeuta Ocupacional","isSadt":false,"total":58,"jan":16,"fev":19,"mar":19,"abr":4,"projMai":6,"projJun":2,"agendamentos":83,"realizados":58,"pctComparecimento":70},{"nome":"Fonoaudiólogo","isSadt":false,"total":3,"jan":0,"fev":1,"mar":2,"abr":0,"projMai":3,"projJun":4,"agendamentos":3,"realizados":3,"pctComparecimento":100}]},"AME SAO CARLOS":{"totalGeral":15650,"sadtTotal":540,"ratioPct":"3.5","especialidades":[{"nome":"Cardiologia","isSadt":false,"total":1939,"jan":411,"fev":420,"mar":708,"abr":400,"projMai":549,"projJun":574,"agendamentos":2262,"realizados":1939,"pctComparecimento":86},{"nome":"Enfermeiro","isSadt":false,"total":1673,"jan":456,"fev":416,"mar":422,"abr":379,"projMai":362,"projJun":340,"agendamentos":1910,"realizados":1673,"pctComparecimento":88},{"nome":"Endocrinologia","isSadt":false,"total":1559,"jan":381,"fev":331,"mar":456,"abr":391,"projMai":429,"projJun":444,"agendamentos":1873,"realizados":1559,"pctComparecimento":83},{"nome":"Oftalmologia","isSadt":false,"total":1207,"jan":293,"fev":289,"mar":318,"abr":307,"projMai":320,"projJun":327,"agendamentos":1691,"realizados":1207,"pctComparecimento":71},{"nome":"Neurologia","isSadt":false,"total":1182,"jan":185,"fev":209,"mar":544,"abr":244,"projMai":424,"projJun":475,"agendamentos":1637,"realizados":1182,"pctComparecimento":72},{"nome":"Otorrinolaringologia","isSadt":false,"total":1133,"jan":298,"fev":267,"mar":334,"abr":234,"projMai":252,"projJun":240,"agendamentos":1471,"realizados":1133,"pctComparecimento":77},{"nome":"Farmacêutico","isSadt":false,"total":1020,"jan":192,"fev":236,"mar":335,"abr":257,"projMai":329,"projJun":358,"agendamentos":1026,"realizados":1020,"pctComparecimento":99},{"nome":"Ortopedia","isSadt":false,"total":790,"jan":121,"fev":133,"mar":187,"abr":349,"projMai":382,"projJun":456,"agendamentos":1011,"realizados":790,"pctComparecimento":78},{"nome":"Dermatologia","isSadt":false,"total":787,"jan":191,"fev":227,"mar":169,"abr":200,"projMai":189,"projJun":186,"agendamentos":1005,"realizados":787,"pctComparecimento":78},{"nome":"Mastologia","isSadt":false,"total":576,"jan":181,"fev":148,"mar":190,"abr":57,"projMai":62,"projJun":29,"agendamentos":713,"realizados":576,"pctComparecimento":81},{"nome":"Anestesiologia","isSadt":true,"total":540,"jan":152,"fev":137,"mar":137,"abr":114,"projMai":107,"projJun":95,"agendamentos":654,"realizados":540,"pctComparecimento":83},{"nome":"Hematologia","isSadt":false,"total":472,"jan":115,"fev":110,"mar":144,"abr":103,"projMai":118,"projJun":117,"agendamentos":544,"realizados":472,"pctComparecimento":87},{"nome":"Pneumologia","isSadt":false,"total":445,"jan":100,"fev":84,"mar":152,"abr":109,"projMai":135,"projJun":145,"agendamentos":540,"realizados":445,"pctComparecimento":82},{"nome":"Cirurgia Vascular","isSadt":false,"total":440,"jan":90,"fev":97,"mar":101,"abr":152,"projMai":158,"projJun":177,"agendamentos":531,"realizados":440,"pctComparecimento":83},{"nome":"Nutricionista","isSadt":false,"total":362,"jan":115,"fev":108,"mar":81,"abr":58,"projMai":41,"projJun":21,"agendamentos":496,"realizados":362,"pctComparecimento":73},{"nome":"Gastroenterologia","isSadt":false,"total":346,"jan":77,"fev":72,"mar":95,"abr":102,"projMai":111,"projJun":121,"agendamentos":436,"realizados":346,"pctComparecimento":79},{"nome":"Fonoaudiólogo","isSadt":false,"total":338,"jan":92,"fev":39,"mar":105,"abr":102,"projMai":109,"projJun":118,"agendamentos":345,"realizados":338,"pctComparecimento":98},{"nome":"Ginecologia","isSadt":false,"total":206,"jan":66,"fev":59,"mar":35,"abr":46,"projMai":31,"projJun":22,"agendamentos":271,"realizados":206,"pctComparecimento":76},{"nome":"Neurologia Infantil","isSadt":false,"total":181,"jan":34,"fev":39,"mar":46,"abr":62,"projMai":68,"projJun":77,"agendamentos":232,"realizados":181,"pctComparecimento":78},{"nome":"Urologia","isSadt":false,"total":176,"jan":19,"fev":5,"mar":37,"abr":115,"projMai":124,"projJun":156,"agendamentos":239,"realizados":176,"pctComparecimento":74},{"nome":"Proctologia","isSadt":false,"total":167,"jan":34,"fev":33,"mar":49,"abr":51,"projMai":59,"projJun":65,"agendamentos":206,"realizados":167,"pctComparecimento":81},{"nome":"Psicólogo","isSadt":false,"total":68,"jan":18,"fev":21,"mar":24,"abr":5,"projMai":8,"projJun":4,"agendamentos":98,"realizados":68,"pctComparecimento":69},{"nome":"Reumatologia","isSadt":false,"total":43,"jan":8,"fev":18,"mar":17,"abr":0,"projMai":23,"projJun":28,"agendamentos":55,"realizados":43,"pctComparecimento":78}]},"AME VALE DO JURUMIRIM":{"totalGeral":31440,"sadtTotal":751,"ratioPct":"2.4","especialidades":[{"nome":"Enfermeiro","isSadt":false,"total":11363,"jan":2291,"fev":1781,"mar":3943,"abr":3348,"projMai":4174,"projJun":4707,"agendamentos":11444,"realizados":11363,"pctComparecimento":99},{"nome":"Oftalmologia","isSadt":false,"total":5105,"jan":1107,"fev":988,"mar":1699,"abr":1311,"projMai":1607,"projJun":1739,"agendamentos":5549,"realizados":5105,"pctComparecimento":92},{"nome":"Urologia","isSadt":false,"total":1903,"jan":276,"fev":563,"mar":498,"abr":566,"projMai":677,"projJun":758,"agendamentos":2144,"realizados":1903,"pctComparecimento":89},{"nome":"Otorrinolaringologia","isSadt":false,"total":1737,"jan":403,"fev":343,"mar":513,"abr":478,"projMai":533,"projJun":573,"agendamentos":2008,"realizados":1737,"pctComparecimento":87},{"nome":"Nutricionista","isSadt":false,"total":1184,"jan":263,"fev":274,"mar":343,"abr":304,"projMai":344,"projJun":363,"agendamentos":1388,"realizados":1184,"pctComparecimento":85},{"nome":"Cirurgia Vascular","isSadt":false,"total":1072,"jan":257,"fev":248,"mar":271,"abr":296,"projMai":303,"projJun":317,"agendamentos":1205,"realizados":1072,"pctComparecimento":89},{"nome":"Neurologia","isSadt":false,"total":924,"jan":317,"fev":196,"mar":230,"abr":181,"projMai":138,"projJun":100,"agendamentos":1073,"realizados":924,"pctComparecimento":86},{"nome":"Cardiologia","isSadt":false,"total":855,"jan":239,"fev":192,"mar":236,"abr":188,"projMai":187,"projJun":176,"agendamentos":942,"realizados":855,"pctComparecimento":91},{"nome":"Anestesiologia","isSadt":true,"total":751,"jan":153,"fev":146,"mar":270,"abr":182,"projMai":241,"projJun":262,"agendamentos":805,"realizados":751,"pctComparecimento":93},{"nome":"Cirurgia Geral","isSadt":false,"total":751,"jan":164,"fev":58,"mar":126,"abr":403,"projMai":384,"projJun":463,"agendamentos":848,"realizados":751,"pctComparecimento":89},{"nome":"Dermatologia","isSadt":false,"total":722,"jan":141,"fev":100,"mar":392,"abr":89,"projMai":215,"projJun":228,"agendamentos":883,"realizados":722,"pctComparecimento":82},{"nome":"Nefrologia","isSadt":false,"total":699,"jan":165,"fev":168,"mar":176,"abr":190,"projMai":196,"projJun":204,"agendamentos":751,"realizados":699,"pctComparecimento":93},{"nome":"Obstetrícia","isSadt":false,"total":674,"jan":163,"fev":124,"mar":220,"abr":167,"projMai":196,"projJun":206,"agendamentos":786,"realizados":674,"pctComparecimento":86},{"nome":"Ortopedia","isSadt":false,"total":576,"jan":130,"fev":206,"mar":71,"abr":169,"projMai":140,"projJun":138,"agendamentos":644,"realizados":576,"pctComparecimento":89},{"nome":"Geriatria","isSadt":false,"total":542,"jan":133,"fev":123,"mar":167,"abr":119,"projMai":136,"projJun":136,"agendamentos":599,"realizados":542,"pctComparecimento":90},{"nome":"Pneumologia","isSadt":false,"total":409,"jan":0,"fev":0,"mar":224,"abr":185,"projMai":146,"projJun":107,"agendamentos":496,"realizados":409,"pctComparecimento":82},{"nome":"Endocrinologia","isSadt":false,"total":383,"jan":96,"fev":88,"mar":154,"abr":45,"projMai":74,"projJun":65,"agendamentos":435,"realizados":383,"pctComparecimento":88},{"nome":"Cirurgia Plástica","isSadt":false,"total":356,"jan":85,"fev":72,"mar":88,"abr":111,"projMai":113,"projJun":122,"agendamentos":396,"realizados":356,"pctComparecimento":90},{"nome":"Proctologia","isSadt":false,"total":342,"jan":19,"fev":26,"mar":123,"abr":174,"projMai":226,"projJun":282,"agendamentos":402,"realizados":342,"pctComparecimento":85},{"nome":"Reumatologia","isSadt":false,"total":281,"jan":44,"fev":54,"mar":98,"abr":85,"projMai":112,"projJun":129,"agendamentos":312,"realizados":281,"pctComparecimento":90},{"nome":"Psicólogo","isSadt":false,"total":269,"jan":80,"fev":137,"mar":12,"abr":40,"projMai":6,"projJun":0,"agendamentos":334,"realizados":269,"pctComparecimento":81},{"nome":"Gastroenterologia","isSadt":false,"total":179,"jan":15,"fev":43,"mar":60,"abr":61,"projMai":84,"projJun":99,"agendamentos":201,"realizados":179,"pctComparecimento":89},{"nome":"Farmacêutico","isSadt":false,"total":170,"jan":34,"fev":57,"mar":46,"abr":33,"projMai":39,"projJun":38,"agendamentos":202,"realizados":170,"pctComparecimento":84},{"nome":"Fisioterapeuta","isSadt":false,"total":122,"jan":13,"fev":54,"mar":26,"abr":29,"projMai":36,"projJun":38,"agendamentos":136,"realizados":122,"pctComparecimento":90},{"nome":"Neonatologia","isSadt":false,"total":49,"jan":17,"fev":12,"mar":8,"abr":12,"projMai":8,"projJun":6,"agendamentos":69,"realizados":49,"pctComparecimento":71},{"nome":"Pneumologia Infantil","isSadt":false,"total":22,"jan":22,"fev":0,"mar":0,"abr":0,"projMai":0,"projJun":0,"agendamentos":27,"realizados":22,"pctComparecimento":81}]}};
+
+// Render first tab on load
+window.addEventListener('load',()=>renderCharts('geral'));
+// Build especialidades tab dynamically
+let _espBuilt=false;
+function buildEspTab() {
+  if(_espBuilt)return; _espBuilt=true;
+  const container = document.getElementById('tab-especialidades');
+
+  const fmtK = v => v >= 1000 ? (v/1000).toFixed(1)+'K' : String(v);
+  const trend = (cur, prev) => cur > prev ? '↑' : cur < prev ? '↓' : '→';
+  const barW = (v, max) => Math.round(v/max*100);
+
+  // Summary KPI row
+  const totalGeral = Object.values(ESP_DATA).reduce((s,a) => s+a.totalGeral, 0);
+  const sadtTotal  = Object.values(ESP_DATA).reduce((s,a) => s+a.sadtTotal, 0);
+  let html = `
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-label">Total Consultas Jan–Abr/26</div><div class="kpi-value">${totalGeral.toLocaleString('pt-BR')}</div><div class="kpi-sub">6 AMEs · 144 especialidades</div></div>
+    <div class="kpi orange"><div class="kpi-label">SADT Interno (Anestesiologia)</div><div class="kpi-value">${sadtTotal.toLocaleString('pt-BR')}</div><div class="kpi-sub">${(sadtTotal/totalGeral*100).toFixed(1)}% do total de consultas</div></div>
+    <div class="kpi purple"><div class="kpi-label">Correlação SADT × Consultas</div><div class="kpi-value">1 : ${(totalGeral/sadtTotal).toFixed(1)}</div><div class="kpi-sub">1 ato SADT a cada X consultas médicas</div></div>
+    <div class="kpi teal"><div class="kpi-label">Projeção Total Mai/26</div><div class="kpi-value">${Object.values(ESP_DATA).reduce((s,a)=>s+a.especialidades.reduce((ss,e)=>ss+e.projMai,0),0).toLocaleString('pt-BR')}</div><div class="kpi-sub">Baseado em tendência Jan–Abr</div></div>
+  </div>
+
+  <div style="background:#fff;border-radius:10px;padding:14px 18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);font-size:12px;color:#555">
+    <strong style="color:#003366">Como usar:</strong> Clique em qualquer <strong>▶ AME</strong> para expandir o detalhamento completo por especialidade.
+    <span style="background:#e8f5e9;color:#1b5e20;padding:2px 6px;border-radius:3px;margin:0 4px">Verde</span> = consultas crescendo.
+    <span style="background:#fff3e0;color:#e65100;padding:2px 6px;border-radius:3px;margin:0 4px">🔬 SADT</span> = apoio diagnóstico interno (correlacionado ao volume de consultas).
+  </div>
+  <style>
+    details.esp-block{background:#fff;border-radius:10px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+    details.esp-block summary{cursor:pointer;padding:14px 20px;background:linear-gradient(135deg,#003366 0%,#005a9e 100%);color:#fff;font-size:14px;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    details.esp-block summary::-webkit-details-marker{display:none}
+    details.esp-block summary .arrow{transition:transform .3s;font-size:12px}
+    details.esp-block[open] summary .arrow{transform:rotate(90deg)}
+    details.esp-block summary .sum-stats{display:flex;gap:20px;font-size:12px;font-weight:400;opacity:.9}
+    .esp-inner{padding:0 0 12px}
+    .esp-bar-wrap{display:flex;align-items:center;gap:6px}
+    .esp-bar{height:8px;background:#003366;border-radius:4px;min-width:2px}
+    .esp-bar.sadt{background:#ff8b00}
+    .low-comp{color:#de350b}
+    details.esp-block table th{background:#003366;color:#fff;padding:7px 10px;font-size:11px}
+    details.esp-block table td{padding:6px 10px;font-size:12px;border-bottom:1px solid #edf0f4}
+    details.esp-block table tr:nth-child(even) td{background:#f7f9fc}
+    details.esp-block table tr.sadt-row td{background:#fff8e8}
+  </style>`;
+
+  // One <details> per AME
+  const AMES_ORDER = ['AME CAMPINAS','AME RIBEIRAO PRETO','AME FRANCA','AME VALE DO JURUMIRIM','AME CASA BRANCA','AME SAO CARLOS'];
+  AMES_ORDER.forEach(ame => {
+    const a = ESP_DATA[ame];
+    if (!a) return;
+    const maxTot = a.especialidades[0]?.total || 1;
+    const displayName = ame.replace('AME ','AME ').replace('RIBEIRAO','Ribeirão').replace('SAO','São');
+
+    html += `
+    <details class="esp-block">
+      <summary>
+        <span>▶ ${displayName}</span>
+        <div class="sum-stats">
+          <span>📊 Total Jan–Abr: <strong>${a.totalGeral.toLocaleString('pt-BR')}</strong></span>
+          <span>🔬 SADT: <strong>${a.sadtTotal.toLocaleString('pt-BR')}</strong> (${a.ratioPct}%)</span>
+          <span>📋 ${a.especialidades.length} especialidades</span>
+        </div>
+        <span class="arrow">▶</span>
+      </summary>
+      <div class="esp-inner">
+        <table style="width:100%;border-collapse:collapse">
+          <tr>
+            <th style="text-align:left;min-width:180px">Especialidade</th>
+            <th class="right">Jan</th><th class="right">Fev</th><th class="right">Mar</th><th class="right">Abr</th>
+            <th class="right" style="background:#1a3d6e">Total Jan–Abr</th>
+            <th class="right" style="background:#6554c0;color:#fff">Prev. Mai</th>
+            <th class="right" style="background:#6554c0;color:#fff">Prev. Jun</th>
+            <th class="right">Agendamentos</th>
+            <th class="right">% Comparec.</th>
+            <th>Volume</th>
+          </tr>`;
+
+    a.especialidades.forEach(e => {
+      const bw = barW(e.total, maxTot);
+      const compClass = e.pctComparecimento < 75 ? 'low-comp' : '';
+      const rowClass = e.isSadt ? ' class="sadt-row"' : '';
+      const sadtBadge = e.isSadt ? ' <span style="background:#ff8b00;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px">SADT</span>' : '';
+      const tendMar = trend(e.mar, e.fev);
+      const tendAbr = trend(e.abr, e.mar);
+      html += `
+          <tr${rowClass}>
+            <td>${e.nome}${sadtBadge}</td>
+            <td class="right">${e.jan.toLocaleString('pt-BR')}</td>
+            <td class="right">${e.fev.toLocaleString('pt-BR')}</td>
+            <td class="right">${e.mar.toLocaleString('pt-BR')} ${tendMar}</td>
+            <td class="right">${e.abr.toLocaleString('pt-BR')} ${tendAbr}</td>
+            <td class="right" style="font-weight:700">${e.total.toLocaleString('pt-BR')}</td>
+            <td class="right" style="color:#6554c0;font-weight:600">${e.projMai > 0 ? e.projMai.toLocaleString('pt-BR') : '–'}</td>
+            <td class="right" style="color:#6554c0;font-weight:600">${e.projJun > 0 ? e.projJun.toLocaleString('pt-BR') : '–'}</td>
+            <td class="right">${e.agendamentos.toLocaleString('pt-BR')}</td>
+            <td class="right ${compClass}">${e.pctComparecimento}%</td>
+            <td><div class="esp-bar-wrap"><div class="esp-bar${e.isSadt?' sadt':''}" style="width:${bw}%"></div></div></td>
+          </tr>`;
+    });
+
+    html += `</table>
+        <p style="font-size:11px;color:#888;padding:8px 10px 0">
+          Comp. = Taxa de comparecimento (Realizadas/Agendadas).
+          <span style="color:#de350b">Vermelho</span> = abaixo de 75%.
+          Previsão Mai/Jun via regressão linear sobre Jan–Abr.
+          🔬 SADT Interno (Anestesiologia): ônus proporcional ao volume de CMA realizado.
+        </p>
+      </div>
+    </details>`;
+  });
+
+  // Cross-AME SADT correlation table
+  html += `
+  <div class="chart-box" style="margin-top:16px">
+    <div class="chart-title">Correlação SADT Interno × Volume de Consultas Médicas – Jan–Abr/2026</div>
+    <table>
+      <tr><th>AME</th><th class="right">Consultas Totais</th><th class="right">SADT (Anestesiologia)</th><th class="right">Ratio SADT/Consulta</th><th class="right">1 SADT a cada</th><th class="right">Prev. Consultas Mai</th><th class="right">Prev. SADT Mai (estimado)</th></tr>`;
+  AMES_ORDER.forEach(ame => {
+    const a = ESP_DATA[ame];
+    if (!a) return;
+    const ratio = (a.sadtTotal/a.totalGeral*100).toFixed(1);
+    const inverso = (a.totalGeral/a.sadtTotal).toFixed(1);
+    const projConsTotal = a.especialidades.reduce((s,e)=>s+e.projMai,0);
+    const projSadt = Math.round(projConsTotal * a.sadtTotal/a.totalGeral);
+    const dn = ame.replace('AME ','').replace('RIBEIRAO','Ribeirão').replace('SAO','São');
+    html += `<tr>
+      <td>${dn}</td>
+      <td class="right">${a.totalGeral.toLocaleString('pt-BR')}</td>
+      <td class="right">${a.sadtTotal.toLocaleString('pt-BR')}</td>
+      <td class="right">${ratio}%</td>
+      <td class="right">${inverso} consultas</td>
+      <td class="right" style="color:#6554c0">${projConsTotal.toLocaleString('pt-BR')}</td>
+      <td class="right" style="color:#ff8b00">${projSadt.toLocaleString('pt-BR')}</td>
+    </tr>`;
+  });
+  const totCons = Object.values(ESP_DATA).reduce((s,a)=>s+a.totalGeral,0);
+  const totSadt = Object.values(ESP_DATA).reduce((s,a)=>s+a.sadtTotal,0);
+  html += `<tr class="total"><td>TOTAL 6 AMEs</td><td class="right">${totCons.toLocaleString('pt-BR')}</td><td class="right">${totSadt.toLocaleString('pt-BR')}</td><td class="right">${(totSadt/totCons*100).toFixed(1)}%</td><td class="right">${(totCons/totSadt).toFixed(1)} consultas</td><td class="right" colspan="2">–</td></tr>`;
+  html += `</table>
+    <p class="note">SADT Interno = Anestesiologia (principal indicador de suporte às CMA realizadas pelas AMEs). O custo financeiro por ato SADT será calculado após extração do KPIH — preencher em .env: SADT_INTERNO_CUSTO_POR_CONSULTA_[AME].</p>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+let _indBuilt=false;
+function buildIndicadoresTab(){
+  if(_indBuilt)return; _indBuilt=true;
+
+  // ── Dados dinâmicos de dados-embutidos.js (gerado por node gerar-dados.js) ──
+  const DD=(window.DADOS_DASH||{}).ames||{};
+  const SADT_INT={frc:1544,cb:397,cp:2170,avj:751,scl:540,rp:1687}; // SADT Interno fixo (ônus da unidade)
+
+  function mk(k){
+    const d=DD[k]||{}, q=d.qtde||{}, f=d.fin||{}, a=d.analise||{};
+    const si=SADT_INT[k]||0, F=1.5, F3=3;
+    const r=(v,dec=3)=>+(((v||0)/1e6).toFixed(dec));
+    return{
+      label:{frc:'Franca',cb:'Casa Branca',cp:'Campinas',avj:'Jurumirim',scl:'S.Carlos',rp:'Rib.Preto'}[k],
+      consult: a.consultReal||0, naoMed: a.naoMedReal||0,
+      cmaA: a.cmaAReal||0, cmaM: a.cmaMReal||0,
+      sadt: si, sadtExt: a.sadtReal||0,
+      consultProj: Math.round((a.consultReal||0)*F),
+      naoMedProj:  Math.round((a.naoMedReal||0)*F),
+      cmaAProj:    Math.round((a.cmaAReal||0)*F),
+      cmaMProj:    Math.round((a.cmaMReal||0)*F),
+      sadtProj:    Math.round(si*F),
+      sadtExtProj: Math.round((a.sadtReal||0)*F),
+      idxSadt: (a.consultReal||0)>0 ? si/(a.consultReal) : 0,
+      rec4m:  r(f.receita),   pes4m: r(f.pessoal),
+      ass4m:  r(f.assistenciais), adm4m: r(f.administrativos),
+      mat4m:  r(f.materiais), uti4m: r(f.utilidades),
+      res4m:  r(f.ressarcimento), totD4m: r(f.despesa),
+      pesAno: r(f.pessoal*F3),   assAno: r(f.assistenciais*F3),
+      admAno: r(f.administrativos*F3), matAno: r(f.materiais*F3),
+      utiAno: r(f.utilidades*F3), resAno: r(f.ressarcimento*F3),
+      totDAno:r(f.despesa*F3),   recAno: r(f.receita*F3),
+      ctMes:  r(f.receita/4),    ctAno:  r(f.receita/4*12),
+      saldo1: r(f.saldoJan),     saldo4: r(f.saldoAbr),
+    };
+  }
+  const KEYS=['frc','cb','cp','avj','scl','rp'];
+  const IND={};
+  KEYS.forEach(k=>IND[k]=mk(k));
+
+  const TT={idxSadt:0};
+  ['consult','naoMed','cmaA','cmaM','sadt','sadtExt','consultProj','naoMedProj','cmaAProj','cmaMProj',
+   'sadtProj','sadtExtProj','rec4m','pes4m','ass4m','adm4m','mat4m','uti4m','res4m','totD4m',
+   'pesAno','assAno','admAno','matAno','utiAno','resAno','totDAno','recAno','ctMes','ctAno'].forEach(f=>{
+    TT[f]=KEYS.reduce((s,k)=>s+(IND[k][f]||0),0);
+  });
+  TT.saldo4=KEYS.reduce((s,k)=>s+(IND[k].saldo4||0),0);
+  TT.idxSadt=TT.consult>0?TT.sadt/TT.consult:0;
+  const ni=(v,d=0)=>typeof v==='number'?v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}):'–';
+  const row=(lbl,fn,cls,sub)=>{
+    const tdCls=sub?'label sub':'label';
+    const trCls=cls?` class="${cls}"`:'';
+    let r=`<tr${trCls}><td class="${tdCls}">${lbl}</td>`;
+    KEYS.forEach(k=>r+=`<td class="right">${fn(IND[k])}</td>`);
+    r+=`<td class="right" style="font-weight:700">${fn(TT)}</td></tr>`;
+    return r;
+  };
+  const grp=lbl=>`<tr class="group-row"><td colspan="8">${lbl}</td></tr>`;
+
+  const ttlRec4m=ni(TT.rec4m,3), ttlDesp4m=ni(TT.totD4m,3);
+  const ttlRes4m=ni(TT.rec4m-TT.totD4m,3);
+
+  let h=`<style>
+.ind-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.ind-table th{background:#003366;color:#fff;padding:6px 8px;text-align:center;white-space:nowrap;font-size:11px}
+.ind-table th.left{text-align:left;min-width:220px}
+.ind-table td{padding:5px 8px;border-bottom:1px solid #edf0f4;white-space:nowrap}
+.ind-table td.label{font-weight:600;color:#003366;background:#f0f4fb;min-width:220px;text-align:left}
+.ind-table td.label.sub{color:#555;font-weight:400;padding-left:18px}
+.ind-table td.right{text-align:right}
+.ind-table tr.group-row td{background:#003366;color:#fff;font-weight:700;padding:5px 8px;white-space:nowrap}
+.ind-table tr.total-row td{background:#e8edf5;font-weight:700;color:#003366}
+.ind-table tr.result-pos td{background:#e8f5e9}
+.ind-table tr.result-neg td{background:#fff3f0}
+.ind-val-pos{color:#00875a;font-weight:700}
+.ind-val-neg{color:#de350b;font-weight:700}
+</style>
+<div class="kpi-row" style="margin-bottom:14px">
+  <div class="kpi"><div class="kpi-label">Período</div><div class="kpi-value" style="font-size:16px">Jan–Abr/2026</div><div class="kpi-sub">4 meses acumulados · 6 AMEs</div></div>
+  <div class="kpi green"><div class="kpi-label">Consultas Médicas (45)</div><div class="kpi-value">${ni(TT.consult)}</div><div class="kpi-sub pos">Proj. semestral: ~${ni(TT.consultProj)}</div></div>
+  <div class="kpi orange"><div class="kpi-label">CMA Maior</div><div class="kpi-value">${ni(TT.cmaA)}</div><div class="kpi-sub">3ª meta · mín 95%</div></div><div class="kpi orange"><div class="kpi-label">cma menor</div><div class="kpi-value">${ni(TT.cmaM)}</div><div class="kpi-sub">4ª meta · mín 95%</div></div>
+  <div class="kpi purple"><div class="kpi-label">SADT Interno (Anestesiologia)</div><div class="kpi-value">${ni(TT.sadt)}</div><div class="kpi-sub">Ônus da unidade · por consulta</div></div>
+  <div class="kpi" style="border-left-color:#e65100"><div class="kpi-label">SADT Externo (Apoio Diag.)</div><div class="kpi-value" style="color:#e65100">${ni(TT.sadtExt)}</div><div class="kpi-sub">Lab · Imagem · Endoscopia · Diag.Esp.</div></div>
+  <div class="kpi teal"><div class="kpi-label">Receita Total 4m</div><div class="kpi-value">R$ ${ttlRec4m}M</div><div class="kpi-sub pos">Resultado: ${ni(TT.rec4m-TT.totD4m,3)} M</div></div>
+</div>
+<div class="chart-box" style="overflow-x:auto">
+<table class="ind-table">
+<thead>
+<tr>
+  <th class="left" rowspan="2">Indicador – Jan–Abr/2026</th>
+  <th>Franca</th><th>Casa Branca</th><th>Campinas</th><th>Jurumirim</th><th>S.Carlos</th><th>Rib.Preto</th>
+  <th style="background:#1a3d6e">TOTAL</th>
+</tr>
+<tr>
+  <th style="font-size:10px;font-weight:400;background:#0a4080">frc</th>
+  <th style="font-size:10px;font-weight:400;background:#0a4080">cb</th>
+  <th style="font-size:10px;font-weight:400;background:#0a4080">cp</th>
+  <th style="font-size:10px;font-weight:400;background:#0a4080">avj</th>
+  <th style="font-size:10px;font-weight:400;background:#0a4080">scl</th>
+  <th style="font-size:10px;font-weight:400;background:#0a4080">rp</th>
+  <th style="font-size:10px;font-weight:400;background:#1a3d6e">tt</th>
+</tr>
+</thead>
+<tbody>
+`;
+  h+=grp('📊 PRODUÇÃO AMBULATORIAL – Realizado Jan–Abr/2026');
+  h+=row('Consultas Médicas Especializadas',d=>ni(d.consult));
+  h+=row('SADT Interno (Anestesiologia)',d=>ni(d.sadt),'','sub');
+  h+=row('SADT Externo (Lab · Imagem · Endoscopia · Diag.Esp.)',d=>ni(d.sadtExt),'','sub');
+  h+=`<tr><td class="label" style="padding-left:8px;color:#005a9e;font-weight:700">SADT Total (Interno + Externo)</td>${KEYS.map(k=>`<td class="right" style="font-weight:700;color:#005a9e">${ni(IND[k].sadt+IND[k].sadtExt)}</td>`).join('')}<td class="right" style="font-weight:700;color:#005a9e">${ni(TT.sadt+TT.sadtExt)}</td></tr>`;
+  h+=row('Não-Médica + Proc.',d=>ni(d.naoMed));
+  h+=row('CMA Maior (Cirurgia Maior Ambulatorial)',d=>ni(d.cmaA));
+  h+=row('cma menor (Cirurgia Menor Ambulatorial)',d=>ni(d.cmaM));
+
+  h+=grp('📈 PROJEÇÃO ANUAL 2026 (tendência linear Jan–Abr × extrapolação)');
+  h+=row('Consultas Méd. – Proj. Anual',d=>ni(d.consultProj));
+  h+=row('SADT Interno – Proj. Anual',d=>ni(d.sadtProj),'','sub');
+  h+=row('SADT Externo – Proj. Anual',d=>ni(d.sadtExtProj),'','sub');
+  h+=row('Não Médicas – Proj. Anual',d=>ni(d.naoMedProj));
+  h+=row('CMA – Proj. Anual',d=>ni(d.cmaAProj));
+  h+=row('cma – Proj. Anual',d=>ni(d.cmaMProj));
+
+  h+=grp('🔬 ÍNDICES DE QUALIDADE (por consulta médica)');
+  h+=row('Índice SADT Interno / Consulta',d=>ni(d.idxSadt,3));
+
+  h+=grp('💰 FINANCEIRO – Jan–Abr/2026 (R$ milhões)');
+  h+=row('Receita Contrato Custeio 4m',d=>ni(d.rec4m,3));
+  h+=row('Desp. Pessoal CLT',d=>ni(d.pes4m,3),'','sub');
+  h+=row('Desp. Terceiros Assistenciais',d=>ni(d.ass4m,3),'','sub');
+  h+=row('Desp. Terceiros Administrativos',d=>ni(d.adm4m,3),'','sub');
+  h+=row('Desp. Insumos / Materiais',d=>ni(d.mat4m,3),'','sub');
+  h+=row('Desp. Utilidades Públicas',d=>ni(d.uti4m,3),'','sub');
+  h+=row('Desp. Ressarcimento / Rateio',d=>ni(d.res4m,3),'','sub');
+  h+=row('TOTAL DESPESAS 4 meses',d=>ni(d.totD4m,3),'total-row');
+
+  // Result row with colour
+  const resRow=KEYS.map(k=>{const v=IND[k].rec4m-IND[k].totD4m;return`<td class="right ${v>=0?'ind-val-pos':'ind-val-neg'}">${ni(v,3)}</td>`;}).join('');
+  const resTT=TT.rec4m-TT.totD4m;
+  h+=`<tr class="${resTT>=0?'result-pos':'result-neg'}"><td class="label">Resultado (Receita – Despesas)</td>${resRow}<td class="right ${resTT>=0?'ind-val-pos':'ind-val-neg'}" style="font-weight:700">${ni(resTT,3)}</td></tr>`;
+
+  h+=grp('📅 PROJEÇÃO FINANCEIRA ANUAL 2026');
+  h+=row('Contrato Mensal (R$ mi)',d=>ni(d.ctMes,3));
+  h+=row('Contrato Anual (R$ mi)',d=>ni(d.ctAno,3));
+  h+=row('Receita Projetada Ano (R$ mi)',d=>ni(d.recAno,3));
+  h+=row('Pessoal CLT – Proj. Anual',d=>ni(d.pesAno,3),'','sub');
+  h+=row('Assistencial – Proj. Anual',d=>ni(d.assAno,3),'','sub');
+  h+=row('Administrativo – Proj. Anual',d=>ni(d.admAno,3),'','sub');
+  h+=row('Materiais – Proj. Anual',d=>ni(d.matAno,3),'','sub');
+  h+=row('Utilidades – Proj. Anual',d=>ni(d.utiAno,3),'','sub');
+  h+=row('Ressarcimento – Proj. Anual',d=>ni(d.resAno,3),'','sub');
+  h+=row('TOTAL DESPESAS Proj. Anual',d=>ni(d.totDAno,3),'total-row');
+
+  h+=grp('🏦 SALDOS CONTA CUSTEIO (R$ mi)');
+  h+=row('Saldo conta custeio – JAN/2026',d=>ni(d.saldo1,3));
+  h+=row('Saldo conta custeio – ABR/2026',d=>ni(d.saldo4,3));
+
+  h+=`</tbody></table>
+<p class="note" style="margin:10px 0 0">
+  Fonte: arquivos locais – Metas Financeiras, Metas de Quantidade e metas detalhadas (especialidades). Jan–Abr/2026 (4 meses). &nbsp;
+  Projeção anual = tendência linear dos 4 meses realizados extrapolada até dez/2026. &nbsp;
+  Exames de apoio diagnóstico aguardam extração de sistema externo. &nbsp;
+  AME Franca: novo contrato R$ 2.196.196/mês a partir de Mai/2026 (+19,4%) – impacto positivo no 2º semestre.
+</p></div>`;
+
+  document.getElementById('tab-indicadores').innerHTML=h;
+}
+</script>
+</body>
+</html>

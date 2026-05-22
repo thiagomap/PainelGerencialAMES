@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Indicadores Consolidados – Grupo Santa Casa de Franca</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="dados-embutidos.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222}
+header{background:linear-gradient(135deg,#003366,#0055a5);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:18px;font-weight:700}
+header p{font-size:12px;opacity:.8;margin-top:3px}
+.nav{background:#fff;border-bottom:1px solid #dde;padding:10px 28px;display:flex;gap:12px}
+.nav a{text-decoration:none;font-size:12px;color:#003366;font-weight:600;padding:5px 14px;border-radius:16px;border:1px solid #003366}
+.nav a:hover{background:#003366;color:#fff}
+.main{max-width:1300px;margin:24px auto;padding:0 16px}
+.kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.kpi{background:#fff;border-radius:10px;padding:14px 18px;flex:1;min-width:160px;border-left:4px solid #003366;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.kpi.green{border-left-color:#00875a}
+.kpi.orange{border-left-color:#e65100}
+.kpi.purple{border-left-color:#6a1b9a}
+.kpi-label{font-size:10px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:20px;font-weight:700;color:#003366;margin:4px 0}
+.kpi-sub{font-size:11px;color:#666}
+.pos{color:#00875a}
+.neg{color:#c0392b}
+.section-title{font-size:13px;font-weight:700;color:#003366;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;border-bottom:2px solid #003366;padding-bottom:5px}
+.chart-box{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow-x:auto}
+
+/* Tabela indicadores */
+.ind-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.ind-table th{background:#003366;color:#fff;padding:6px 8px;text-align:center;white-space:nowrap;font-size:11px}
+.ind-table th.left{text-align:left;min-width:220px}
+.ind-table td{padding:5px 8px;border-bottom:1px solid #edf0f4;white-space:nowrap}
+.ind-table td.label{font-weight:600;color:#003366;background:#f0f4fb;min-width:220px;text-align:left}
+.ind-table td.label.sub{color:#555;font-weight:400;padding-left:18px}
+.ind-table td.right{text-align:right}
+.ind-table tr.group-row td{background:#003366;color:#fff;font-weight:700;padding:5px 8px}
+.ind-table tr.total-row td{background:#e8edf5;font-weight:700;color:#003366}
+.ind-table tr.result-pos td{background:#e8f5e9}
+.ind-table tr.result-neg td{background:#fff3f0}
+.val-pos{color:#00875a;font-weight:700}
+.val-neg{color:#de350b;font-weight:700}
+
+/* Gráfico barras */
+.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+@media(max-width:700px){.charts-2{grid-template-columns:1fr}}
+.chart-wrap{height:240px;position:relative}
+footer{text-align:center;padding:24px;font-size:12px;color:#999;margin-top:24px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📈 Indicadores Consolidados – Jan–Abr/2026</h1>
+    <p id="hdr-sub">Grupo Santa Casa de Franca · 6 AMEs · Contrato SES/SP</p>
+  </div>
+  <div style="font-size:12px;opacity:.8;text-align:right" id="hdr-data">Carregando…</div>
+</header>
+<div class="nav">
+  <a href="index.html">← Início</a>
+  <a href="dashboard-grid-powerbi.html">Dashboard Completo</a>
+  <a href="ame-detalhe.html?ame=cp">Campinas</a>
+  <a href="ame-detalhe.html?ame=frc">Franca</a>
+  <a href="ame-detalhe.html?ame=cb">Casa Branca</a>
+  <a href="ame-detalhe.html?ame=avj">Jurumirim</a>
+  <a href="ame-detalhe.html?ame=rp">Rib. Preto</a>
+  <a href="ame-detalhe.html?ame=scl">São Carlos</a>
+</div>
+<div class="main" id="main-content">
+  <p style="padding:40px;text-align:center;color:#666">Carregando dados…</p>
+</div>
+<footer>Grupo Santa Casa de Franca · Dados: Metas SES/SP 11/05/2026 · Sem envio externo</footer>
+
+<script>
+const SADT_INT = {frc:1544,cb:397,cp:2170,avj:751,scl:540,rp:1687};
+const KEYS     = ['frc','cb','cp','avj','scl','rp'];
+const LABELS   = {frc:'Franca',cb:'Casa Branca',cp:'Campinas',avj:'Jurumirim',scl:'S.Carlos',rp:'Rib.Preto'};
+
+function ni(v,d=0){
+  if(typeof v!=='number'||isNaN(v)) return '–';
+  return v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+
+function buildIND(){
+  const DD = (window.DADOS_DASH||{}).ames||{};
+  const IND = {}, F=1.5, F3=3;
+
+  KEYS.forEach(k=>{
+    const d=DD[k]||{}, q=d.qtde||{}, f=d.fin||{}, a=d.analise||{};
+    const si=SADT_INT[k]||0;
+    const r=v=>+((v||0)/1e6).toFixed(3);
+    IND[k]={
+      label:LABELS[k],
+      consult:a.consultReal||0, naoMed:a.naoMedReal||0,
+      cmaA:a.cmaAReal||0, cmaM:a.cmaMReal||0,
+      sadt:si, sadtExt:a.sadtReal||0,
+      consultProj:Math.round((a.consultReal||0)*F),
+      naoMedProj: Math.round((a.naoMedReal||0)*F),
+      cmaAProj:   Math.round((a.cmaAReal||0)*F),
+      cmaMProj:   Math.round((a.cmaMReal||0)*F),
+      sadtProj:   Math.round(si*F),
+      sadtExtProj:Math.round((a.sadtReal||0)*F),
+      idxSadt:(a.consultReal||0)>0?si/a.consultReal:0,
+      rec4m:r(f.receita), pes4m:r(f.pessoal),
+      ass4m:r(f.assistenciais), adm4m:r(f.administrativos),
+      mat4m:r(f.materiais), uti4m:r(f.utilidades),
+      res4m:r(f.ressarcimento), totD4m:r(f.despesa),
+      pesAno:r((f.pessoal||0)*F3),   assAno:r((f.assistenciais||0)*F3),
+      admAno:r((f.administrativos||0)*F3), matAno:r((f.materiais||0)*F3),
+      utiAno:r((f.utilidades||0)*F3), resAno:r((f.ressarcimento||0)*F3),
+      totDAno:r((f.despesa||0)*F3),   recAno:r((f.receita||0)*F3),
+      ctMes:r((f.receita||0)/4), ctAno:r((f.receita||0)/4*12),
+      saldo1:r(f.saldoJan), saldo4:r(f.saldoAbr),
+    };
+  });
+
+  const TT={idxSadt:0};
+  ['consult','naoMed','cmaA','cmaM','sadt','sadtExt','consultProj','naoMedProj',
+   'cmaAProj','cmaMProj','sadtProj','sadtExtProj','rec4m','pes4m','ass4m','adm4m',
+   'mat4m','uti4m','res4m','totD4m','pesAno','assAno','admAno','matAno',
+   'utiAno','resAno','totDAno','recAno','ctMes','ctAno'].forEach(f=>{
+    TT[f]=KEYS.reduce((s,k)=>s+(IND[k][f]||0),0);
+  });
+  TT.saldo4=KEYS.reduce((s,k)=>s+(IND[k].saldo4||0),0);
+  TT.idxSadt=TT.consult>0?TT.sadt/TT.consult:0;
+  return {IND,TT};
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const gen=(window.DADOS_DASH||{}).geradoEm;
+  if(gen) document.getElementById('hdr-data').textContent='Dados: '+new Date(gen).toLocaleString('pt-BR');
+
+  const {IND,TT}=buildIND();
+  const row=(lbl,fn,cls,sub)=>{
+    const tdCls=sub?'label sub':'label';
+    const trCls=cls?` class="${cls}"`:'';
+    let r=`<tr${trCls}><td class="${tdCls}">${lbl}</td>`;
+    KEYS.forEach(k=>r+=`<td class="right">${fn(IND[k])}</td>`);
+    r+=`<td class="right" style="font-weight:700">${fn(TT)}</td></tr>`;
+    return r;
+  };
+  const grp=lbl=>`<tr class="group-row"><td colspan="${KEYS.length+2}">${lbl}</td></tr>`;
+
+  const ttlRec4m=ni(TT.rec4m,3);
+  const ttlRes4m=+(TT.rec4m-TT.totD4m).toFixed(3);
+
+  // KPI cards
+  let kpi=`<div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Período</div><div class="kpi-value" style="font-size:16px">Jan–Abr/2026</div><div class="kpi-sub">4 meses · 6 AMEs</div></div>
+    <div class="kpi green"><div class="kpi-label">Consultas Médicas</div><div class="kpi-value">${ni(TT.consult)}</div><div class="kpi-sub pos">Proj. semestral: ${ni(TT.consultProj)}</div></div>
+    <div class="kpi orange"><div class="kpi-label">CMA Maior</div><div class="kpi-value">${ni(TT.cmaA)}</div><div class="kpi-sub">3ª meta · mín 95%</div></div><div class="kpi orange"><div class="kpi-label">cma menor</div><div class="kpi-value">${ni(TT.cmaM)}</div><div class="kpi-sub">4ª meta · mín 95%</div></div>
+    <div class="kpi purple"><div class="kpi-label">SADT Externo</div><div class="kpi-value">${ni(TT.sadtExt)}</div><div class="kpi-sub">Apoio Diagnóstico Externo</div></div>
+    <div class="kpi"><div class="kpi-label">Receita Total 4m</div><div class="kpi-value">R$ ${ttlRec4m}M</div><div class="kpi-sub ${ttlRes4m>=0?'pos':'neg'}">Resultado: ${ttlRes4m>=0?'+':''}R$ ${ni(ttlRes4m,3)}M</div></div>
+  </div>`;
+
+  // Tabela
+  let tbl=`<table class="ind-table"><thead><tr>
+    <th class="left" rowspan="2">Indicador – Jan–Abr/2026</th>
+    ${KEYS.map(k=>`<th>${LABELS[k]}</th>`).join('')}
+    <th style="background:#1a3d6e">TOTAL</th>
+  </tr><tr>
+    ${KEYS.map(k=>`<th style="font-size:10px;font-weight:400;background:#0a4080">${k}</th>`).join('')}
+    <th style="font-size:10px;font-weight:400;background:#1a3d6e">tt</th>
+  </tr></thead><tbody>`;
+
+  tbl+=grp('📊 PRODUÇÃO – Realizado Jan–Abr/2026');
+  tbl+=row('Consultas Médicas Especializadas',d=>ni(d.consult));
+  tbl+=row('SADT Externo (Lab · Imagem · Endoscopia)',d=>ni(d.sadtExt),'','sub');
+  tbl+=`<tr><td class="label" style="padding-left:8px;color:#005a9e;font-weight:700">SADT Total (Int.+Ext.)</td>
+    ${KEYS.map(k=>`<td class="right" style="color:#005a9e;font-weight:700">${ni(IND[k].sadt+IND[k].sadtExt)}</td>`).join('')}
+    <td class="right" style="color:#005a9e;font-weight:700">${ni(TT.sadt+TT.sadtExt)}</td></tr>`;
+  tbl+=row('Não-Médica + Proc.',d=>ni(d.naoMed));
+  tbl+=row('CMA Maior (Cirurgia Maior Ambulatorial)',d=>ni(d.cmaA));
+  tbl+=row('cma menor (Cirurgia Menor Ambulatorial)',d=>ni(d.cmaM));
+
+  tbl+=grp('📈 PROJEÇÃO SEMESTRAL (×1,5 · Jan–Jun/2026)');
+  tbl+=row('Consultas – Proj. Semestral',d=>ni(d.consultProj));
+  tbl+=row('SADT Externo – Proj. Semestral',d=>ni(d.sadtExtProj),'','sub');
+  tbl+=row('NMed – Proj. Semestral',d=>ni(d.naoMedProj));
+  tbl+=row('CMA – Proj. Semestral',d=>ni(d.cmaAProj));
+  tbl+=row('cma – Proj. Semestral',d=>ni(d.cmaMProj));
+
+  tbl+=grp('🔬 ÍNDICES (por consulta médica)');
+  tbl+=row('Índice SADT Interno / Consulta',d=>ni(d.idxSadt,3));
+
+  tbl+=grp('💰 FINANCEIRO – Jan–Abr/2026 (R$ milhões)');
+  tbl+=row('Receita Contrato',d=>ni(d.rec4m,3));
+  tbl+=row('Pessoal CLT',d=>ni(d.pes4m,3),'','sub');
+  tbl+=row('Terceiros Assistenciais',d=>ni(d.ass4m,3),'','sub');
+  tbl+=row('Terceiros Administrativos',d=>ni(d.adm4m,3),'','sub');
+  tbl+=row('Materiais',d=>ni(d.mat4m,3),'','sub');
+  tbl+=row('Utilidades Públicas',d=>ni(d.uti4m,3),'','sub');
+  tbl+=row('Ressarcimento / Rateio',d=>ni(d.res4m,3),'','sub');
+  tbl+=row('TOTAL DESPESAS',d=>ni(d.totD4m,3),'total-row');
+
+  const resRow=KEYS.map(k=>{
+    const v=+(IND[k].rec4m-IND[k].totD4m).toFixed(3);
+    return `<td class="right ${v>=0?'val-pos':'val-neg'}">${ni(v,3)}</td>`;
+  }).join('');
+  const resTT=+(TT.rec4m-TT.totD4m).toFixed(3);
+  tbl+=`<tr class="${resTT>=0?'result-pos':'result-neg'}"><td class="label">Resultado (Rec. – Desp.)</td>
+    ${resRow}<td class="right ${resTT>=0?'val-pos':'val-neg'}" style="font-weight:700">${ni(resTT,3)}</td></tr>`;
+
+  tbl+=grp('🏦 SALDOS CONTA CUSTEIO (R$ mi)');
+  tbl+=row('Saldo Abertura Jan',d=>ni(d.saldo1,3));
+  tbl+=row('Saldo Final Abr',d=>ni(d.saldo4,3));
+  tbl+='</tbody></table>';
+
+  // Charts (consultas vs meta)
+  const DD=(window.DADOS_DASH||{}).ames||{};
+  const chartData = KEYS.map(k=>{
+    const a=(DD[k]||{}).analise||{};
+    return {
+      label: LABELS[k],
+      pctConsulta: a.pctConsulta||0,
+      pctCmaM: a.pctCmaM||0,
+      pctSadt: a.pctSadt||0,
+    };
+  });
+
+  const chartCfg=(data,label,min)=>({
+    type:'bar',
+    data:{
+      labels:data.map(d=>d.label),
+      datasets:[{
+        label,
+        data:data.map(d=>d[Object.keys(d)[1]]),
+        backgroundColor:data.map(d=>{
+          const v=d[Object.keys(d)[1]];
+          return v>=100?'#00875a':v>=90?'#2196f3':v>=75?'#ff8b00':'#c0392b';
+        }),
+        borderRadius:4,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{min:0,max:130,ticks:{callback:v=>v+'%'},grid:{color:'#f0f0f0'}},
+        x:{grid:{display:false}}
+      },
+      annotation:{annotations:[{type:'line',yMin:min,yMax:min,borderColor:'#c0392b',borderWidth:2,borderDash:[5,5]}]}
+    }
+  });
+
+  document.getElementById('main-content').innerHTML = kpi +
+    `<div class="section-title">Atingimento Contratual – Projeção Semestral</div>
+    <div class="charts-2">
+      <div class="chart-box"><div style="font-size:12px;font-weight:600;color:#003366;margin-bottom:8px">Consultas Médicas (meta 90%)</div><div class="chart-wrap"><canvas id="ch-cons"></canvas></div></div>
+      <div class="chart-box"><div style="font-size:12px;font-weight:600;color:#003366;margin-bottom:8px">cma menor (meta 95%)</div><div class="chart-wrap"><canvas id="ch-cma"></canvas></div></div>
+    </div>
+    <div class="section-title">Tabela de Indicadores Consolidados</div>
+    <div class="chart-box">${tbl}</div>`;
+
+  // Renderizar gráficos
+  new Chart(document.getElementById('ch-cons'), chartCfg(chartData.map(d=>({label:d.label,v:d.pctConsulta})),'% Consultas',90));
+  new Chart(document.getElementById('ch-cma'),  chartCfg(chartData.map(d=>({label:d.label,v:d.pctCmaM})),'% cma',95));
+});
+</script>
+</body>
+</html>

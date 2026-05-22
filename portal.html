@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistema Gerencial – Grupo Santa Casa de Franca</title>
+<script src="dados-embutidos.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#222}
+
+/* ── TOP BAR ──────────────────────────────────────────────────── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:52px;z-index:200;
+  background:linear-gradient(90deg,#001f5b 0%,#003494 100%);
+  display:flex;align-items:center;gap:0;box-shadow:0 2px 12px rgba(0,0,0,.35);
+}
+#topbar .tb-toggle{
+  width:52px;height:52px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;font-size:20px;flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,.1);transition:background .15s
+}
+#topbar .tb-toggle:hover{background:rgba(255,255,255,.08)}
+#topbar .tb-logo{
+  display:flex;align-items:center;gap:10px;padding:0 18px;
+  border-right:1px solid rgba(255,255,255,.1);flex-shrink:0
+}
+#topbar .tb-logo .logo-ico{font-size:22px}
+#topbar .tb-logo .logo-txt{font-size:14px;font-weight:700;color:#fff;line-height:1.2}
+#topbar .tb-logo .logo-sub{font-size:10px;color:rgba(255,255,255,.65)}
+#topbar .tb-title{padding:0 18px;color:#fff;font-size:13px;font-weight:600;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#topbar .tb-right{display:flex;align-items:center;gap:0;margin-left:auto}
+.tb-kpi{padding:0 14px;text-align:center;border-left:1px solid rgba(255,255,255,.1);height:52px;
+  display:flex;flex-direction:column;justify-content:center;cursor:default}
+.tb-kpi .kv{font-size:14px;font-weight:800;color:#fff}
+.tb-kpi .kl{font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+.tb-kpi.danger .kv{color:#ff6b6b}
+.tb-kpi.success .kv{color:#69f0ae}
+.tb-time{padding:0 16px;border-left:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.75);
+  font-size:12px;text-align:right;line-height:1.6;height:52px;display:flex;flex-direction:column;justify-content:center}
+
+/* ── SIDEBAR ──────────────────────────────────────────────────── */
+#sidebar{
+  position:fixed;top:52px;left:0;bottom:0;width:230px;z-index:100;
+  background:#0d1b3e;overflow-y:auto;overflow-x:hidden;
+  transition:transform .25s ease,width .25s ease;
+  display:flex;flex-direction:column;
+}
+#sidebar.collapsed{transform:translateX(-230px)}
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-track{background:transparent}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+.sb-section{padding:14px 0 4px;margin:0 12px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-section:first-child{padding-top:10px}
+.sb-section-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.35);
+  text-transform:uppercase;letter-spacing:1px;padding:0 8px;margin-bottom:6px}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 8px;border-radius:8px;cursor:pointer;
+  color:rgba(255,255,255,.75);font-size:13px;font-weight:500;
+  transition:background .12s,color .12s;text-decoration:none;
+  margin-bottom:2px;position:relative
+}
+.sb-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.sb-item.active{background:rgba(99,134,255,.2);color:#fff}
+.sb-item.active::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+  width:3px;height:70%;background:#638aff;border-radius:0 3px 3px 0}
+.sb-item .si-ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-item .si-txt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-item .si-badge{font-size:10px;background:#c0392b;color:#fff;border-radius:8px;
+  padding:1px 6px;font-weight:700;line-height:1.4;flex-shrink:0}
+.sb-item .si-badge.ok{background:#00875a}
+.sb-item .si-badge.danger,.sb-item .si-badge.risk{background:#c0392b}
+.sb-item .si-badge.warn{background:#e65100}
+
+.sb-ame-status{display:flex;gap:4px;flex-wrap:wrap;padding:4px 8px 8px}
+.ame-st-dot{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.ame-st-dot:hover{opacity:.8}
+.dot-ok{background:#00875a;color:#fff}
+.dot-warn{background:#e65100;color:#fff}
+.dot-risk{background:#c0392b;color:#fff}
+
+.sb-footer{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer p{font-size:10px;color:rgba(255,255,255,.3);line-height:1.6;text-align:center}
+
+/* ── CONTENT ──────────────────────────────────────────────────── */
+#content-area{
+  position:fixed;top:52px;left:230px;right:0;bottom:28px;
+  transition:left .25s ease;background:#eef1f6;
+}
+#content-area.expanded{left:0}
+#main-iframe{width:100%;height:100%;border:none;display:block}
+
+/* ── STATUS BAR ──────────────────────────────────────────────── */
+#statusbar{
+  position:fixed;bottom:0;left:0;right:0;height:28px;z-index:200;
+  background:#0d1b3e;border-top:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;gap:0;font-size:11px;color:rgba(255,255,255,.55);
+}
+.sb-stat{padding:0 14px;border-right:1px solid rgba(255,255,255,.07);white-space:nowrap;height:28px;
+  display:flex;align-items:center;gap:5px}
+.sb-stat strong{color:rgba(255,255,255,.85)}
+.sb-stat .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+#status-server{margin-left:auto;padding:0 14px;display:flex;align-items:center;gap:6px}
+.srv-dot{width:7px;height:7px;border-radius:50%;background:#69f0ae;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── SPLASH / DASHBOARD INICIAL ─────────────────────────────── */
+#splash{
+  position:absolute;inset:0;background:#eef1f6;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  padding:24px 32px 32px;overflow-y:auto;
+}
+.splash-welcome{font-size:26px;font-weight:800;color:#001f5b;margin-bottom:6px;text-align:center}
+.splash-sub{font-size:14px;color:#666;margin-bottom:36px;text-align:center}
+.splash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:900px}
+@media(max-width:720px){.splash-grid{grid-template-columns:1fr}}
+.splash-card{
+  background:#fff;border-radius:14px;padding:22px;cursor:pointer;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);transition:transform .15s,box-shadow .15s;
+  border-top:4px solid #003494;text-align:left;position:relative;overflow:hidden
+}
+.splash-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,0,0,.13)}
+.splash-card .sc-ico{font-size:30px;margin-bottom:10px}
+.splash-card .sc-title{font-size:15px;font-weight:700;color:#001f5b;margin-bottom:4px}
+.splash-card .sc-sub{font-size:12px;color:#666;line-height:1.5}
+.splash-card .sc-stat{font-size:22px;font-weight:900;color:#001f5b;margin-top:12px}
+.splash-card .sc-stat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.4px}
+.sc-badge{position:absolute;top:14px;right:14px;font-size:10px;padding:3px 8px;
+  border-radius:8px;font-weight:700}
+.scb-risk{background:#fff0f0;color:#c0392b}
+.scb-ok{background:#e8f5e9;color:#00875a}
+.scb-warn{background:#fff3e0;color:#e65100}
+
+/* AME cards no splash */
+.ame-cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:900px;margin-bottom:20px}
+@media(max-width:720px){.ame-cards-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.ame-cards-grid{grid-template-columns:1fr}}
+.ame-card-mini{background:#fff;border-radius:12px;padding:16px 18px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);cursor:pointer;
+  transition:transform .15s,box-shadow .15s;border-left:5px solid #ccc;position:relative}
+.ame-card-mini:hover{transform:translateY(-3px);box-shadow:0 6px 22px rgba(0,0,0,.13)}
+.ame-card-mini.st-ok{border-left-color:#00875a}
+.ame-card-mini.st-atencao{border-left-color:#e65100}
+.ame-card-mini.st-risco{border-left-color:#c0392b}
+.ame-card-mini.st-critico{border-left-color:#880e4f}
+.acm-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.acm-name{font-size:13px;font-weight:700;color:#001f5b}
+.acm-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;flex-shrink:0}
+.acm-b-ok{background:#e8f5e9;color:#00875a}
+.acm-b-atencao{background:#fff3e0;color:#e65100}
+.acm-b-risco{background:#fff0f0;color:#c0392b}
+.acm-b-critico{background:#fce4ec;color:#880e4f}
+.acm-kpis{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.acm-kpi{font-size:11px;color:#555}
+.acm-kpi strong{font-size:12px;color:#001f5b;font-weight:700}
+.acm-bar-wrap{margin-top:8px}
+.acm-bar-label{display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px}
+.acm-bar-track{height:5px;background:#eee;border-radius:3px;overflow:hidden}
+.acm-bar-fill{height:100%;border-radius:3px}
+.acm-resultado{margin-top:8px;font-size:11px;font-weight:700;text-align:right}
+.acm-resultado.pos{color:#00875a} .acm-resultado.neg{color:#c0392b}
+
+/* Section label */
+.splash-section{font-size:11px;font-weight:700;color:#001f5b;text-transform:uppercase;
+  letter-spacing:.8px;margin:8px 0 10px;width:100%;max-width:900px;
+  border-bottom:2px solid #001f5b;padding-bottom:5px}
+
+.splash-kpis{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap;justify-content:center;width:100%;max-width:900px}
+.sk{background:#fff;border-radius:10px;padding:14px 22px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);flex:1;min-width:140px}
+.sk-v{font-size:22px;font-weight:900;color:#001f5b}
+.sk-l{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
+.sk-sub{font-size:12px;margin-top:2px}
+.pos{color:#00875a}.neg{color:#c0392b}.warn{color:#e65100}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="tb-toggle" onclick="toggleSidebar()" title="Menu">☰</div>
+  <div class="tb-logo">
+    <div class="logo-ico">🏥</div>
+    <div><div class="logo-txt">Santa Casa de Franca</div><div class="logo-sub">Sistema Gerencial · AMEs</div></div>
+  </div>
+  <div class="tb-title" id="tb-title">Portal Gerencial</div>
+  <div class="tb-right">
+    <div class="tb-kpi" id="kpi-ames" title="6 AMEs monitoradas">
+      <div class="kv" id="kv-ames">6</div>
+      <div class="kl">AMEs</div>
+    </div>
+    <div class="tb-kpi danger" id="kpi-risco" title="Em risco ou crítico">
+      <div class="kv" id="kv-risco">–</div>
+      <div class="kl">Em Risco</div>
+    </div>
+    <div class="tb-kpi success" id="kpi-rec" title="Receita total 4 meses">
+      <div class="kv" id="kv-rec">–</div>
+      <div class="kl">Receita 4m</div>
+    </div>
+    <div class="tb-kpi" id="kpi-atras" title="Atividades atrasadas (Cronoata)">
+      <div class="kv" id="kv-atras">–</div>
+      <div class="kl">Atrasadas</div>
+    </div>
+    <div class="tb-time" id="tb-clock">–</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+
+  <div class="sb-section">
+    <div class="sb-section-lbl">Painéis</div>
+    <div class="sb-item active" data-href="splash" data-title="Inicio">
+      <span class="si-ico">🏠</span><span class="si-txt">Início</span>
+    </div>
+    <div class="sb-item" data-href="dashboard-grid-powerbi.html" data-title="Dashboard Gerencial">
+      <span class="si-ico">📊</span><span class="si-txt">Dashboard Gerencial</span>
+    </div>
+    <div class="sb-item" data-href="painel.html" data-title="Painel AMEs">
+      <span class="si-ico">🏥</span><span class="si-txt">Painel AMEs</span>
+    </div>
+    <div class="sb-item" data-href="indicadores.html" data-title="Indicadores Consolidados">
+      <span class="si-ico">📈</span><span class="si-txt">Indicadores</span>
+    </div>
+    <div class="sb-item" data-href="hospital.html" data-title="Hospital DRP">
+      <span class="si-ico">🏨</span><span class="si-txt">Hospital DRP</span>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-lbl">Gestão</div>
+    <div class="sb-item" data-href="cronoata.html" data-title="Cronoata – Atividades">
+      <span class="si-ico">📋</span><span class="si-txt">Cronoata / Atividades</span>
+      <span class="si-badge danger" id="sb-badge-atras">–</span>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-lbl">AMEs – Detalhe</div>
+    <div class="sb-item" data-href="ame-detalhe.html?ame=frc" data-title="AME Franca">
+      <span class="si-ico">🔬</span><span class="si-txt">AME Franca</span>
+      <span class="si-badge" id="sb-st-frc">–</span>
+    </div>
+    <div class="sb-item" data-href="ame-detalhe.html?ame=scl" data-title="AME Sao Carlos">
+      <span class="si-ico">🔬</span><span class="si-txt">AME São Carlos</span>
+      <span class="si-badge" id="sb-st-scl">–</span>
+    </div>
+    <div class="sb-item" data-href="ame-detalhe.html?ame=rp" data-title="AME Ribeirao Preto">
+      <span class="si-ico">🔬</span><span class="si-txt">AME Rib. Preto</span>
+      <span class="si-badge" id="sb-st-rp">–</span>
+    </div>
+    <div class="sb-item" data-href="ame-detalhe.html?ame=cp" data-title="AME Campinas">
+      <span class="si-ico">🔬</span><span class="si-txt">AME Campinas</span>
+      <span class="si-badge" id="sb-st-cp">–</span>
+    </div>
+    <div class="sb-item" data-href="ame-detalhe.html?ame=cb" data-title="AME Casa Branca">
+      <span class="si-ico">🔬</span><span class="si-txt">AME Casa Branca</span>
+      <span class="si-badge" id="sb-st-cb">–</span>
+    </div>
+    <div class="sb-item" data-href="ame-detalhe.html?ame=avj" data-title="AME Vale Jurumirim">
+      <span class="si-ico">🔬</span><span class="si-txt">AME Vale Jurumirim</span>
+      <span class="si-badge" id="sb-st-avj">–</span>
+    </div>
+  </div>
+
+  <div class="sb-footer">
+    <p>Grupo Santa Casa de Franca<br>Dados: Metas SES/SP 2026<br>Jan–Abr/2026 · 4 de 6 meses</p>
+  </div>
+</div>
+
+<!-- CONTENT AREA -->
+<div id="content-area">
+  <!-- SPLASH (página inicial) -->
+  <div id="splash">
+    <div class="splash-welcome">Bom dia 👋 Portal Gerencial</div>
+    <div class="splash-sub">Grupo Santa Casa de Franca · 6 AMEs · Jan–Abr/2026</div>
+
+    <div class="splash-kpis" id="splash-kpis">
+      <div class="sk"><div class="sk-v" id="sk-cons">–</div><div class="sk-l">Consultas</div><div class="sk-sub" style="color:#555">4 meses</div></div>
+      <div class="sk"><div class="sk-v" id="sk-cma">–</div><div class="sk-l">CMA+cma</div><div class="sk-sub" style="color:#555">cirurgias</div></div>
+      <div class="sk"><div class="sk-v" id="sk-sadt">–</div><div class="sk-l">SADT</div><div class="sk-sub" style="color:#555">apoio diag.</div></div>
+      <div class="sk"><div class="sk-v" id="sk-rec">–</div><div class="sk-l">Receita</div><div class="sk-sub" style="color:#555">6 AMEs</div></div>
+      <div class="sk"><div class="sk-v" id="sk-res">–</div><div class="sk-l">Resultado</div><div class="sk-sub" style="color:#555">rec. − desp.</div></div>
+      <div class="sk"><div class="sk-v" id="sk-atras">–</div><div class="sk-l">Atrasadas</div><div class="sk-sub" style="color:#555">cronoata</div></div>
+    </div>
+
+    <div class="splash-section">Status por Unidade</div>
+    <div class="ame-cards-grid" id="ame-cards-grid"></div>
+
+    <div class="splash-section">Módulos do Sistema</div>
+    <div class="splash-grid" id="splash-grid"></div>
+  </div>
+
+  <!-- IFRAME -->
+  <iframe id="main-iframe" src="about:blank" style="display:none"
+    onload="onIframeLoad()"></iframe>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="sb-stat"><div class="dot" style="background:#69f0ae"></div>Servidor local ativo</div>
+  <div class="sb-stat">Atualizado: <strong id="st-data">–</strong></div>
+  <div class="sb-stat">Período: <strong>Jan–Abr/2026 · 4/6 meses</strong></div>
+  <div class="sb-stat">Contrato SES/SP · 6 AMEs</div>
+  <div class="sb-stat" id="st-atras-bar">Cronoata: <strong id="st-atras">carregando…</strong></div>
+  <div id="status-server">
+    <div class="srv-dot"></div>
+    <span id="st-server-txt">online</span>
+  </div>
+</div>
+
+<script>
+const DD   = (window.DADOS_DASH||{}).ames||{};
+const gen  = (window.DADOS_DASH||{}).geradoEm;
+const KEYS = ['cp','frc','cb','avj','rp','scl'];
+const NOMES= {cp:'AME Campinas',frc:'AME Franca',cb:'AME Casa Branca',avj:'AME Vale Jurumirim',rp:'AME Rib. Preto',scl:'AME São Carlos'};
+const ST_BADGE = {ok:'ok',atencao:'warn',risco:'risk',critico:'risk'};
+const ST_TXT   = {ok:'✓ OK',atencao:'⚠ Aten.',risco:'✗ Risco',critico:'✗ Crít.'};
+
+let _sidebarOpen = true;
+
+// ── Clock ─────────────────────────────────────────────────────
+function updateClock(){
+  const now = new Date();
+  document.getElementById('tb-clock').innerHTML =
+    `<div>${now.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})}</div>` +
+    `<div style="font-size:13px;font-weight:700;color:#fff">${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>`;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ── Sidebar toggle ────────────────────────────────────────────
+function toggleSidebar(){
+  _sidebarOpen = !_sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed',!_sidebarOpen);
+  document.getElementById('content-area').classList.toggle('expanded',!_sidebarOpen);
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function navTo(href, el, title){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('tb-title').textContent = title||href;
+
+  const splash = document.getElementById('splash');
+  const iframe = document.getElementById('main-iframe');
+
+  if(href === 'splash'){
+    splash.style.display = 'flex';
+    iframe.style.display = 'none';
+    iframe.src = 'about:blank';
+    return;
+  }
+  splash.style.display = 'none';
+  iframe.style.display = 'block';
+  iframe.src = href;
+}
+
+function onIframeLoad(){
+  // nothing needed
+}
+
+// ── Load AME data ─────────────────────────────────────────────
+function ni(v,d=0){ return typeof v==='number'&&!isNaN(v)?v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}):'–'; }
+
+function loadAmeData(){
+  if(!DD || !Object.keys(DD).length) return;
+
+  let totRec=0, totDesp=0, totCons=0, totCmaA=0, totCmaM=0, totSadt=0, risco=0;
+  KEYS.forEach(k=>{
+    const d=DD[k]||{}, a=d.analise||{}, f=d.fin||{};
+    totRec  += f.receita||0;
+    totDesp += f.despesa||0;
+    totCons += a.consultReal||0;
+    totCmaA += a.cmaAReal||0;
+    totCmaM += a.cmaMReal||0;
+    totSadt += a.sadtReal||0;
+    if(a.status==='risco'||a.status==='critico') risco++;
+  });
+  const totRes = totRec-totDesp;
+
+  // Top bar KPIs
+  document.getElementById('kv-risco').textContent = risco;
+  document.getElementById('kpi-risco').className  = 'tb-kpi '+(risco>0?'danger':'success');
+  document.getElementById('kv-rec').textContent   = 'R$ '+ni(totRec/1e6,2)+'M';
+
+  // Splash KPIs
+  document.getElementById('sk-cons').textContent = ni(totCons);
+  document.getElementById('sk-cma').textContent  = ni(totCmaA+totCmaM);
+  document.getElementById('sk-sadt').textContent = ni(totSadt);
+  document.getElementById('sk-rec').textContent  = 'R$ '+ni(totRec/1e6,2)+'M';
+  const resEl = document.getElementById('sk-res');
+  resEl.textContent = (totRes>=0?'+':'')+'R$ '+ni(totRes/1e6,2)+'M';
+  resEl.className   = 'sk-v '+(totRes>=0?'pos':'neg');
+
+  // Status bar
+  if(gen) document.getElementById('st-data').textContent = new Date(gen).toLocaleString('pt-BR');
+
+  // Sidebar AME badges
+  KEYS.forEach(k=>{
+    const st = (DD[k]?.analise?.status)||'ok';
+    const el = document.getElementById('sb-st-'+k);
+    if(!el) return;
+    el.textContent  = ST_TXT[st]||'';
+    el.className    = 'si-badge '+(ST_BADGE[st]||'ok');
+  });
+
+  // Splash cards
+  renderAmeCards();
+  renderSplashCards(risco, totRes);
+}
+
+function pct(r,c){ return c>0?r/c*100:0; }
+function pctCls(v,min){ return v>=min?'#00875a':v>=(min-5)?'#e65100':'#c0392b'; }
+
+function renderAmeCards(){
+  const ST_CLS = {ok:'st-ok',atencao:'st-atencao',risco:'st-risco',critico:'st-critico'};
+  const ST_BADGE_CLS = {ok:'acm-b-ok',atencao:'acm-b-atencao',risco:'acm-b-risco',critico:'acm-b-critico'};
+  const ST_TXT2 = {ok:'✓ OK',atencao:'⚠ ATENÇÃO',risco:'✗ RISCO',critico:'✗ CRÍTICO'};
+  const DEST = {cp:'ame-detalhe.html?ame=cp',frc:'ame-detalhe.html?ame=frc',
+    cb:'ame-detalhe.html?ame=cb',avj:'ame-detalhe.html?ame=avj',
+    rp:'ame-detalhe.html?ame=rp',scl:'ame-detalhe.html?ame=scl'};
+
+  const grid = document.getElementById('ame-cards-grid');
+  grid.innerHTML = KEYS.map(k=>{
+    const d=DD[k]||{}, a=d.analise||{}, f=d.fin||{};
+    const st = a.status||'ok';
+    const rec = f.receita||0, desp = f.despesa||0, res = rec-desp;
+    const pctCons = pct(a.consultReal||0, a.consultCont||0)*1.5;
+    const pctSadt = pct(a.sadtReal||0,  a.sadtCont||0)*1.5;
+    const pctCmaA = pct(a.cmaAReal||0,  a.cmaACont||0)*1.5;
+    const minPct  = Math.min(pctCons,pctSadt,pctCmaA||999);
+    const corBarra = pctCls(minPct,90);
+    return `<div class="ame-card-mini ${ST_CLS[st]||'st-ok'}" data-nav="${DEST[k]}" data-nav-title="${NOMES[k]}">
+      <div class="acm-header">
+        <div class="acm-name">${NOMES[k]}</div>
+        <span class="acm-badge ${ST_BADGE_CLS[st]||'acm-b-ok'}">${ST_TXT2[st]||'OK'}</span>
+      </div>
+      <div class="acm-kpis">
+        <div class="acm-kpi">Consultas <strong>${ni(a.consultReal||0)}</strong></div>
+        <div class="acm-kpi">SADT <strong>${ni(a.sadtReal||0)}</strong></div>
+        <div class="acm-kpi">CMA <strong>${ni((a.cmaAReal||0)+(a.cmaMReal||0))}</strong></div>
+        <div class="acm-kpi">Receita <strong>R$ ${ni(rec/1e6,2)}M</strong></div>
+      </div>
+      <div class="acm-bar-wrap">
+        <div class="acm-bar-label"><span>Atingimento mín.</span><span style="color:${corBarra};font-weight:700">${ni(minPct,1)}%</span></div>
+        <div class="acm-bar-track"><div class="acm-bar-fill" style="width:${Math.min(minPct,100)}%;background:${corBarra}"></div></div>
+      </div>
+      <div class="acm-resultado ${res>=0?'pos':'neg'}">${res>=0?'+':''}R$ ${ni(res/1e6,3)}M</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSplashCards(risco, totRes){
+  const CARDS = [
+    {href:'painel.html',     ico:'🏥', title:'Painel AMEs',        sub:'Metas contratuais · 6 unidades · Produção e financeiro',     el:'navTo(\'painel.html\',null,\'🏥 Painel AMEs\')'},
+    {href:'dashboard-grid-powerbi.html', ico:'📊', title:'Dashboard Gerencial', sub:'Visão completa · Hospital · AMEs · Especialidades · Fluxo de caixa', el:'navTo(\'dashboard-grid-powerbi.html\',null,\'📊 Dashboard\')'},
+    {href:'cronoata.html',   ico:'📋', title:'Cronoata',           sub:'Acompanhamento de atividades · 827 itens · 6 AMEs',           el:'navTo(\'cronoata.html\',null,\'📋 Cronoata\')'},
+    {href:'indicadores.html',ico:'📈', title:'Indicadores',        sub:'Metas SES/SP · Análise semestral · Status por unidade',       el:'navTo(\'indicadores.html\',null,\'📈 Indicadores\')'},
+    {href:'hospital.html',   ico:'🏨', title:'Hospital DRP',       sub:'Painel hospitalar · Receita · Despesa · Resultado mensal',    el:'navTo(\'hospital.html\',null,\'🏨 Hospital DRP\')'},
+    {href:'ame-detalhe.html?ame=frc', ico:'🔬', title:'AME Franca (detalhe)', sub:'Produção detalhada · Especialidades · Projeções Mai/Jun', el:'navTo(\'ame-detalhe.html?ame=frc\',null,\'🔬 AME Franca\')'},
+  ];
+
+  const grid = document.getElementById('splash-grid');
+  grid.innerHTML = CARDS.map((c,i)=>{
+    let badge='', badgeCls='';
+    if(i===0){ badge=risco+' em risco'; badgeCls=risco>0?'scb-risk':'scb-ok'; }
+    if(i===2){ badge='atualizar'; badgeCls='scb-warn'; }
+    return `<div class="splash-card" data-nav="${c.href}" data-nav-title="${c.title}">
+      ${badge?`<span class="sc-badge ${badgeCls}">${badge}</span>`:''}
+      <div class="sc-ico">${c.ico}</div>
+      <div class="sc-title">${c.title}</div>
+      <div class="sc-sub">${c.sub}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Load Cronoata stats ────────────────────────────────────────
+async function loadCronoataStats(){
+  try{
+    const r = await fetch('/cronoata-data.json?t='+Date.now());
+    const d = await r.json();
+    const AME_KEYS = ['frc','scl','rp','cp','cb','avj'];
+    let atrasadas=0, andamento=0;
+    AME_KEYS.forEach(k=>{
+      (d[k]?.items||[]).forEach(i=>{
+        if(i.status==='L') atrasadas++;
+        if(i.status==='K') andamento++;
+      });
+    });
+    document.getElementById('kv-atras').textContent  = atrasadas;
+    document.getElementById('sb-badge-atras').textContent = atrasadas;
+    document.getElementById('sb-badge-atras').className = 'si-badge '+(atrasadas>0?'danger':'ok');
+    document.getElementById('kpi-atras').className = 'tb-kpi '+(atrasadas>0?'danger':'');
+    document.getElementById('sk-atras').textContent = atrasadas;
+    document.getElementById('st-atras').innerHTML = `<strong style="color:${atrasadas>0?'#ff6b6b':'#69f0ae'}">${atrasadas} atrasadas</strong> · ${andamento} em andamento`;
+    document.getElementById('sk-atras').className = 'sk-v '+(atrasadas>0?'neg':'pos');
+  }catch(e){
+    document.getElementById('st-atras').textContent='erro ao carregar';
+  }
+}
+
+// ── Saudação no splash ────────────────────────────────────────
+function setSaudacao(){
+  const h = new Date().getHours();
+  const s = h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  document.querySelector('.splash-welcome').textContent = s+' 👋 Portal Gerencial';
+}
+
+// ── Sidebar event delegation ──────────────────────────────────
+document.getElementById('sidebar').addEventListener('click', e => {
+  const item = e.target.closest('[data-href]');
+  if(!item) return;
+  navTo(item.dataset.href, item, item.dataset.title || item.dataset.href);
+});
+
+// ── Splash cards event delegation ────────────────────────────
+document.getElementById('splash').addEventListener('click', e => {
+  const card = e.target.closest('[data-nav]');
+  if(!card) return;
+  navTo(card.dataset.nav, null, card.dataset.navTitle || card.dataset.nav);
+});
+
+// ── Init ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  setSaudacao();
+  loadAmeData();
+  loadCronoataStats();
+});
+</script>
+</body>
+</html>

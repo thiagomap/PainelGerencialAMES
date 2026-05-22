@@ -1,0 +1,97 @@
+{
+  "administrador": {
+    "nome": "Administrador Geral",
+    "cnes": "ADMIN001",
+    "descricao": "Gerencia 3 hospitais + 6 AMEs",
+    "instituicoes_gerenciadas": [
+      {
+        "tipo": "Hospital",
+        "nome": "Hospital do Coração",
+        "status": "Ativo"
+      },
+      {
+        "tipo": "Hospital",
+        "nome": "Hospital do Câncer",
+        "status": "Ativo"
+      },
+      {
+        "tipo": "Hospital",
+        "nome": "Santa Casa",
+        "status": "Ativo"
+      }
+    ]
+  },
+  "ames": [
+    {
+      "id": 1,
+      "cnes": "cnes_campinas",
+      "nome": "AME Campinas",
+      "arquivo": "AME Campinas 04 2026.xlsx",
+      "status": "Ativo",
+      "mês": "Abril 2026"
+    },
+    {
+      "id": 2,
+      "cnes": "cnes_casa_branca",
+      "nome": "AME Casa Branca",
+      "arquivo": "AME Casa Branca 04 2026.xlsx",
+      "status": "Ativo",
+      "mês": "Abril 2026"
+    },
+    {
+      "id": 3,
+      "cnes": "cnes_franca",
+      "nome": "AME Franca",
+      "arquivo": "AME Franca 04 2026.xlsx",
+      "status": "Ativo",
+      "mês": "Abril 2026"
+    },
+    {
+      "id": 4,
+      "cnes": "cnes_jurumirim",
+      "nome": "AME Jurumirim",
+      "arquivo": "AME Jurumirim 04 2026.xlsx",
+      "status": "Ativo",
+      "mês": "Abril 2026"
+    },
+    {
+      "id": 5,
+      "cnes": "cnes_ribeirao_preto",
+      "nome": "AME Ribeirão Preto",
+      "arquivo": "AME Ribeirão Preto 04 2026.xlsx",
+      "status": "Ativo",
+      "mês": "Abril 2026"
+    },
+    {
+      "id": 6,
+      "cnes": "cnes_sao_carlos",
+      "nome": "AME São Carlos",
+      "arquivo": "AME São Carlos 04 2026.xlsx",
+      "status": "Ativo",
+      "mês": "Abril 2026"
+    }
+  ],
+  "santa_casa": [
+    {
+      "cnes": "cnes_santa_casa",
+      "nome": "Santa Casa",
+      "arquivo": "Santa Casa 04 2026.xlsx",
+      "status": "Ativo",
+      "mês": "Abril 2026"
+    }
+  ],
+  "estrutura_cnes": {
+    "administrativo": {
+      "cnes": "ADMIN001",
+      "gerencia": [
+        "Hospital do Coração",
+        "Hospital do Câncer",
+        "Santa Casa"
+      ]
+    },
+    "ames_independentes": 6,
+    "total_instituicoes": 10
+  },
+  "data_configuracao": "2026-05-11T00:00:00Z",
+  "versao_api_grid": "1.0"
+}

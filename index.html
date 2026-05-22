@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grupo Santa Casa de Franca – Portal Gerencial</title>
+<script src="dados-embutidos.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:100vh}
+header{background:linear-gradient(135deg,#003366 0%,#0055a5 100%);color:#fff;padding:24px 32px;display:flex;align-items:center;gap:20px}
+header h1{font-size:22px;font-weight:700}
+header p{font-size:13px;opacity:.85;margin-top:4px}
+.badge-gerado{font-size:11px;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:12px;margin-top:6px;display:inline-block}
+.main{max-width:1100px;margin:32px auto;padding:0 16px}
+.section-title{font-size:13px;font-weight:700;color:#003366;text-transform:uppercase;letter-spacing:.8px;margin:28px 0 12px;border-bottom:2px solid #003366;padding-bottom:6px}
+.grid{display:grid;gap:14px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:700px){.grid-3,.grid-2{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s;display:block}
+.card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.13)}
+.card-head{padding:14px 18px 10px;border-bottom:1px solid #f0f0f0}
+.card-head .label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:#666;margin-bottom:4px}
+.card-head .title{font-size:16px;font-weight:700;color:#003366}
+.card-head .sub{font-size:12px;color:#555;margin-top:3px}
+.card-body{padding:12px 18px 14px}
+.status-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:600}
+.chip-ok{background:#e8f5e9;color:#00875a}
+.chip-warn{background:#fff3e0;color:#e65100}
+.chip-risk{background:#fff0f0;color:#c0392b}
+.chip-crit{background:#fce4ec;color:#880e4f}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:4px}
+.metric{font-size:12px;color:#444}
+.metric span{font-weight:700;color:#003366}
+.big-link{background:linear-gradient(135deg,#003366,#0055a5);color:#fff;border-radius:10px;padding:18px 24px;text-decoration:none;display:flex;align-items:center;gap:16px;box-shadow:0 3px 12px rgba(0,51,102,.25);transition:opacity .15s}
+.big-link:hover{opacity:.9}
+.big-link .ico{font-size:28px}
+.big-link .txt{font-size:15px;font-weight:700}
+.big-link .sub{font-size:12px;opacity:.85;margin-top:2px}
+.link-url{font-size:11px;background:#f5f5f5;border:1px solid #ddd;padding:5px 10px;border-radius:6px;font-family:monospace;word-break:break-all;margin-top:8px;color:#333;display:block}
+footer{text-align:center;padding:24px;font-size:12px;color:#999;margin-top:24px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Grupo Santa Casa de Franca – Portal Gerencial</h1>
+    <p>Sistema de Acompanhamento Contratual e Financeiro – AMEs · Hospital · 2026</p>
+    <span class="badge-gerado" id="badge-gerado">Dados: carregando…</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Acesso rápido principal -->
+  <div class="section-title">Acesso Principal</div>
+  <div class="grid grid-2">
+    <a class="big-link" href="dashboard-grid-powerbi.html">
+      <span class="ico">📊</span>
+      <div><div class="txt">Dashboard Gerencial Completo</div><div class="sub">Visão Geral · Hospital · AMEs · Especialidades · Indicadores</div></div>
+    </a>
+    <a class="big-link" href="indicadores.html">
+      <span class="ico">📈</span>
+      <div><div class="txt">Indicadores Consolidados – 6 AMEs</div><div class="sub">Produção · Financeiro · Análise Contratual Semestral</div></div>
+    </a>
+  </div>
+
+  <!-- AMEs -->
+  <div class="section-title">Análise Detalhada por Unidade (AME)</div>
+  <div class="grid grid-3" id="ame-cards"></div>
+
+  <!-- Links para copiar -->
+  <div class="section-title">Links para Compartilhar</div>
+  <div style="background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 2px 8px rgba(0,0,0,.07)">
+    <p style="font-size:12px;color:#555;margin-bottom:10px">Copie e envie estes links para os responsáveis de cada unidade (todos devem estar na mesma rede):</p>
+    <div id="link-list"></div>
+  </div>
+
+</div>
+<footer>Grupo Santa Casa de Franca · Dados: Metas SES/SP 11/05/2026 · Gerado localmente – sem envio a servidores externos</footer>
+
+<script>
+const IP = location.hostname + ':' + location.port;
+
+const AMES = [
+  {key:'cp',  nome:'AME Campinas',       emoji:'🏥'},
+  {key:'cb',  nome:'AME Casa Branca',    emoji:'🏥'},
+  {key:'frc', nome:'AME Franca',         emoji:'🏥'},
+  {key:'avj', nome:'AME Jurumirim',      emoji:'🏥'},
+  {key:'rp',  nome:'AME Ribeirão Preto', emoji:'🏥'},
+  {key:'scl', nome:'AME São Carlos',     emoji:'🏥'},
+];
+
+const STATUS_LABEL = {ok:'✓ OK',atencao:'⚠ ATENÇÃO',risco:'✗ RISCO',critico:'✗ CRÍTICO'};
+const STATUS_CHIP  = {ok:'chip-ok',atencao:'chip-warn',risco:'chip-risk',critico:'chip-crit'};
+
+function ni(v, d=0){
+  if(typeof v!=='number') return '–';
+  return v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+
+function pctClass(p){
+  return p>=95?'chip-ok':p>=90?'chip-warn':p>=75?'chip-risk':'chip-crit';
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const DD = (window.DADOS_DASH||{}).ames||{};
+  const gen = (window.DADOS_DASH||{}).geradoEm;
+  if(gen){
+    const dt = new Date(gen);
+    document.getElementById('badge-gerado').textContent =
+      'Dados gerados em: ' + dt.toLocaleString('pt-BR');
+  }
+
+  const cardsEl = document.getElementById('ame-cards');
+  const linkEl  = document.getElementById('link-list');
+
+  AMES.forEach(({key, nome, emoji})=>{
+    const d = DD[key]||{};
+    const a = d.analise||{};
+    const f = d.fin||{};
+    const st = a.status||'ok';
+    const chipCls = STATUS_CHIP[st]||'chip-ok';
+    const stLabel = STATUS_LABEL[st]||'OK';
+    const riscos  = (a.riscos||[]).join(' · ')||'Todas as metas OK';
+    const url = `ame-detalhe.html?ame=${key}`;
+    const rec = f.receita?((f.receita-f.despesa)/1e6).toFixed(3):null;
+
+    cardsEl.innerHTML += `
+      <a class="card" href="${url}">
+        <div class="card-head">
+          <div class="label">${emoji} Análise Detalhada</div>
+          <div class="title">${nome}</div>
+          <div class="sub">${riscos}</div>
+        </div>
+        <div class="card-body">
+          <div class="status-bar">
+            <span class="chip ${chipCls}">${stLabel}</span>
+            ${a.pctConsulta!=null?`<span class="chip ${pctClass(a.pctConsulta)}">Consultas ${ni(a.pctConsulta,1)}%</span>`:''}
+            ${a.pctCmaM!=null?`<span class="chip ${pctClass(a.pctCmaM)}">cma ${ni(a.pctCmaM,1)}%</span>`:''}
+            ${a.pctSadt!=null?`<span class="chip ${pctClass(a.pctSadt)}">SADT ${ni(a.pctSadt,1)}%</span>`:''}
+          </div>
+          <div class="metrics" style="margin-top:10px">
+            <div class="metric">Consultas <span>${ni(a.consultReal)}</span></div>
+            <div class="metric">CMA <span>${ni(a.cmaAReal)}</span></div>
+            <div class="metric">cma <span>${ni(a.cmaMReal)}</span></div>
+            <div class="metric">SADT <span>${ni(a.sadtReal)}</span></div>
+            ${f.receita?`<div class="metric">Receita <span>R$ ${ni(f.receita/1e6,3)}M</span></div>`:''}
+            ${rec!=null?`<div class="metric">Resultado <span style="color:${parseFloat(rec)>=0?'#00875a':'#c0392b'}">${parseFloat(rec)>=0?'+':''}R$ ${rec}M</span></div>`:''}
+          </div>
+        </div>
+      </a>`;
+
+    linkEl.innerHTML += `
+      <div style="margin-bottom:8px">
+        <strong style="font-size:12px;color:#003366">${nome}:</strong>
+        <a class="link-url" href="${url}">http://${IP}/${url}</a>
+      </div>`;
+  });
+
+  // Adicionar links principais
+  linkEl.innerHTML += `
+    <div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px">
+      <strong style="font-size:12px;color:#003366">Dashboard completo:</strong>
+      <a class="link-url" href="dashboard-grid-powerbi.html">http://${IP}/dashboard-grid-powerbi.html</a>
+      <strong style="font-size:12px;color:#003366">Indicadores:</strong>
+      <a class="link-url" href="indicadores.html">http://${IP}/indicadores.html</a>
+    </div>`;
+});
+</script>
+</body>
+</html>

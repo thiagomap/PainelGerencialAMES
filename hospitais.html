@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestão Hospitalar – Grupo Santa Casa de Franca</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Segoe UI',sans-serif;background:#eef1f6;color:#222;font-size:13px}
+#topbar{position:fixed;top:0;left:0;right:0;height:50px;background:linear-gradient(90deg,#1a3a1a,#2e7d32);color:#fff;display:flex;align-items:center;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.tb-back{width:50px;height:50px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;border-right:1px solid rgba(255,255,255,.15);flex-shrink:0;text-decoration:none;color:#fff}
+.tb-back:hover{background:rgba(255,255,255,.1)}
+.tb-brand{padding:0 16px;border-right:1px solid rgba(255,255,255,.1)}
+.tb-brand .b1{font-size:14px;font-weight:700}
+.tb-brand .b2{font-size:9px;opacity:.6;letter-spacing:.4px}
+.tb-view{padding:0 16px;font-size:12px;font-weight:600;flex:1;opacity:.85}
+.tb-kpi{padding:0 14px;text-align:center;border-left:1px solid rgba(255,255,255,.1);height:50px;display:flex;flex-direction:column;justify-content:center;flex-shrink:0}
+.tb-kpi .kv{font-size:13px;font-weight:800}
+.tb-kpi .kl{font-size:9px;opacity:.6;text-transform:uppercase;letter-spacing:.4px}
+.tb-kpi.grn .kv{color:#a5d6a7}.tb-kpi.red .kv{color:#ef9a9a}
+#clock-box{padding:0 14px;border-left:1px solid rgba(255,255,255,.1);font-size:11px;opacity:.7;text-align:right;line-height:1.7;flex-shrink:0}
+
+/* TABS */
+#tabs{position:fixed;top:50px;left:0;right:0;height:44px;background:#fff;border-bottom:2px solid #dde8dd;display:flex;z-index:200;box-shadow:0 2px 6px rgba(0,0,0,.06);overflow-x:auto}
+.tab{padding:0 22px;font-size:12px;font-weight:600;color:#555;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;display:flex;align-items:center;gap:7px;transition:color .15s}
+.tab:hover{color:#2e7d32;background:#f5faf5}
+.tab.active{color:#2e7d32;border-bottom-color:#2e7d32}
+.tab-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.tab-dot.ok{background:#2e7d32}.tab-dot.w{background:#f57c00}.tab-dot.r{background:#c0392b}
+
+/* CONTENT */
+#content{position:fixed;top:94px;left:0;right:0;bottom:24px;overflow-y:auto;background:#eef1f6}
+.panel{display:none;padding:18px 24px 28px;max-width:1380px;margin:0 auto}
+.panel.active{display:block}
+
+/* SHARED */
+.sec{font-size:11px;font-weight:700;color:#1a3a1a;text-transform:uppercase;letter-spacing:.7px;margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid #2e7d32}
+.krow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.kpi{background:#fff;border-radius:10px;padding:12px 16px;flex:1;min-width:130px;border-left:4px solid #2e7d32;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.kpi.red{border-left-color:#c0392b}.kpi.amb{border-left-color:#f57c00}.kpi.blu{border-left-color:#1565c0}.kpi.pur{border-left-color:#6a1b9a}.kpi.tea{border-left-color:#00796b}
+.kl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.kv{font-size:19px;font-weight:800;color:#1a3a1a}
+.ks{font-size:11px;color:#888;margin-top:2px}
+.pos{color:#2e7d32;font-weight:700}.neg{color:#c0392b;font-weight:700}.warn{color:#f57c00;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+.cbox{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.ctitle{font-size:11px;font-weight:700;color:#1a3a1a;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.cwrap{height:210px;position:relative}
+.cwrap.sm{height:160px}
+.tbl-wrap{background:#fff;border-radius:10px;padding:3px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{background:#1a3a1a;color:#fff;padding:6px 10px;text-align:center;font-size:10px;white-space:nowrap}
+th.l{text-align:left}
+td{padding:5px 10px;border-bottom:1px solid #eee;white-space:nowrap;text-align:center}
+td.lbl{font-weight:600;color:#1a3a1a;text-align:left;background:#f5faf5}
+td.lbl.sub{font-weight:400;color:#555;padding-left:22px;background:#fff}
+td.lbl.grp{font-weight:700;color:#fff;background:#2e7d32;padding:5px 10px}
+td.pv{color:#2e7d32;font-weight:700}.td.nv{color:#c0392b;font-weight:700}
+tr.tot td{background:#e8f5e9;font-weight:700}
+tr.res-n td{background:#ffcdd2;font-weight:800}
+/* INDICADORES OPERACIONAIS */
+.ind-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.ind-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.ind-val{font-size:22px;font-weight:800;color:#1a3a1a}
+.ind-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.ind-bar{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px}
+.ind-fill{height:100%;border-radius:3px}
+.ind-ref{font-size:10px;color:#888;margin-top:3px}
+/* HOSP NAV CARDS on Consolidado */
+.hosp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+@media(max-width:800px){.hosp-cards{grid-template-columns:1fr}}
+.hcard{border-radius:12px;padding:18px;color:#fff;cursor:pointer;transition:transform .15s}
+.hcard:hover{transform:translateY(-2px)}
+.hcard.sc{background:linear-gradient(135deg,#1b5e20,#388e3c)}
+.hcard.ca{background:linear-gradient(135deg,#880e4f,#c2185b)}
+.hcard.co{background:linear-gradient(135deg,#0d47a1,#1565c0)}
+.hcard-name{font-size:15px;font-weight:800;margin-bottom:4px}
+.hcard-cnpj{font-size:9px;opacity:.65;margin-bottom:12px}
+.hcard-kpis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hkpi{background:rgba(0,0,0,.2);border-radius:6px;padding:6px 10px}
+.hkpi .hv{font-size:14px;font-weight:800}
+.hkpi .hl{font-size:9px;opacity:.65}
+/* STATUS BAR */
+#sb{position:fixed;bottom:0;left:0;right:0;height:24px;background:#1a3a1a;display:flex;align-items:center;font-size:10px;color:rgba(255,255,255,.45);padding:0 14px;gap:12px;z-index:300}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:#69f0ae;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* INFO BOX */
+.info-box{background:#e8f5e9;border-left:4px solid #2e7d32;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#1b5e20}
+.warn-box{background:#fff8e1;border-left:4px solid #f57c00;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#4e3100}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <a class="tb-back" href="portal-principal.html" title="Voltar ao Portal">◀</a>
+  <div class="tb-brand"><div class="b1">Gestão Hospitalar</div><div class="b2">Grupo Santa Casa de Franca · 3 Hospitais</div></div>
+  <div class="tb-view" id="tb-view">Consolidado</div>
+  <div class="tb-kpi"><div class="kv">337</div><div class="kl">Leitos</div></div>
+  <div class="tb-kpi grn"><div class="kv">R$ 36,6M</div><div class="kl">Rec./mês</div></div>
+  <div class="tb-kpi red"><div class="kv">−R$ 1,4M</div><div class="kl">Result./mês</div></div>
+  <div id="clock-box"><span id="ck-date">–</span><br><span id="ck-time" style="font-size:13px;font-weight:700;color:#a5d6a7">–</span></div>
+</div>
+
+<!-- TABS -->
+<div id="tabs">
+  <div class="tab active" onclick="showTab('consolidado',this)"><span class="tab-dot ok"></span> 📊 Consolidado</div>
+  <div class="tab" onclick="showTab('santa-casa',this)"><span class="tab-dot ok"></span> 🏛️ Santa Casa</div>
+  <div class="tab" onclick="showTab('cancer',this)"><span class="tab-dot w"></span> 🧬 Hospital do Câncer</div>
+  <div class="tab" onclick="showTab('coracao',this)"><span class="tab-dot ok"></span> ❤️ Hospital do Coração</div>
+</div>
+
+<div id="content">
+
+<!-- ══ CONSOLIDADO ══ -->
+<div id="p-consolidado" class="panel active">
+  <div class="warn-box"><strong>ℹ️ Dados de referência:</strong> Santa Casa = Relatório Gerencial Mar/2026 (Controladoria). Hospital do Câncer e Hospital do Coração = dados de referência para parametrização — atualize com os dados reais de cada unidade.</div>
+
+  <div class="sec">Visão Geral – 3 Hospitais Jan–Abr/2026</div>
+  <div class="krow">
+    <div class="kpi"><div class="kl">Receita Total Estimada</div><div class="kv">R$ 146,6M</div><div class="ks">3 hospitais · 4 meses</div></div>
+    <div class="kpi red"><div class="kl">Resultado Op. (c/ subvenção)</div><div class="kv neg">−R$ 5,5M</div><div class="ks">Estrutural · coberto por Tab. Paulista</div></div>
+    <div class="kpi"><div class="kl">Leitos Totais</div><div class="kv">337</div><div class="ks">SC 200 · Câncer 62 · Coração 75</div></div>
+    <div class="kpi blu"><div class="kl">Internações/mês</div><div class="kv">~1.100</div><div class="ks">Consolidado 3 hospitais</div></div>
+    <div class="kpi"><div class="kl">Ocupação Média</div><div class="kv">82%</div><div class="ks">Referência: ≥ 75%</div></div>
+    <div class="kpi pur"><div class="kl">ALOS Médio</div><div class="kv">4,8d</div><div class="ks">Dias de permanência média</div></div>
+  </div>
+
+  <div class="sec">Resumo por Hospital</div>
+  <div class="hosp-cards">
+    <div class="hcard sc" onclick="showTab('santa-casa',document.querySelector('.tab:nth-child(2)'))">
+      <div class="hcard-name">🏛️ Santa Casa de Franca</div>
+      <div class="hcard-cnpj">CNPJ 47.969.134/0001-89 · ONA Nível 3</div>
+      <div class="hcard-kpis">
+        <div class="hkpi"><div class="hv">R$ 22,4M</div><div class="hl">Rec./mês Mar/26</div></div>
+        <div class="hkpi"><div class="hv">200</div><div class="hl">Leitos</div></div>
+        <div class="hkpi"><div class="hv">−R$ 1,1M</div><div class="hl">Resultado Mar/26</div></div>
+        <div class="hkpi"><div class="hv">R$ 81,8M</div><div class="hl">Patr. Líquido</div></div>
+      </div>
+    </div>
+    <div class="hcard ca" onclick="showTab('cancer',document.querySelector('.tab:nth-child(3)'))">
+      <div class="hcard-name">🧬 Hospital do Câncer</div>
+      <div class="hcard-cnpj">CNPJ a preencher · Oncologia</div>
+      <div class="hcard-kpis">
+        <div class="hkpi"><div class="hv">R$ 6,1M</div><div class="hl">Rec./mês</div></div>
+        <div class="hkpi"><div class="hv">62</div><div class="hl">Leitos</div></div>
+        <div class="hkpi"><div class="hv">~850</div><div class="hl">Quimio/mês</div></div>
+        <div class="hkpi"><div class="hv">+R$ 25K</div><div class="hl">Resultado</div></div>
+      </div>
+    </div>
+    <div class="hcard co" onclick="showTab('coracao',document.querySelector('.tab:nth-child(4)'))">
+      <div class="hcard-name">❤️ Hospital do Coração</div>
+      <div class="hcard-cnpj">CNPJ a preencher · Cardiologia</div>
+      <div class="hcard-kpis">
+        <div class="hkpi"><div class="hv">R$ 7,9M</div><div class="hl">Rec./mês</div></div>
+        <div class="hkpi"><div class="hv">75</div><div class="hl">Leitos (25 UTI)</div></div>
+        <div class="hkpi"><div class="hv">~130</div><div class="hl">Cateterismos/mês</div></div>
+        <div class="hkpi"><div class="hv">+R$ 125K</div><div class="hl">Resultado</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Receita Mensal Consolidada (R$ M) · Jan–Abr/2026</div><div class="cwrap"><canvas id="ch-cons-rec"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Ocupação de Leitos por Hospital (%)</div><div class="cwrap"><canvas id="ch-cons-ocup"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══ SANTA CASA ══ -->
+<div id="p-santa-casa" class="panel">
+  <div class="info-box"><strong>Fundação Santa Casa de Misericórdia de Franca</strong> · CNPJ 47.969.134/0001-89 · ONA Nível 3 · DRE accrual Mar/2026</div>
+  <div class="sec">KPIs – Março/2026</div>
+  <div class="krow">
+    <div class="kpi blu"><div class="kl">Receita Total Mar/26</div><div class="kv">R$ 22,4M</div><div class="ks pos">+4% vs orçamento</div></div>
+    <div class="kpi red"><div class="kl">Custo + Despesa</div><div class="kv">R$ 23,6M</div><div class="ks neg">105% da receita</div></div>
+    <div class="kpi red"><div class="kl">Resultado Mar/26</div><div class="kv neg">−R$ 1,1M</div><div class="ks">Déficit op. estrutural</div></div>
+    <div class="kpi"><div class="kl">Tabela SUS Paulista</div><div class="kv">R$ 5,79M</div><div class="ks">Complemento SES/SP</div></div>
+    <div class="kpi red"><div class="kl">Acumulado Jan–Mar</div><div class="kv neg">−R$ 1,23M</div><div class="ks">3 meses · accrual</div></div>
+    <div class="kpi"><div class="kl">PL (31/03/2026)</div><div class="kv">R$ 81,8M</div><div class="ks">Sólido · estável</div></div>
+  </div>
+
+  <div class="sec">Resultado Financeiro – Jan–Abr/2026</div>
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Receita vs Despesa Mensal (R$ M)</div><div class="cwrap"><canvas id="ch-sc-fin"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Composição Receita Mar/2026</div><div class="cwrap"><canvas id="ch-sc-rec"></canvas></div></div>
+  </div>
+
+  <div class="sec">DRE Consolidado – Real × Orçado (Março/2026)</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th class="l">Descrição</th><th>Real Mar/25</th><th>Real Mar/26</th><th>Orç Mar/26</th><th>Δ Orç</th><th>AH%</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl grp" colspan="6">RECEITAS</td></tr>
+      <tr><td class="lbl">Receita Líquida SUS</td><td>9.078.174</td><td>8.990.643</td><td>9.992.854</td><td class="neg">−1.002.211</td><td class="neg">−10%</td></tr>
+      <tr><td class="lbl sub">MAC</td><td>5.826.208</td><td>4.907.242</td><td>6.552.081</td><td class="neg">−1.644.839</td><td class="neg">−25%</td></tr>
+      <tr><td class="lbl sub">FAEC</td><td>1.242.386</td><td>1.833.562</td><td>1.431.193</td><td class="pos">+402.369</td><td class="pos">+28%</td></tr>
+      <tr><td class="lbl sub">Incentivos</td><td>2.009.580</td><td>2.249.838</td><td>2.009.580</td><td class="pos">+240.258</td><td class="pos">+12%</td></tr>
+      <tr><td class="lbl">Convênios / Particular</td><td>2.515.737</td><td>3.217.413</td><td>3.022.411</td><td class="pos">+195.002</td><td class="pos">+6%</td></tr>
+      <tr><td class="lbl">Tab. SUS Paulista + Subv.</td><td>6.366.234</td><td>8.268.238</td><td>6.909.101</td><td class="pos">+1.359.137</td><td class="pos">+20%</td></tr>
+      <tr><td class="lbl">Ensino / Parcerias</td><td>346.407</td><td>344.644</td><td>331.578</td><td class="pos">+13.066</td><td class="pos">+4%</td></tr>
+      <tr class="tot"><td class="lbl">TOTAL RECEITA</td><td>20.025.436</td><td class="pos">22.447.702</td><td>21.598.926</td><td class="pos">+848.776</td><td class="pos">+4%</td></tr>
+      <tr><td class="lbl grp" colspan="6">CUSTOS E DESPESAS</td></tr>
+      <tr><td class="lbl">Folha Assistencial</td><td>7.308.856</td><td>8.244.092</td><td>8.051.196</td><td class="neg">+192.896</td><td class="neg">+2%</td></tr>
+      <tr><td class="lbl">Honorários Médicos</td><td>5.177.243</td><td>5.552.347</td><td>5.342.655</td><td class="neg">+209.693</td><td class="neg">+4%</td></tr>
+      <tr><td class="lbl">Mat / Med / OPME</td><td>4.061.923</td><td>4.826.374</td><td>4.387.887</td><td class="neg">+438.488</td><td class="neg">+10%</td></tr>
+      <tr><td class="lbl">Outros custos</td><td>1.797.793</td><td>1.944.785</td><td>2.007.544</td><td class="pos">−62.759</td><td class="pos">−3%</td></tr>
+      <tr><td class="lbl">Despesas Administrativas</td><td>2.745.000</td><td>3.065.000</td><td>2.980.000</td><td class="neg">+85.000</td><td class="neg">+3%</td></tr>
+      <tr class="tot"><td class="lbl">TOTAL CUSTOS + DESPESAS</td><td>21.090.815</td><td class="neg">23.632.598</td><td>22.769.282</td><td class="neg">+863.316</td><td class="neg">+4%</td></tr>
+      <tr class="res-n"><td class="lbl">RESULTADO OPERACIONAL</td><td class="neg">−1.065.379</td><td class="neg">−1.184.896</td><td class="neg">−1.170.356</td><td class="neg">−14.540</td><td>−1%</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="sec">Indicadores Assistenciais</div>
+  <div class="ind-grid">
+    <div class="ind-card"><div class="ind-lbl">Taxa de Ocupação</div><div class="ind-val">84%</div><div class="ind-bar"><div class="ind-fill" style="width:84%;background:#2e7d32"></div></div><div class="ind-ref">Referência ≥ 75% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">ALOS (dias méd. intern.)</div><div class="ind-val">5,2d</div><div class="ind-bar"><div class="ind-fill" style="width:60%;background:#f57c00"></div></div><div class="ind-ref">Referência ≤ 5,0d · <span class="warn">ATENÇÃO</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Taxa Reinternação 30d</div><div class="ind-val">7,1%</div><div class="ind-bar"><div class="ind-fill" style="width:71%;background:#f57c00"></div></div><div class="ind-ref">Meta ≤ 8% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Taxa de Infecção Hosp.</div><div class="ind-val">2,3%</div><div class="ind-bar"><div class="ind-fill" style="width:46%;background:#2e7d32"></div></div><div class="ind-ref">Meta ≤ 5% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Cirurgias/mês</div><div class="ind-val">~380</div><div class="ind-bar"><div class="ind-fill" style="width:76%;background:#1565c0"></div></div><div class="ind-ref">Ambulatorial + internação</div></div>
+    <div class="ind-card"><div class="ind-lbl">Partos/mês</div><div class="ind-val">~110</div><div class="ind-bar"><div class="ind-fill" style="width:55%;background:#6a1b9a"></div></div><div class="ind-ref">Normal + cesárea</div></div>
+  </div>
+</div>
+
+<!-- ══ HOSPITAL DO CÂNCER ══ -->
+<div id="p-cancer" class="panel">
+  <div class="warn-box"><strong>📋 Hospital do Câncer</strong> — Dados de referência para parametrização. Substitua pelos valores reais extraídos do sistema TASY / relatório gerencial da unidade. CNPJ e nome legal a confirmar.</div>
+  <div class="sec">KPIs – Jan–Abr/2026 (Referência)</div>
+  <div class="krow">
+    <div class="kpi pur"><div class="kl">Receita Total 4m</div><div class="kv">R$ 24,3M</div><div class="ks">~R$ 6,1M/mês</div></div>
+    <div class="kpi red"><div class="kl">Custo Total 4m</div><div class="kv">R$ 24,2M</div><div class="ks">~R$ 6,05M/mês</div></div>
+    <div class="kpi"><div class="kl">Resultado 4m</div><div class="kv pos">+R$ 100K</div><div class="ks">Margem 0,4%</div></div>
+    <div class="kpi tea"><div class="kl">Sessões Quimio/mês</div><div class="kv">~850</div><div class="ks">Ambulatorial + internação</div></div>
+    <div class="kpi pur"><div class="kl">Sessões Radio/mês</div><div class="kv">~420</div><div class="ks">Linear + braquiterapia</div></div>
+    <div class="kpi"><div class="kl">Leitos</div><div class="kv">62</div><div class="ks">Oncologia 40 · Clínica 22</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Receita vs Despesa Mensal (R$ M)</div><div class="cwrap"><canvas id="ch-ca-fin"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Mix de Procedimentos Oncológicos</div><div class="cwrap"><canvas id="ch-ca-proc"></canvas></div></div>
+  </div>
+
+  <div class="sec">Produção Oncológica – Jan–Abr/2026</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th class="l">Procedimento</th><th>Janeiro</th><th>Fevereiro</th><th>Março</th><th>Abril</th><th>Total 4m</th><th>Média/mês</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Quimioterapia Ambulatorial</td><td>820</td><td>798</td><td>864</td><td>878</td><td>3.360</td><td>840</td></tr>
+      <tr><td class="lbl">Quimioterapia Internação</td><td>42</td><td>38</td><td>45</td><td>40</td><td>165</td><td>41</td></tr>
+      <tr><td class="lbl">Radioterapia (Linear)</td><td>395</td><td>380</td><td>435</td><td>452</td><td>1.662</td><td>415</td></tr>
+      <tr><td class="lbl">Braquiterapia</td><td>12</td><td>10</td><td>14</td><td>11</td><td>47</td><td>12</td></tr>
+      <tr><td class="lbl">Biopsias / Diagnóstico</td><td>68</td><td>71</td><td>75</td><td>72</td><td>286</td><td>72</td></tr>
+      <tr><td class="lbl">Cirurgias Oncológicas</td><td>28</td><td>25</td><td>31</td><td>29</td><td>113</td><td>28</td></tr>
+      <tr class="tot"><td class="lbl">INTERNAÇÕES (total)</td><td>155</td><td>148</td><td>162</td><td>158</td><td>623</td><td>156</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="sec">Indicadores de Qualidade – Oncologia</div>
+  <div class="ind-grid">
+    <div class="ind-card"><div class="ind-lbl">Taxa de Ocupação</div><div class="ind-val">79%</div><div class="ind-bar"><div class="ind-fill" style="width:79%;background:#2e7d32"></div></div><div class="ind-ref">Meta ≥ 75% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">ALOS Oncologia</div><div class="ind-val">4,1d</div><div class="ind-bar"><div class="ind-fill" style="width:62%;background:#2e7d32"></div></div><div class="ind-ref">Referência ≤ 5,0d · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Tempo 1ª Quimio (dias)</div><div class="ind-val">18d</div><div class="ind-bar"><div class="ind-fill" style="width:64%;background:#f57c00"></div></div><div class="ind-ref">Meta ≤ 15d · <span class="warn">ATENÇÃO</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Taxa Toxicidade G3+</div><div class="ind-val">8,2%</div><div class="ind-bar"><div class="ind-fill" style="width:41%;background:#2e7d32"></div></div><div class="ind-ref">Meta ≤ 15% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Pacientes Ativos</div><div class="ind-val">~620</div><div class="ind-bar"><div class="ind-fill" style="width:62%;background:#6a1b9a"></div></div><div class="ind-ref">Em tratamento ativo</div></div>
+    <div class="ind-card"><div class="ind-lbl">Novos Casos/mês</div><div class="ind-val">~45</div><div class="ind-bar"><div class="ind-fill" style="width:45%;background:#c2185b"></div></div><div class="ind-ref">Diagnósticos confirmados</div></div>
+  </div>
+</div>
+
+<!-- ══ HOSPITAL DO CORAÇÃO ══ -->
+<div id="p-coracao" class="panel">
+  <div class="warn-box"><strong>📋 Hospital do Coração</strong> — Dados de referência para parametrização. Substitua pelos valores reais extraídos do sistema TASY / relatório gerencial da unidade. CNPJ e nome legal a confirmar.</div>
+  <div class="sec">KPIs – Jan–Abr/2026 (Referência)</div>
+  <div class="krow">
+    <div class="kpi blu"><div class="kl">Receita Total 4m</div><div class="kv">R$ 31,6M</div><div class="ks">~R$ 7,9M/mês</div></div>
+    <div class="kpi red"><div class="kl">Custo Total 4m</div><div class="kv">R$ 31,1M</div><div class="ks">~R$ 7,77M/mês</div></div>
+    <div class="kpi"><div class="kl">Resultado 4m</div><div class="kv pos">+R$ 500K</div><div class="ks">Margem 1,6%</div></div>
+    <div class="kpi blu"><div class="kl">Cateterismos/mês</div><div class="kv">~130</div><div class="ks">Diagn. + terapêutico</div></div>
+    <div class="kpi red"><div class="kl">Angioplastias/mês</div><div class="kv">~45</div><div class="ks">PTCA + Stent</div></div>
+    <div class="kpi"><div class="kl">Leitos</div><div class="kv">75</div><div class="ks">UTI 25 · Enf. 50</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Receita vs Despesa Mensal (R$ M)</div><div class="cwrap"><canvas id="ch-co-fin"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Procedimentos Cardiológicos</div><div class="cwrap"><canvas id="ch-co-proc"></canvas></div></div>
+  </div>
+
+  <div class="sec">Produção Cardiológica – Jan–Abr/2026</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th class="l">Procedimento</th><th>Janeiro</th><th>Fevereiro</th><th>Março</th><th>Abril</th><th>Total 4m</th><th>Média/mês</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Cateterismo Diagnóstico</td><td>85</td><td>82</td><td>90</td><td>88</td><td>345</td><td>86</td></tr>
+      <tr><td class="lbl">Angioplastia (PTCA+Stent)</td><td>42</td><td>38</td><td>48</td><td>52</td><td>180</td><td>45</td></tr>
+      <tr><td class="lbl">Marcapasso / CDI</td><td>18</td><td>15</td><td>20</td><td>17</td><td>70</td><td>18</td></tr>
+      <tr><td class="lbl">Cirurgia Cardíaca (CRM)</td><td>22</td><td>19</td><td>25</td><td>23</td><td>89</td><td>22</td></tr>
+      <tr><td class="lbl">Ecocardiograma</td><td>310</td><td>290</td><td>325</td><td>318</td><td>1.243</td><td>311</td></tr>
+      <tr><td class="lbl">Holter / MAPA</td><td>145</td><td>138</td><td>152</td><td>149</td><td>584</td><td>146</td></tr>
+      <tr class="tot"><td class="lbl">INTERNAÇÕES (total)</td><td>290</td><td>275</td><td>305</td><td>298</td><td>1.168</td><td>292</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="sec">Indicadores de Qualidade – Cardiologia</div>
+  <div class="ind-grid">
+    <div class="ind-card"><div class="ind-lbl">Taxa de Ocupação</div><div class="ind-val">86%</div><div class="ind-bar"><div class="ind-fill" style="width:86%;background:#2e7d32"></div></div><div class="ind-ref">Meta ≥ 75% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Ocup. UTI Cardíaca</div><div class="ind-val">91%</div><div class="ind-bar"><div class="ind-fill" style="width:91%;background:#f57c00"></div></div><div class="ind-ref">Crítico ≥ 90% · <span class="warn">ALTA</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">ALOS Cardio</div><div class="ind-val">5,1d</div><div class="ind-bar"><div class="ind-fill" style="width:68%;background:#f57c00"></div></div><div class="ind-ref">Meta ≤ 5,0d · <span class="warn">ATENÇÃO</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Mortalidade Intra-hosp.</div><div class="ind-val">3,2%</div><div class="ind-bar"><div class="ind-fill" style="width:32%;background:#2e7d32"></div></div><div class="ind-ref">Meta ≤ 5% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Sucesso Angioplastia</div><div class="ind-val">96,8%</div><div class="ind-bar"><div class="ind-fill" style="width:97%;background:#2e7d32"></div></div><div class="ind-ref">Meta ≥ 95% · <span class="pos">OK</span></div></div>
+    <div class="ind-card"><div class="ind-lbl">Readmissão 30d</div><div class="ind-val">5,4%</div><div class="ind-bar"><div class="ind-fill" style="width:54%;background:#2e7d32"></div></div><div class="ind-ref">Meta ≤ 8% · <span class="pos">OK</span></div></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div id="sb"><div class="sb-dot"></div><span>Gestão Hospitalar · 3 Hospitais · 337 Leitos</span><span style="margin-left:auto;opacity:.4">Jan–Abr/2026 · Grupo Santa Casa de Franca</span></div>
+
+<script>
+const MESES = ['Janeiro','Fevereiro','Março','Abril'];
+
+function showTab(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  const titles={consolidado:'Consolidado – 3 Hospitais','santa-casa':'Santa Casa de Franca',cancer:'Hospital do Câncer',coracao:'Hospital do Coração'};
+  document.getElementById('tb-view').textContent = titles[id]||id;
+  renderCharts(id);
+}
+
+let _rendered = {};
+function renderCharts(id){
+  if(_rendered[id]) return; _rendered[id]=true;
+  setTimeout(()=>{
+    if(id==='consolidado') renderConsolidado();
+    if(id==='santa-casa') renderSantaCasa();
+    if(id==='cancer') renderCancer();
+    if(id==='coracao') renderCoracao();
+  }, 60);
+}
+
+function mkChart(id,cfg){ const el=document.getElementById(id); if(!el)return; return new Chart(el,cfg); }
+
+function renderConsolidado(){
+  mkChart('ch-cons-rec',{type:'bar',data:{labels:MESES,datasets:[
+    {label:'Santa Casa',data:[32.4,14.5,29.9,23.5],backgroundColor:'#2e7d32',borderRadius:3},
+    {label:'H. Câncer',data:[5.8,6.2,5.9,6.4],backgroundColor:'#c2185b',borderRadius:3},
+    {label:'H. Coração',data:[7.5,8.0,7.8,8.3],backgroundColor:'#1565c0',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>v+'M'}}}}});
+  mkChart('ch-cons-ocup',{type:'bar',data:{labels:['Santa Casa','H. Câncer','H. Coração'],datasets:[
+    {label:'Taxa Ocupação (%)',data:[84,79,86],backgroundColor:['#2e7d32','#c2185b','#1565c0'],borderRadius:6},
+    {label:'Meta (75%)',data:[75,75,75],backgroundColor:['rgba(0,0,0,.15)','rgba(0,0,0,.15)','rgba(0,0,0,.15)'],borderRadius:6},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
+}
+
+function renderSantaCasa(){
+  mkChart('ch-sc-fin',{type:'bar',data:{labels:MESES,datasets:[
+    {label:'Receita',data:[32.4,14.5,22.4,23.5],backgroundColor:'#2e7d32',borderRadius:3},
+    {label:'Despesa',data:[22.4,23.0,23.6,25.1],backgroundColor:'#ef5350',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>v+'M'}}}}});
+  mkChart('ch-sc-rec',{type:'doughnut',data:{labels:['SUS Federal','Tab. Paulista','Convênios','Subvenções','Ensino'],datasets:[{data:[8.99,5.79,3.22,2.48,0.34],backgroundColor:['#1565c0','#2e7d32','#f57c00','#6a1b9a','#00796b'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}}});
+}
+
+function renderCancer(){
+  mkChart('ch-ca-fin',{type:'bar',data:{labels:MESES,datasets:[
+    {label:'Receita',data:[5.8,6.2,5.9,6.4],backgroundColor:'#c2185b',borderRadius:3},
+    {label:'Despesa',data:[6.1,5.9,6.0,6.2],backgroundColor:'#ef9a9a',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>v+'M'}}}}});
+  mkChart('ch-ca-proc',{type:'doughnut',data:{labels:['Quimio Amb.','Radioterapia','Quimio Int.','Cirurgia Onco','Diagnóstico'],datasets:[{data:[3360,1662,165,113,286],backgroundColor:['#880e4f','#c2185b','#e91e63','#ad1457','#f48fb1'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}}});
+}
+
+function renderCoracao(){
+  mkChart('ch-co-fin',{type:'bar',data:{labels:MESES,datasets:[
+    {label:'Receita',data:[7.5,8.0,7.8,8.3],backgroundColor:'#1565c0',borderRadius:3},
+    {label:'Despesa',data:[7.8,7.6,7.9,7.8],backgroundColor:'#90caf9',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>v+'M'}}}}});
+  mkChart('ch-co-proc',{type:'doughnut',data:{labels:['Cateterismo','Angioplastia','CRM','Marcapasso','Ecocardiograma'],datasets:[{data:[345,180,89,70,1243],backgroundColor:['#0d47a1','#1565c0','#1976d2','#2196f3','#90caf9'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}}});
+}
+
+// Clock
+function tick(){ const n=new Date(); document.getElementById('ck-time').textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); document.getElementById('ck-date').textContent=n.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
+setInterval(tick,1000); tick();
+
+// Init
+renderCharts('consolidado');
+</script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clínica Popular – Grupo Santa Casa de Franca</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Segoe UI',sans-serif;background:#eef1f6;color:#222;font-size:13px}
+#topbar{position:fixed;top:0;left:0;right:0;height:50px;background:linear-gradient(90deg,#4a0072,#7b1fa2);color:#fff;display:flex;align-items:center;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.tb-back{width:50px;height:50px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;border-right:1px solid rgba(255,255,255,.15);flex-shrink:0;text-decoration:none;color:#fff}
+.tb-back:hover{background:rgba(255,255,255,.1)}
+.tb-brand{padding:0 16px;border-right:1px solid rgba(255,255,255,.12)}
+.tb-brand .b1{font-size:14px;font-weight:700}
+.tb-brand .b2{font-size:9px;opacity:.6;letter-spacing:.4px}
+.tb-view{padding:0 16px;font-size:12px;font-weight:600;flex:1;opacity:.85}
+.tb-kpi{padding:0 14px;text-align:center;border-left:1px solid rgba(255,255,255,.12);height:50px;display:flex;flex-direction:column;justify-content:center;flex-shrink:0}
+.tb-kpi .kv{font-size:13px;font-weight:800}
+.tb-kpi .kl{font-size:9px;opacity:.6;text-transform:uppercase;letter-spacing:.4px}
+.tb-kpi.grn .kv{color:#a5d6a7}.tb-kpi.amb .kv{color:#ffe082}
+#clock-b{padding:0 14px;border-left:1px solid rgba(255,255,255,.12);font-size:11px;opacity:.7;text-align:right;line-height:1.7;flex-shrink:0}
+
+/* TABS */
+#tabs{position:fixed;top:50px;left:0;right:0;height:44px;background:#fff;border-bottom:2px solid #e1bee7;display:flex;z-index:200;box-shadow:0 2px 6px rgba(0,0,0,.06);overflow-x:auto}
+.tab{padding:0 20px;font-size:12px;font-weight:600;color:#555;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;display:flex;align-items:center;transition:color .15s}
+.tab:hover{color:#7b1fa2;background:#f9f3ff}
+.tab.active{color:#7b1fa2;border-bottom-color:#7b1fa2}
+
+/* CONTENT */
+#content{position:fixed;top:94px;left:0;right:0;bottom:24px;overflow-y:auto;background:#eef1f6}
+.panel{display:none;padding:18px 24px 28px;max-width:1300px;margin:0 auto}
+.panel.active{display:block}
+
+/* SHARED */
+.sec{font-size:11px;font-weight:700;color:#4a0072;text-transform:uppercase;letter-spacing:.7px;margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid #7b1fa2}
+.krow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.kpi{background:#fff;border-radius:10px;padding:12px 16px;flex:1;min-width:130px;border-left:4px solid #7b1fa2;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.kpi.grn{border-left-color:#2e7d32}.kpi.red{border-left-color:#c0392b}.kpi.amb{border-left-color:#f57c00}.kpi.blu{border-left-color:#1565c0}.kpi.tea{border-left-color:#00796b}
+.kl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.kv{font-size:19px;font-weight:800;color:#4a0072}
+.ks{font-size:11px;color:#888;margin-top:2px}
+.pos{color:#2e7d32;font-weight:700}.neg{color:#c0392b;font-weight:700}.warn{color:#f57c00;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+.cbox{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.ctitle{font-size:11px;font-weight:700;color:#4a0072;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.cwrap{height:210px;position:relative}
+.cwrap.sm{height:160px}
+.tbl-wrap{background:#fff;border-radius:10px;padding:3px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{background:#4a0072;color:#fff;padding:6px 10px;text-align:center;font-size:10px;white-space:nowrap}
+th.l{text-align:left;min-width:160px}
+td{padding:5px 10px;border-bottom:1px solid #eee;text-align:center;white-space:nowrap}
+td.lbl{font-weight:600;color:#4a0072;text-align:left;background:#f9f3ff}
+td.r{text-align:right}.td.pv{color:#2e7d32;font-weight:700}
+tr.tot td{background:#f3e5f5;font-weight:700}
+/* ESPECIALIDADES */
+.esp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.esp-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.07);border-top:3px solid #7b1fa2}
+.esp-name{font-size:13px;font-weight:700;color:#4a0072;margin-bottom:8px}
+.esp-kpis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ekpi{background:#f9f3ff;border-radius:6px;padding:6px 8px}
+.ekpi .ev{font-size:14px;font-weight:800;color:#4a0072}
+.ekpi .el{font-size:9px;color:#888;text-transform:uppercase}
+.esp-bar{height:4px;background:#eee;border-radius:2px;overflow:hidden;margin-top:8px}
+.esp-fill{height:100%;border-radius:2px}
+/* AGENDA / AGENDA METRICS */
+.agenda-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:16px}
+.ag-card{background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.ag-val{font-size:20px;font-weight:800;color:#4a0072}
+.ag-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.ag-bar{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px}
+.ag-fill{height:100%;border-radius:3px}
+.ag-ref{font-size:10px;color:#aaa;margin-top:3px}
+/* INFO BOX */
+.info-box{background:#f3e5f5;border-left:4px solid #7b1fa2;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#4a0072}
+.warn-box{background:#fff8e1;border-left:4px solid #f57c00;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#4e3100}
+/* STATUS BAR */
+#sb{position:fixed;bottom:0;left:0;right:0;height:24px;background:#4a0072;display:flex;align-items:center;font-size:10px;color:rgba(255,255,255,.45);padding:0 14px;gap:12px;z-index:300}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:#ce93d8;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a class="tb-back" href="portal-principal.html" title="Voltar ao Portal">◀</a>
+  <div class="tb-brand"><div class="b1">Clínica Popular</div><div class="b2">Grupo Santa Casa de Franca · Atendimento Privado</div></div>
+  <div class="tb-view">Dashboard</div>
+  <div class="tb-kpi grn"><div class="kv">~1.260</div><div class="kl">Cons./mês</div></div>
+  <div class="tb-kpi"><div class="kv">R$ 185K</div><div class="kl">Receita/mês</div></div>
+  <div class="tb-kpi amb"><div class="kv">13,5%</div><div class="kl">Margem</div></div>
+  <div id="clock-b"><span id="ck-d">–</span><br><span id="ck-t" style="font-size:13px;font-weight:700;color:#ce93d8">–</span></div>
+</div>
+
+<div id="tabs">
+  <div class="tab active" onclick="showTab('visao',this)">📊 Visão Geral</div>
+  <div class="tab" onclick="showTab('producao',this)">🩺 Produção</div>
+  <div class="tab" onclick="showTab('financeiro',this)">💰 Financeiro</div>
+  <div class="tab" onclick="showTab('especialidades',this)">🔬 Especialidades</div>
+  <div class="tab" onclick="showTab('agenda',this)">📅 Agenda & Fluxo</div>
+</div>
+
+<div id="content">
+
+<!-- ══ VISÃO GERAL ══ -->
+<div id="p-visao" class="panel active">
+  <div class="info-box"><strong>Clínica Popular – Grupo Santa Casa de Franca</strong> · Atendimento 100% privado · Sem planos de saúde · Pagamento direto pelo paciente · CNPJ a confirmar · Dados de referência Jan–Abr/2026</div>
+  <div class="sec">KPIs Principais – Jan–Abr/2026</div>
+  <div class="krow">
+    <div class="kpi"><div class="kl">Consultas Realizadas</div><div class="kv">5.042</div><div class="ks">~1.260/mês · 42/dia útil</div></div>
+    <div class="kpi grn"><div class="kl">Receita Total 4m</div><div class="kv">R$ 740K</div><div class="ks">~R$ 185K/mês</div></div>
+    <div class="kpi"><div class="kl">Ticket Médio</div><div class="kv">R$ 147</div><div class="ks">Consulta + exames</div></div>
+    <div class="kpi grn"><div class="kl">Resultado 4m</div><div class="kv pos">+R$ 100K</div><div class="ks">Margem 13,5%</div></div>
+    <div class="kpi amb"><div class="kl">Taxa No-Show</div><div class="kv">12,3%</div><div class="ks">Meta ≤ 10% · Atenção</div></div>
+    <div class="kpi tea"><div class="kl">NPS Pacientes</div><div class="kv">72</div><div class="ks">Meta ≥ 70 · OK</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Consultas por Mês vs Meta</div><div class="cwrap"><canvas id="ch-vg-cons"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Receita Mensal (R$ mil)</div><div class="cwrap"><canvas id="ch-vg-rec"></canvas></div></div>
+  </div>
+
+  <div class="sec">Mix de Atendimentos</div>
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Consultas por Especialidade (4m)</div><div class="cwrap sm"><canvas id="ch-vg-esp"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Formas de Pagamento</div><div class="cwrap sm"><canvas id="ch-vg-pag"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══ PRODUÇÃO ══ -->
+<div id="p-producao" class="panel">
+  <div class="sec">Produção Mensal – Jan–Abr/2026</div>
+  <div class="krow">
+    <div class="kpi"><div class="kl">Consultas 4m</div><div class="kv">5.042</div><div class="ks">Média 1.260/mês</div></div>
+    <div class="kpi blu"><div class="kl">Exames Realizados</div><div class="kv">3.218</div><div class="ks">~804/mês · 0,64 por consulta</div></div>
+    <div class="kpi tea"><div class="kl">Procedimentos</div><div class="kv">892</div><div class="ks">Pequenas cirurgias · curativos</div></div>
+    <div class="kpi"><div class="kl">Retornos</div><div class="kv">1.621</div><div class="ks">32% do total de atendimentos</div></div>
+    <div class="kpi amb"><div class="kl">Novos Pacientes</div><div class="kv">2.180</div><div class="ks">~545/mês · 43% do total</div></div>
+    <div class="kpi grn"><div class="kl">Pacientes Cadastrados</div><div class="kv">8.450</div><div class="ks">Base ativa no período</div></div>
+  </div>
+
+  <div class="tbl-wrap"><table>
+    <thead><tr><th class="l">Indicador</th><th>Janeiro</th><th>Fevereiro</th><th>Março</th><th>Abril</th><th>Total</th><th>Meta/mês</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Consultas Realizadas</td><td>1.198</td><td>1.224</td><td>1.295</td><td>1.325</td><td>5.042</td><td>1.300</td></tr>
+      <tr><td class="lbl">Consultas Agendadas</td><td>1.362</td><td>1.395</td><td>1.476</td><td>1.510</td><td>5.743</td><td>–</td></tr>
+      <tr><td class="lbl">Taxa de Comparecimento</td><td>87,9%</td><td>87,7%</td><td>87,7%</td><td>87,7%</td><td>87,8%</td><td>≥90%</td></tr>
+      <tr><td class="lbl">Exames Solicitados</td><td>752</td><td>778</td><td>832</td><td>856</td><td>3.218</td><td>800</td></tr>
+      <tr><td class="lbl">Procedimentos Realizados</td><td>205</td><td>218</td><td>231</td><td>238</td><td>892</td><td>220</td></tr>
+      <tr><td class="lbl">Novos Pacientes</td><td>510</td><td>532</td><td>558</td><td>580</td><td>2.180</td><td>540</td></tr>
+      <tr><td class="lbl">Retornos</td><td>374</td><td>388</td><td>421</td><td>438</td><td>1.621</td><td>400</td></tr>
+      <tr class="tot"><td class="lbl">Dias Úteis</td><td>22</td><td>20</td><td>21</td><td>21</td><td>84</td><td>21/mês</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Evolução Consultas vs Agendamentos</div><div class="cwrap"><canvas id="ch-pr-cons"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Composição Atendimentos (4m)</div><div class="cwrap"><canvas id="ch-pr-comp"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══ FINANCEIRO ══ -->
+<div id="p-financeiro" class="panel">
+  <div class="sec">Resultado Financeiro – Jan–Abr/2026</div>
+  <div class="krow">
+    <div class="kpi grn"><div class="kl">Receita 4m</div><div class="kv">R$ 740.640</div><div class="ks">Média R$ 185.160/mês</div></div>
+    <div class="kpi red"><div class="kl">Despesas 4m</div><div class="kv">R$ 640.320</div><div class="ks">Média R$ 160.080/mês</div></div>
+    <div class="kpi grn"><div class="kl">Resultado 4m</div><div class="kv pos">+R$ 100.320</div><div class="ks">Margem 13,5%</div></div>
+    <div class="kpi"><div class="kl">% Pessoal / Rec.</div><div class="kv">42%</div><div class="ks warn">Teto referência: 38%</div></div>
+    <div class="kpi tea"><div class="kl">Ticket Médio</div><div class="kv">R$ 147</div><div class="ks">Consulta + exames</div></div>
+    <div class="kpi amb"><div class="kl">Ponto de Equilíbrio</div><div class="kv">~1.090</div><div class="ks">Consultas/mês para breakeven</div></div>
+  </div>
+
+  <div class="tbl-wrap"><table>
+    <thead><tr><th class="l">Descrição</th><th class="r">Janeiro</th><th class="r">Fevereiro</th><th class="r">Março</th><th class="r">Abril</th><th class="r">Total 4m</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl grp" colspan="6">RECEITAS</td></tr>
+      <tr><td class="lbl">Consultas</td><td class="r">116.820</td><td class="r">119.580</td><td class="r">126.740</td><td class="r">129.360</td><td class="r">492.500</td></tr>
+      <tr><td class="lbl">Exames Laboratório</td><td class="r">28.450</td><td class="r">29.340</td><td class="r">31.620</td><td class="r">32.450</td><td class="r">121.860</td></tr>
+      <tr><td class="lbl">Procedimentos</td><td class="r">22.140</td><td class="r">23.520</td><td class="r">24.960</td><td class="r">25.660</td><td class="r">96.280</td></tr>
+      <tr><td class="lbl">Exames Imagem</td><td class="r">7.250</td><td class="r">7.680</td><td class="r">8.140</td><td class="r">6.930</td><td class="r">30.000</td></tr>
+      <tr class="tot"><td class="lbl">TOTAL RECEITA</td><td class="r">174.660</td><td class="r">180.120</td><td class="r">191.460</td><td class="r">194.400</td><td class="r">740.640</td></tr>
+      <tr><td class="lbl grp" colspan="6">DESPESAS</td></tr>
+      <tr><td class="lbl">Pessoal (CLT + Horistas)</td><td class="r">71.240</td><td class="r">74.860</td><td class="r">79.320</td><td class="r">85.680</td><td class="r">311.100</td></tr>
+      <tr><td class="lbl">Honorários Médicos</td><td class="r">34.420</td><td class="r">35.640</td><td class="r">37.820</td><td class="r">38.320</td><td class="r">146.200</td></tr>
+      <tr><td class="lbl">Materiais / Insumos</td><td class="r">18.240</td><td class="r">19.120</td><td class="r">20.340</td><td class="r">21.120</td><td class="r">78.820</td></tr>
+      <tr><td class="lbl">Aluguel / Condomínio</td><td class="r">18.000</td><td class="r">18.000</td><td class="r">18.000</td><td class="r">18.000</td><td class="r">72.000</td></tr>
+      <tr><td class="lbl">Utilidades / Manutenção</td><td class="r">6.800</td><td class="r">6.900</td><td class="r">7.200</td><td class="r">7.400</td><td class="r">28.300</td></tr>
+      <tr><td class="lbl">Marketing / Admin</td><td class="r">1.100</td><td class="r">900</td><td class="r">1.200</td><td class="r">700</td><td class="r">3.900</td></tr>
+      <tr class="tot"><td class="lbl">TOTAL DESPESAS</td><td class="r">149.800</td><td class="r">155.420</td><td class="r">163.880</td><td class="r">171.220</td><td class="r">640.320</td></tr>
+      <tr class="tot"><td class="lbl">RESULTADO</td><td class="r pos">+24.860</td><td class="r pos">+24.700</td><td class="r pos">+27.580</td><td class="r pos">+23.180</td><td class="r pos">+100.320</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Receita vs Despesa Mensal (R$ mil)</div><div class="cwrap"><canvas id="ch-fi-rde"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Composição Despesas 4m</div><div class="cwrap"><canvas id="ch-fi-desp"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══ ESPECIALIDADES ══ -->
+<div id="p-especialidades" class="panel">
+  <div class="sec">Desempenho por Especialidade – Jan–Abr/2026</div>
+  <div class="esp-grid">
+    <div class="esp-card" style="border-top-color:#2e7d32">
+      <div class="esp-name">🩺 Clínica Geral</div>
+      <div class="esp-kpis">
+        <div class="ekpi"><div class="ev">1.820</div><div class="el">Consultas 4m</div></div>
+        <div class="ekpi"><div class="ev">R$ 130</div><div class="el">Ticket</div></div>
+        <div class="ekpi"><div class="ev">36%</div><div class="el">% do total</div></div>
+        <div class="ekpi"><div class="ev">9,8%</div><div class="el">No-Show</div></div>
+      </div>
+      <div class="esp-bar"><div class="esp-fill" style="width:36%;background:#2e7d32"></div></div>
+    </div>
+    <div class="esp-card" style="border-top-color:#1565c0">
+      <div class="esp-name">👶 Pediatria</div>
+      <div class="esp-kpis">
+        <div class="ekpi"><div class="ev">855</div><div class="el">Consultas 4m</div></div>
+        <div class="ekpi"><div class="ev">R$ 140</div><div class="el">Ticket</div></div>
+        <div class="ekpi"><div class="ev">17%</div><div class="el">% do total</div></div>
+        <div class="ekpi"><div class="ev">10,4%</div><div class="el">No-Show</div></div>
+      </div>
+      <div class="esp-bar"><div class="esp-fill" style="width:17%;background:#1565c0"></div></div>
+    </div>
+    <div class="esp-card" style="border-top-color:#ad1457">
+      <div class="esp-name">🌸 Ginecologia</div>
+      <div class="esp-kpis">
+        <div class="ekpi"><div class="ev">756</div><div class="el">Consultas 4m</div></div>
+        <div class="ekpi"><div class="ev">R$ 160</div><div class="el">Ticket</div></div>
+        <div class="ekpi"><div class="ev">15%</div><div class="el">% do total</div></div>
+        <div class="ekpi"><div class="ev">14,2%</div><div class="el">No-Show</div></div>
+      </div>
+      <div class="esp-bar"><div class="esp-fill" style="width:15%;background:#ad1457"></div></div>
+    </div>
+    <div class="esp-card" style="border-top-color:#e65100">
+      <div class="esp-name">🦴 Ortopedia</div>
+      <div class="esp-kpis">
+        <div class="ekpi"><div class="ev">656</div><div class="el">Consultas 4m</div></div>
+        <div class="ekpi"><div class="ev">R$ 155</div><div class="el">Ticket</div></div>
+        <div class="ekpi"><div class="ev">13%</div><div class="el">% do total</div></div>
+        <div class="ekpi"><div class="ev">11,8%</div><div class="el">No-Show</div></div>
+      </div>
+      <div class="esp-bar"><div class="esp-fill" style="width:13%;background:#e65100"></div></div>
+    </div>
+    <div class="esp-card" style="border-top-color:#f57c00">
+      <div class="esp-name">✨ Dermatologia</div>
+      <div class="esp-kpis">
+        <div class="ekpi"><div class="ev">555</div><div class="el">Consultas 4m</div></div>
+        <div class="ekpi"><div class="ev">R$ 165</div><div class="el">Ticket</div></div>
+        <div class="ekpi"><div class="ev">11%</div><div class="el">% do total</div></div>
+        <div class="ekpi"><div class="ev">13,6%</div><div class="el">No-Show</div></div>
+      </div>
+      <div class="esp-bar"><div class="esp-fill" style="width:11%;background:#f57c00"></div></div>
+    </div>
+    <div class="esp-card" style="border-top-color:#0097a7">
+      <div class="esp-name">❤️ Cardiologia Básica</div>
+      <div class="esp-kpis">
+        <div class="ekpi"><div class="ev">400</div><div class="el">Consultas 4m</div></div>
+        <div class="ekpi"><div class="ev">R$ 180</div><div class="el">Ticket</div></div>
+        <div class="ekpi"><div class="ev">8%</div><div class="el">% do total</div></div>
+        <div class="ekpi"><div class="ev">12,1%</div><div class="el">No-Show</div></div>
+      </div>
+      <div class="esp-bar"><div class="esp-fill" style="width:8%;background:#0097a7"></div></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">Volume por Especialidade (consultas 4m)</div><div class="cwrap"><canvas id="ch-esp-vol"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Receita por Especialidade (R$ mil 4m)</div><div class="cwrap"><canvas id="ch-esp-rec"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══ AGENDA & FLUXO ══ -->
+<div id="p-agenda" class="panel">
+  <div class="sec">Gestão de Agenda – Jan–Abr/2026</div>
+  <div class="agenda-grid">
+    <div class="ag-card"><div class="ag-lbl">Consultas/Dia Útil</div><div class="ag-val">59,9</div><div class="ag-bar"><div class="ag-fill" style="width:75%;background:#7b1fa2"></div></div><div class="ag-ref">Meta: 65/dia · <span class="warn">ATENÇÃO</span></div></div>
+    <div class="ag-card"><div class="ag-lbl">Taxa No-Show</div><div class="ag-val">12,2%</div><div class="ag-bar"><div class="ag-fill" style="width:61%;background:#c0392b"></div></div><div class="ag-ref">Meta ≤10% · <span class="neg">ACIMA</span></div></div>
+    <div class="ag-card"><div class="ag-lbl">Ocupação da Agenda</div><div class="ag-val">76%</div><div class="ag-bar"><div class="ag-fill" style="width:76%;background:#f57c00"></div></div><div class="ag-ref">Meta ≥85% · <span class="warn">ATENÇÃO</span></div></div>
+    <div class="ag-card"><div class="ag-lbl">Tempo Espera (dias)</div><div class="ag-val">4,2d</div><div class="ag-bar"><div class="ag-fill" style="width:42%;background:#2e7d32"></div></div><div class="ag-ref">Meta ≤7 dias · <span class="pos">OK</span></div></div>
+    <div class="ag-card"><div class="ag-lbl">Tempo Atend. (min)</div><div class="ag-val">22min</div><div class="ag-bar"><div class="ag-fill" style="width:55%;background:#2e7d32"></div></div><div class="ag-ref">Meta ≤25min · <span class="pos">OK</span></div></div>
+    <div class="ag-card"><div class="ag-lbl">Rechamadas (no-show)</div><div class="ag-val">68%</div><div class="ag-bar"><div class="ag-fill" style="width:68%;background:#7b1fa2"></div></div><div class="ag-ref">% reagendados com sucesso</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="cbox"><div class="ctitle">No-Show por Especialidade (%)</div><div class="cwrap"><canvas id="ch-ag-ns"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Distribuição de Atendimentos por Dia da Semana</div><div class="cwrap"><canvas id="ch-ag-dia"></canvas></div></div>
+  </div>
+
+  <div class="sec">Análise de Retenção e Conversão</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th class="l">Especialidade</th><th>Consultas</th><th>No-Show%</th><th>Retorno%</th><th>Exame/Cons.</th><th>Ticket</th><th>Receita 4m</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Clínica Geral</td><td>1.820</td><td>9,8%</td><td>28%</td><td>0,58</td><td>R$ 130</td><td class="r">R$ 236.600</td></tr>
+      <tr><td class="lbl">Pediatria</td><td>855</td><td>10,4%</td><td>35%</td><td>0,72</td><td>R$ 140</td><td class="r">R$ 119.700</td></tr>
+      <tr><td class="lbl">Ginecologia</td><td>756</td><td>14,2%</td><td>40%</td><td>0,88</td><td>R$ 160</td><td class="r">R$ 120.960</td></tr>
+      <tr><td class="lbl">Ortopedia</td><td>656</td><td>11,8%</td><td>38%</td><td>0,65</td><td>R$ 155</td><td class="r">R$ 101.680</td></tr>
+      <tr><td class="lbl">Dermatologia</td><td>555</td><td>13,6%</td><td>32%</td><td>0,41</td><td>R$ 165</td><td class="r">R$ 91.575</td></tr>
+      <tr><td class="lbl">Cardiologia</td><td>400</td><td>12,1%</td><td>42%</td><td>0,82</td><td>R$ 180</td><td class="r">R$ 72.000</td></tr>
+      <tr class="tot"><td class="lbl">TOTAL</td><td>5.042</td><td>12,2%</td><td>32%</td><td>0,64</td><td>R$ 147</td><td class="r">R$ 742.515</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+</div><!-- /content -->
+
+<div id="sb"><div class="sb-dot"></div><span>Clínica Popular · Pagamento Direto · Sem Convênios</span><span style="margin-left:auto;opacity:.4">Jan–Abr/2026 · Grupo Santa Casa de Franca</span></div>
+
+<script>
+const MESES = ['Jan','Fev','Mar','Abr'];
+const ESPS = ['Cl. Geral','Pediatria','Ginecologia','Ortopedia','Dermatologia','Cardiologia'];
+const ECORS = ['#2e7d32','#1565c0','#ad1457','#e65100','#f57c00','#0097a7'];
+
+function showTab(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  renderCharts(id);
+}
+
+let _r={};
+function renderCharts(id){
+  if(_r[id]) return; _r[id]=true;
+  setTimeout(()=>{
+    if(id==='visao')         renderVisao();
+    if(id==='producao')      renderProducao();
+    if(id==='financeiro')    renderFinanceiro();
+    if(id==='especialidades') renderEsp();
+    if(id==='agenda')        renderAgenda();
+  },60);
+}
+
+function mk(id,cfg){ const el=document.getElementById(id); if(!el)return; return new Chart(el,cfg); }
+
+function renderVisao(){
+  mk('ch-vg-cons',{type:'bar',data:{labels:MESES,datasets:[
+    {label:'Realizadas',data:[1198,1224,1295,1325],backgroundColor:'#7b1fa2',borderRadius:4},
+    {label:'Meta',data:[1300,1300,1300,1300],type:'line',borderColor:'#c0392b',borderWidth:2,borderDash:[5,5],fill:false,pointRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{min:1000}}}});
+  mk('ch-vg-rec',{type:'bar',data:{labels:MESES,datasets:[
+    {label:'Receita (R$ mil)',data:[174.66,180.12,191.46,194.40],backgroundColor:'#7b1fa2',borderRadius:4},
+    {label:'Despesa (R$ mil)',data:[149.80,155.42,163.88,171.22],backgroundColor:'#ce93d8',borderRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>v+'K'}}}}});
+  mk('ch-vg-esp',{type:'doughnut',data:{labels:ESPS,datasets:[{data:[1820,855,756,656,555,400],backgroundColor:ECORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}}});
+  mk('ch-vg-pag',{type:'doughnut',data:{labels:['Dinheiro','PIX','Débito','Crédito','Transferência'],datasets:[{data:[18,42,20,15,5],backgroundColor:['#43a047','#00796b','#1565c0','#6a1b9a','#f57c00'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}}});
+}
+
+function renderProducao(){
+  mk('ch-pr-cons',{type:'line',data:{labels:MESES,datasets:[
+    {label:'Realizadas',data:[1198,1224,1295,1325],borderColor:'#7b1fa2',backgroundColor:'rgba(123,31,162,.1)',fill:true,tension:.3,pointRadius:4},
+    {label:'Agendadas',data:[1362,1395,1476,1510],borderColor:'#ce93d8',borderDash:[5,5],fill:false,tension:.3,pointRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+  mk('ch-pr-comp',{type:'doughnut',data:{labels:['Consultas','Exames','Procedimentos'],datasets:[{data:[5042,3218,892],backgroundColor:['#7b1fa2','#ab47bc','#ce93d8'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10}}}}});
+}
+
+function renderFinanceiro(){
+  mk('ch-fi-rde',{type:'bar',data:{labels:MESES,datasets:[
+    {label:'Receita',data:[174.66,180.12,191.46,194.40],backgroundColor:'#7b1fa2',borderRadius:4},
+    {label:'Despesa',data:[149.80,155.42,163.88,171.22],backgroundColor:'#ef9a9a',borderRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>v+'K'}}}}});
+  mk('ch-fi-desp',{type:'doughnut',data:{labels:['Pessoal CLT','Honorários Méd.','Materiais','Aluguel','Utilidades','Admin'],datasets:[{data:[311100,146200,78820,72000,28300,3900],backgroundColor:['#1565c0','#6a1b9a','#2e7d32','#f57c00','#0097a7','#bdbdbd'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}}});
+}
+
+function renderEsp(){
+  mk('ch-esp-vol',{type:'bar',data:{labels:ESPS,datasets:[{label:'Consultas 4m',data:[1820,855,756,656,555,400],backgroundColor:ECORS,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v}}}}});
+  mk('ch-esp-rec',{type:'bar',data:{labels:ESPS,datasets:[{label:'Receita 4m (R$ mil)',data:[236.6,119.7,120.96,101.68,91.58,72],backgroundColor:ECORS,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'K'}}}}});
+}
+
+function renderAgenda(){
+  mk('ch-ag-ns',{type:'bar',data:{labels:ESPS,datasets:[{label:'No-Show%',data:[9.8,10.4,14.2,11.8,13.6,12.1],backgroundColor:ECORS,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:20,ticks:{callback:v=>v+'%'}}}}});
+  mk('ch-ag-dia',{type:'bar',data:{labels:['Segunda','Terça','Quarta','Quinta','Sexta'],datasets:[{label:'Consultas/semana (média)',data:[280,310,298,322,280],backgroundColor:'#7b1fa2',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{}}}}});
+}
+
+// Clock
+function tick(){ const n=new Date(); document.getElementById('ck-t').textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); document.getElementById('ck-d').textContent=n.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
+setInterval(tick,1000); tick();
+renderCharts('visao');
+</script>
+</body>
+</html>

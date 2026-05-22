@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Análise Detalhada AME – Grupo Santa Casa de Franca</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="dados-embutidos.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222}
+header{background:linear-gradient(135deg,#003366,#0055a5);color:#fff;padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:18px;font-weight:700}
+header .badge{font-size:11px;background:rgba(255,255,255,.18);padding:4px 12px;border-radius:12px;margin-top:5px;display:inline-block}
+.nav{background:#fff;border-bottom:1px solid #dde;padding:10px 28px;display:flex;gap:8px;flex-wrap:wrap}
+.nav a{text-decoration:none;font-size:12px;color:#003366;font-weight:600;padding:5px 12px;border-radius:16px;border:1px solid #003366;transition:all .15s}
+.nav a:hover,.nav a.active{background:#003366;color:#fff}
+.main{max-width:1100px;margin:20px auto;padding:0 16px}
+
+/* KPI */
+.kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.kpi{background:#fff;border-radius:10px;padding:14px 18px;flex:1;min-width:150px;border-left:4px solid #003366;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.kpi.ok{border-left-color:#00875a}
+.kpi.warn{border-left-color:#ff8b00}
+.kpi.risk{border-left-color:#c0392b}
+.kpi-label{font-size:10px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:22px;font-weight:700;color:#003366;margin:4px 0 2px}
+.kpi-sub{font-size:11px;color:#666}
+.kpi-pct{font-size:14px;font-weight:700}
+.pct-ok{color:#00875a} .pct-warn{color:#ff8b00} .pct-risk{color:#c0392b} .pct-crit{color:#880e4f}
+
+/* Seções */
+.section-title{font-size:13px;font-weight:700;color:#003366;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;border-bottom:2px solid #003366;padding-bottom:5px}
+.chart-box{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow-x:auto;margin-bottom:16px}
+.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:700px){.charts-2{grid-template-columns:1fr}}
+.chart-wrap{height:220px;position:relative}
+.chart-title{font-size:12px;font-weight:600;color:#003366;margin-bottom:8px}
+
+/* Tabelas */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#003366;color:#fff;padding:7px 10px;text-align:center;font-size:11px}
+th.left{text-align:left}
+td{padding:6px 10px;border-bottom:1px solid #eee}
+td.lbl{font-weight:600;color:#003366;background:#f5f7fc}
+td.right{text-align:right}
+tr.hdr45 td{background:#e8edf5;color:#003366;font-weight:700;font-size:11px}
+tr.hdr46 td{background:#e8f5e9;color:#1b5e20;font-weight:700;font-size:11px}
+tr.hdrsadt td{background:#fff3e0;color:#e65100;font-weight:700;font-size:11px}
+tr.total-r td{background:#edf2ff;font-weight:700;color:#003366}
+tr.result td{font-weight:700}
+.badge-ok{background:#e8f5e9;color:#00875a;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600}
+.badge-warn{background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600}
+.badge-risk{background:#fff0f0;color:#c0392b;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600}
+
+/* Alerta */
+.alert{border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px}
+.alert-ok{background:#e8f5e9;border-left:4px solid #00875a;color:#1b5e20}
+.alert-warn{background:#fff8e1;border-left:4px solid #ff8b00;color:#664d03}
+.alert-risk{background:#fff0f0;border-left:4px solid #c0392b;color:#7b1111}
+
+footer{text-align:center;padding:20px;font-size:12px;color:#999;margin-top:24px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 id="hdr-title">Análise Detalhada – AME</h1>
+    <p id="hdr-sub">Contrato SES/SP · Jan–Abr/2026 (4/6 meses) · Grupo Santa Casa de Franca</p>
+  </div>
+  <div style="text-align:right">
+    <span class="badge" id="hdr-status">–</span><br>
+    <span style="font-size:11px;opacity:.8" id="hdr-data">–</span>
+  </div>
+</header>
+
+<div class="nav" id="nav-ames">
+  <a href="index.html">← Início</a>
+  <a href="indicadores.html">Indicadores</a>
+  <a href="?ame=cp">Campinas</a>
+  <a href="?ame=frc">Franca</a>
+  <a href="?ame=cb">Casa Branca</a>
+  <a href="?ame=avj">Jurumirim</a>
+  <a href="?ame=rp">Rib. Preto</a>
+  <a href="?ame=scl">São Carlos</a>
+</div>
+
+<div class="main" id="main-content">
+  <p style="padding:40px;text-align:center;color:#666">Carregando…</p>
+</div>
+
+<footer>Grupo Santa Casa de Franca · Dados: Metas SES/SP 11/05/2026 · Atualização via node gerar-dados.js</footer>
+
+<script>
+const AME_MAP = {
+  cp:'Campinas', cb:'Casa Branca', frc:'Franca',
+  avj:'Jurumirim', rp:'Ribeirão Preto', scl:'São Carlos'
+};
+const MIN = {consulta:90, naoMed:90, cmaA:95, cmaM:95, sadt:90};
+
+function ni(v,d=0){
+  if(typeof v!=='number'||isNaN(v)) return '–';
+  return v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function pctFmt(v){return ni(v,1)+'%'}
+function pctCls(v,min){return v>=100?'pct-ok':v>=min?'pct-ok':v>=(min-5)?'pct-warn':'pct-risk'}
+function badgeFor(v,min){
+  return v>=min?'badge-ok':v>=(min-10)?'badge-warn':'badge-risk';
+}
+function badgeTxt(v,min){
+  return v>=min?'✓ OK':v>=(min-10)?'⚠ Atenção':'✗ RISCO';
+}
+
+// Lê ?ame= da URL
+const params = new URLSearchParams(location.search);
+const AME_KEY = params.get('ame')||'cp';
+
+// Marca link ativo na nav
+document.querySelectorAll('.nav a').forEach(a=>{
+  if(a.href.includes('ame='+AME_KEY)) a.classList.add('active');
+});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const DD = (window.DADOS_DASH||{}).ames||{};
+  const d  = DD[AME_KEY]||{};
+  const q  = d.qtde||{};
+  const f  = d.fin||{};
+  const a  = d.analise||{};
+  const gen = (window.DADOS_DASH||{}).geradoEm;
+
+  const nomeLongo = AME_MAP[AME_KEY]||AME_KEY;
+  document.title = 'AME '+nomeLongo+' – Relatório Gerencial';
+  document.getElementById('hdr-title').textContent = 'Análise Detalhada – AME '+nomeLongo;
+  if(gen) document.getElementById('hdr-data').textContent = 'Dados: '+new Date(gen).toLocaleString('pt-BR');
+
+  // Status badge
+  const stMap={ok:'✓ OK',atencao:'⚠ ATENÇÃO',risco:'✗ RISCO',critico:'✗ CRÍTICO'};
+  const stColor={ok:'#e8f5e9',atencao:'#fff3e0',risco:'#fff0f0',critico:'#fce4ec'};
+  const st=a.status||'ok';
+  const stEl=document.getElementById('hdr-status');
+  stEl.textContent=(stMap[st]||'OK')+' – '+(a.riscos||[]).join(' · ')||'Todas OK';
+  stEl.style.background=stColor[st]||'#e8f5e9';
+  stEl.style.color=st==='ok'?'#00875a':st==='atencao'?'#e65100':'#c0392b';
+
+  // ── Alerta ──
+  const alertCls={ok:'alert-ok',atencao:'alert-warn',risco:'alert-risk',critico:'alert-risk'};
+  const alertIcon={ok:'✅',atencao:'⚠️',risco:'🚨',critico:'🚨'};
+  const riscosTxt=(a.riscos||[]).length?'<br><strong>Pontos de atenção:</strong> '+(a.riscos||[]).join(' · '):'';
+  const alert=`<div class="alert ${alertCls[st]||'alert-ok'}">
+    ${alertIcon[st]||'✅'} <strong>AME ${nomeLongo} – Situação Contratual:</strong>
+    ${stMap[st]||'OK'} · Período Jan–Abr/2026 (${4} de 6 meses realizados)${riscosTxt}
+  </div>`;
+
+  // ── KPI Cards ──
+  function kpiCard(label,value,sub,cls){
+    const kpiCls='kpi'+(cls?' '+cls:'');
+    return`<div class="${kpiCls}">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value">${value}</div>
+      <div class="kpi-sub">${sub}</div>
+    </div>`;
+  }
+  function kpiPct(label,real,cont,meta,min,unit=''){
+    const pct=cont>0?(real/cont*100):0;
+    const proj=Math.round(real*1.5), metaSem=Math.round(cont*1.5);
+    const pj=cont>0?(proj/metaSem*100):0;
+    const cls=pj>=min?'ok':pj>=(min-5)?'warn':'risk';
+    return`<div class="kpi ${cls}">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value">${ni(real)}${unit}</div>
+      <div class="kpi-pct ${pctCls(pj,min)}">${pctFmt(pj)} semestral</div>
+      <div class="kpi-sub">Meta mín: ${min}% | Proj: ${ni(proj)} / ${ni(metaSem)}</div>
+    </div>`;
+  }
+
+  // 5 METAS CONTRATUAIS: Consulta Médica | Consulta Não Médica (s272) | CMA | cma | SADT Ext
+  const naoMedReal=a.s272Real||0, naoMedCont=a.s272Cont||0;
+  const naoMedMeta=Math.round(naoMedCont*1.5);
+  const kpiRow=`<div class="kpi-row">
+    ${kpiPct('1. Consultas Médicas',a.consultReal||0,a.consultCont||0,a.consultMeta||0,90)}
+    ${kpiPct('2. Não-Médica + Proc.',naoMedReal,naoMedCont,naoMedMeta,90)}
+    ${kpiPct('3. CMA Maior (Cirurgia Maior Ambulatorial)',a.cmaAReal||0,a.cmaACont||0,a.cmaAMeta||0,95)}
+    ${kpiPct('4. cma menor (Cirurgia Menor Ambulatorial)',a.cmaMReal||0,a.cmaMCont||0,a.cmaMeta||0,95)}
+    ${kpiPct('5. SADT Externo',a.sadtReal||0,a.sadtCont||0,a.sadtMeta||0,90)}
+    ${f.receita&&f.despesa?kpiCard('Resultado 4m',((f.receita-f.despesa)>=0?'+':'')+ni((f.receita-f.despesa)/1e6,3)+' M','Receita – Despesas',f.receita>=f.despesa?'ok':'risk'):''}
+  </div>`;
+
+  // ── Tabela de Quantidade ──
+  function metaRow(desc,real,cont,min,sub=false){
+    const proj=Math.round(real*1.5), metaSem=Math.round(cont*1.5);
+    const pj=cont>0?(proj/metaSem*100):0;
+    const ok=pj>=min;
+    const badge=`<span class="${badgeFor(pj,min)}">${badgeTxt(pj,min)}</span>`;
+    const delta=proj-metaSem;
+    const subCls=sub?'style="padding-left:28px"':'';
+    return`<tr>
+      <td class="lbl" ${subCls}>${desc} <small style="color:#888">(meta ${min}%)</small></td>
+      <td class="right">${ni(real)}</td>
+      <td class="right">${ni(proj)}</td>
+      <td class="right" style="background:#fff8e1">${ni(metaSem)}</td>
+      <td class="right ${pctCls(pj,min)}" style="font-weight:700">${pctFmt(pj)}</td>
+      <td class="right">${badge}</td>
+      <td class="right ${delta>=0?'pct-ok':'pct-risk'}" style="font-weight:600">${delta>=0?'+':''}${ni(delta)}</td>
+    </tr>`;
+  }
+
+  const qtdeTable=`<table>
+    <thead><tr>
+      <th class="left" style="min-width:260px">Métrica Contratual</th>
+      <th>Realizado<br><small>4 meses</small></th>
+      <th>Projeção<br><small>semestral</small></th>
+      <th style="background:#1a5276">Meta Mín.<br><small>semestral</small></th>
+      <th>%</th>
+      <th>Status</th>
+      <th>Δ Volume</th>
+    </tr></thead>
+    <tbody>
+      <tr class="hdr45"><td colspan="7">&nbsp;&nbsp;45 – Atividade Ambulatorial – Especialidades Médicas</td></tr>
+      ${metaRow('271 – Consultas Médicas',a.consultReal||0,a.consultCont||0,90)}
+      ${metaRow('571 – CMA Maior (Cirurgia Maior Ambulatorial)',a.cmaAReal||0,a.cmaACont||0,95,true)}
+      ${metaRow('572 – cma menor (Cirurgia Menor Ambulatorial)',a.cmaMReal||0,a.cmaMCont||0,95,true)}
+      <tr class="hdr46"><td colspan="7">&nbsp;&nbsp;46 – Atividade Ambulatorial – Especialidades Não Médicas</td></tr>
+      ${metaRow('Não-Médica + Proc.',a.s272Real||0,a.s272Cont||0,90)}
+      <tr class="hdrsadt"><td colspan="7">&nbsp;&nbsp;SADT – Apoio Diagnóstico Externo</td></tr>
+      ${metaRow('680 – SADT Externo',a.sadtReal||0,a.sadtCont||0,90)}
+      <tr class="total-r">
+        <td class="lbl">TOTAL GERAL (todas as seções)</td>
+        <td class="right">${ni((a.consultReal||0)+(a.cmaAReal||0)+(a.cmaMReal||0)+(a.naoMedReal||0)+(a.procTerReal||0)+(a.sadtReal||0))}</td>
+        <td class="right">${ni(((a.consultReal||0)+(a.cmaAReal||0)+(a.cmaMReal||0)+(a.naoMedReal||0)+(a.procTerReal||0)+(a.sadtReal||0))*1.5)}</td>
+        <td class="right">–</td><td class="right">–</td><td>–</td><td>–</td>
+      </tr>
+    </tbody>
+  </table>`;
+
+  // ── Tabela Financeira ──
+  function finRow(lbl,val,sub=false){
+    if(!val&&val!==0) return '';
+    const subSt=sub?'style="padding-left:28px;color:#555;font-weight:400"':'';
+    return`<tr><td class="lbl" ${subSt}>${lbl}</td><td class="right">${ni(val/1e6,3)}</td><td class="right">${ni(val/1e6*3,3)}</td></tr>`;
+  }
+  const res=(f.receita||0)-(f.despesa||0);
+  const finTable=f.receita?`<table>
+    <thead><tr>
+      <th class="left" style="min-width:240px">Categoria</th>
+      <th>Realizado 4m<br><small>R$ milhões</small></th>
+      <th>Proj. Anual<br><small>R$ milhões (×3)</small></th>
+    </tr></thead>
+    <tbody>
+      <tr class="hdr45"><td colspan="3">&nbsp;&nbsp;RECEITAS</td></tr>
+      ${finRow('Repasse Contrato SES',f.receita)}
+      <tr class="total-r"><td class="lbl">TOTAL RECEITAS</td><td class="right">${ni(f.receita/1e6,3)}</td><td class="right">${ni(f.receita/1e6*3,3)}</td></tr>
+      <tr class="hdr46"><td colspan="3">&nbsp;&nbsp;DESPESAS</td></tr>
+      ${finRow('Pessoal (CLT)',f.pessoal,true)}
+      ${finRow('Terceiros Assistenciais',f.assistenciais,true)}
+      ${finRow('Terceiros Administrativos',f.administrativos,true)}
+      ${finRow('Materiais',f.materiais,true)}
+      ${finRow('Utilidades Públicas',f.utilidades,true)}
+      ${finRow('Ressarcimento / Rateio',f.ressarcimento,true)}
+      <tr class="total-r"><td class="lbl">TOTAL DESPESAS</td><td class="right">${ni(f.despesa/1e6,3)}</td><td class="right">${ni(f.despesa/1e6*3,3)}</td></tr>
+      <tr class="result ${res>=0?'':''}">
+        <td class="lbl" style="color:${res>=0?'#00875a':'#c0392b'}">RESULTADO (Rec. – Desp.)</td>
+        <td class="right ${res>=0?'pct-ok':'pct-risk'}">${ni(res/1e6,3)}</td>
+        <td class="right ${res>=0?'pct-ok':'pct-risk'}">${ni(res/1e6*3,3)}</td>
+      </tr>
+      <tr class="hdrsadt"><td colspan="3">&nbsp;&nbsp;SALDOS</td></tr>
+      ${finRow('Saldo Abertura Janeiro',f.saldoJan)}
+      ${finRow('Saldo Final Abril',f.saldoAbr)}
+    </tbody>
+  </table>`:
+  '<p style="color:#888;font-size:13px">Dados financeiros não disponíveis para esta unidade.</p>';
+
+  // ── Gráficos ──
+  const metricas=[
+    {label:'Consultas',real:a.consultReal||0,cont:a.consultCont||0,min:90},
+    {label:'CMA',real:a.cmaAReal||0,cont:a.cmaACont||0,min:95},
+    {label:'cma',real:a.cmaMReal||0,cont:a.cmaMCont||0,min:95},
+    {label:'NMed',real:a.naoMedReal||0,cont:a.naoMedCont||0,min:90},
+    {label:'ProcTer',real:a.procTerReal||0,cont:a.procTerCont||0,min:90},
+    {label:'SADT',real:a.sadtReal||0,cont:a.sadtCont||0,min:90},
+  ].filter(m=>m.cont>0);
+
+  const pcts=metricas.map(m=>m.cont>0?(m.real/m.cont*1.5/m.cont*1.5*100):0);
+  // Corrige: pct = (real×1.5)/(cont×1.5) = real/cont
+  const pctVals=metricas.map(m=>m.cont>0?+(m.real/m.cont*100).toFixed(1):0);
+  const projVals=metricas.map(m=>m.cont>0?+(m.real*1.5/1000).toFixed(1):0);
+  const contVals=metricas.map(m=>+(m.cont*1.5/1000).toFixed(1));
+
+  document.getElementById('main-content').innerHTML =
+    alert + kpiRow +
+    `<div class="section-title">Análise Contratual Detalhada – 1º Semestre 2026</div>
+    <div class="chart-box">${qtdeTable}</div>
+    <div class="charts-2">
+      <div class="chart-box">
+        <div class="chart-title">% Atingimento Contratual por Seção (meta mínima marcada)</div>
+        <div class="chart-wrap"><canvas id="ch-pct"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Projeção Semestral vs Contratado (mil unidades)</div>
+        <div class="chart-wrap"><canvas id="ch-vol"></canvas></div>
+      </div>
+    </div>
+    <div class="section-title">Financeiro – Jan–Abr/2026</div>
+    <div class="chart-box">${finTable}</div>`;
+
+  // Chart % atingimento
+  new Chart(document.getElementById('ch-pct'),{
+    type:'bar',
+    data:{
+      labels:metricas.map(m=>m.label),
+      datasets:[{
+        label:'% atingimento (4m real/cont)',
+        data:pctVals,
+        backgroundColor:pctVals.map((v,i)=>v>=metricas[i].min?'#00875a':v>=(metricas[i].min-10)?'#ff8b00':'#c0392b'),
+        borderRadius:5,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{min:0,max:130,ticks:{callback:v=>v+'%'},grid:{color:'#f5f5f5'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+
+  // Chart volume
+  new Chart(document.getElementById('ch-vol'),{
+    type:'bar',
+    data:{
+      labels:metricas.map(m=>m.label),
+      datasets:[
+        {label:'Projeção semestral',data:metricas.map(m=>+(m.real*1.5).toFixed(0)),backgroundColor:'#1565c0',borderRadius:3},
+        {label:'Contratado semestral',data:metricas.map(m=>+(m.cont*1.5).toFixed(0)),backgroundColor:'#e0e7f5',borderRadius:3},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{
+        y:{ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#f5f5f5'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

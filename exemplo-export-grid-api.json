@@ -1,0 +1,132 @@
+{
+  "api": {
+    "versao": "1.0",
+    "tipo": "hospital-management-grid",
+    "data_exportacao": "2026-05-11T12:00:00Z"
+  },
+  "administrador": {
+    "id": "ADMIN001",
+    "nome": "Administrador Geral",
+    "descricao": "Gerencia 3 hospitais sob 1 CNES",
+    "hospitais_gerenciados": [
+      {
+        "id": 1,
+        "nome": "Hospital do Coração",
+        "status": "ativo"
+      },
+      {
+        "id": 2,
+        "nome": "Hospital do Câncer",
+        "status": "ativo"
+      },
+      {
+        "id": 3,
+        "nome": "Santa Casa",
+        "status": "ativo"
+      }
+    ]
+  },
+  "instituicoes": [
+    {
+      "tipo": "AME",
+      "cnes": "cnes_campinas",
+      "nome": "AME Campinas",
+      "arquivo": "AME Campinas 04 2026.xlsx",
+      "periodo": "04/2026",
+      "status": "ativo",
+      "dados_exemplo": {
+        "receita_total": "R$ XXX.XXX,XX",
+        "despesas_total": "R$ XXX.XXX,XX",
+        "resultado": "R$ XXX.XXX,XX",
+        "linhas_dados": "[será preenchido ao ler o arquivo]"
+      }
+    },
+    {
+      "tipo": "AME",
+      "cnes": "cnes_casa_branca",
+      "nome": "AME Casa Branca",
+      "arquivo": "AME Casa Branca 04 2026.xlsx",
+      "periodo": "04/2026",
+      "status": "ativo"
+    },
+    {
+      "tipo": "AME",
+      "cnes": "cnes_franca",
+      "nome": "AME Franca",
+      "arquivo": "AME Franca 04 2026.xlsx",
+      "periodo": "04/2026",
+      "status": "ativo"
+    },
+    {
+      "tipo": "AME",
+      "cnes": "cnes_jurumirim",
+      "nome": "AME Jurumirim",
+      "arquivo": "AME Jurumirim 04 2026.xlsx",
+      "periodo": "04/2026",
+      "status": "ativo"
+    },
+    {
+      "tipo": "AME",
+      "cnes": "cnes_ribeirao_preto",
+      "nome": "AME Ribeirão Preto",
+      "arquivo": "AME Ribeirão Preto 04 2026.xlsx",
+      "periodo": "04/2026",
+      "status": "ativo"
+    },
+    {
+      "tipo": "AME",
+      "cnes": "cnes_sao_carlos",
+      "nome": "AME São Carlos",
+      "arquivo": "AME São Carlos 04 2026.xlsx",
+      "periodo": "04/2026",
+      "status": "ativo"
+    },
+    {
+      "tipo": "Hospital",
+      "cnes": "cnes_santa_casa",
+      "nome": "Santa Casa",
+      "arquivo": "Santa Casa 04 2026.xlsx",
+      "periodo": "04/2026",
+      "status": "ativo",
+      "sob_administracao": "ADMIN001"
+    }
+  ],
+  "resumo": {
+    "total_ames": 6,
+    "total_hospitais_diretos": 3,
+    "total_instituicoes": 10,
+    "periodo_referencia": "Abril 2026",
+    "estrutura_cnes": {
+      "administrativo": 1,
+      "ames": 6,
+      "hospitals": 1
+    }
+  },
+  "endpoints_api": {
+    "get_all_institutions": "/api/v1/institutions",
+    "get_institution": "/api/v1/institutions/{cnes}",
+    "get_ames": "/api/v1/ames",
+    "get_hospitals": "/api/v1/hospitals",
+    "get_consolidated": "/api/v1/consolidated/{type}",
+    "export_grid": "/api/v1/export/grid",
+    "export_csv": "/api/v1/export/csv",
+    "export_pdf": "/api/v1/export/pdf"
+  },
+  "filtros_disponiveis": {
+    "por_tipo": ["AME", "Hospital"],
+    "por_status": ["ativo", "inativo", "manutenção"],
+    "por_periodo": "yyyy-MM",
+    "por_cnes": "[lista de CNES válidos]"
+  },
+  "campos_exportacao": [
+    "cnes",
+    "nome",
+    "tipo",
+    "periodo",
+    "receita_total",
+    "despesas_total",
+    "resultado_liquido",
+    "margem_operacional",
+    "indices_performance"
+  ]
+}

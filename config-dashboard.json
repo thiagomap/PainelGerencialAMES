@@ -1,0 +1,210 @@
+{
+  "dashboard": {
+    "titulo": "GRID Dashboard - Power BI Style",
+    "descricao": "Análise de Fluxo de Caixa - Hospitais e AMEs",
+    "versao": "1.0",
+    "periodo": "Abril/2026",
+    "ultima_atualizacao": "2026-05-11T12:00:00Z"
+  },
+  "tema": {
+    "cor_primaria": "#667eea",
+    "cor_secundaria": "#764ba2",
+    "cor_sucesso": "#28a745",
+    "cor_warning": "#ffc107",
+    "cor_danger": "#dc3545",
+    "cor_fundo": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "fonte": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif"
+  },
+  "kpis": {
+    "receita_total": {
+      "titulo": "💰 Receita Total",
+      "descricao": "Soma de todas as receitas",
+      "formato": "moeda",
+      "classe": "success"
+    },
+    "despesa_total": {
+      "titulo": "📊 Despesa Total",
+      "descricao": "Soma de todas as despesas",
+      "formato": "moeda",
+      "classe": "warning"
+    },
+    "resultado_liquido": {
+      "titulo": "📈 Resultado Líquido",
+      "descricao": "Receita - Despesa",
+      "formato": "moeda",
+      "classe": "dynamic"
+    },
+    "margem_media": {
+      "titulo": "🎯 Margem Média",
+      "descricao": "(Resultado / Receita) × 100",
+      "formato": "percentual",
+      "classe": "dynamic"
+    }
+  },
+  "graficos": {
+    "receita_por_instituicao": {
+      "titulo": "📊 Receita por Instituição",
+      "tipo": "bar",
+      "serie": "receita",
+      "xaxis": "nome",
+      "cores": "dinamico"
+    },
+    "despesa_por_instituicao": {
+      "titulo": "💰 Despesa por Instituição",
+      "tipo": "bar",
+      "serie": "despesa",
+      "xaxis": "nome",
+      "cores": "#ffc107"
+    },
+    "resultado_por_instituicao": {
+      "titulo": "📈 Resultado por Instituição",
+      "tipo": "bar",
+      "serie": "resultado",
+      "xaxis": "nome",
+      "cores": "dinamico_pos_neg"
+    },
+    "margem_operacional": {
+      "titulo": "🎯 Margem Operacional %",
+      "tipo": "line",
+      "serie": "margem",
+      "xaxis": "nome",
+      "cores": "#667eea"
+    }
+  },
+  "filtros": {
+    "instituicao": {
+      "label": "🏥 Instituição",
+      "tipo": "select",
+      "opcoes": "dinamico_das_instituicoes"
+    },
+    "tipo": {
+      "label": "📁 Tipo",
+      "tipo": "select",
+      "opcoes": [
+        { "value": "", "label": "Todos" },
+        { "value": "AME", "label": "AMEs" },
+        { "value": "Hospital", "label": "Hospitais" }
+      ]
+    },
+    "metrica": {
+      "label": "📈 Métrica",
+      "tipo": "select",
+      "opcoes": [
+        { "value": "receita", "label": "Receita" },
+        { "value": "despesa", "label": "Despesa" },
+        { "value": "resultado", "label": "Resultado" },
+        { "value": "margem", "label": "Margem" }
+      ]
+    },
+    "periodo": {
+      "label": "📅 Período",
+      "tipo": "date",
+      "opcoes": null
+    }
+  },
+  "tabela": {
+    "titulo": "📋 Análise Detalhada - Comparativo Geral",
+    "colunas": [
+      {
+        "campo": "nome",
+        "titulo": "Instituição",
+        "largura": "200px",
+        "alinhamento": "left"
+      },
+      {
+        "campo": "tipo",
+        "titulo": "Tipo",
+        "largura": "100px",
+        "alinhamento": "center",
+        "formato": "badge"
+      },
+      {
+        "campo": "receita",
+        "titulo": "Receita",
+        "largura": "150px",
+        "alinhamento": "right",
+        "formato": "moeda"
+      },
+      {
+        "campo": "despesa",
+        "titulo": "Despesa",
+        "largura": "150px",
+        "alinhamento": "right",
+        "formato": "moeda"
+      },
+      {
+        "campo": "resultado",
+        "titulo": "Resultado",
+        "largura": "150px",
+        "alinhamento": "right",
+        "formato": "moeda_dinamico"
+      },
+      {
+        "campo": "margem",
+        "titulo": "Margem %",
+        "largura": "120px",
+        "alinhamento": "right",
+        "formato": "percentual"
+      },
+      {
+        "campo": "status",
+        "titulo": "Status",
+        "largura": "100px",
+        "alinhamento": "center",
+        "formato": "status"
+      }
+    ],
+    "ordenacao_padrao": "nome",
+    "direcao_padrao": "asc",
+    "itens_por_pagina": 20,
+    "paginacao": true
+  },
+  "formatacoes": {
+    "moeda": {
+      "locale": "pt-BR",
+      "style": "currency",
+      "currency": "BRL"
+    },
+    "percentual": {
+      "minimo_fracao": 2,
+      "maximo_fracao": 2,
+      "sufixo": "%"
+    },
+    "data": {
+      "locale": "pt-BR",
+      "formato": "DD/MM/YYYY"
+    }
+  },
+  "integracao": {
+    "tipo": "json",
+    "endpoint": "dashboard-data.json",
+    "atualizacao_automatica": false,
+    "intervalo_atualizacao_ms": 300000,
+    "cache_local": true,
+    "tempo_cache_ms": 600000
+  },
+  "seguranca": {
+    "modo_local": true,
+    "criptografar_dados": false,
+    "requer_autenticacao": false,
+    "tokens": []
+  },
+  "exportacao": {
+    "pdf": false,
+    "excel": false,
+    "csv": true,
+    "json": true,
+    "imagem": true
+  },
+  "alertas": {
+    "margem_minima": 10,
+    "margem_alerta": 15,
+    "resultado_minimo": 0,
+    "ativar_notificacoes": false
+  },
+  "performance": {
+    "compressao_grafico": true,
+    "lazy_loading": true,
+    "cache_charts": true
+  }
+}

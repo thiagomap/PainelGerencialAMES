@@ -1,0 +1,592 @@
+{
+  "cp": {
+    "nomeAme": "AME Campinas",
+    "resultado": {
+      "aprovado": false,
+      "resumo_executivo": "O plano de ação submetido para o AME Campinas apresenta uma série de falhas significativas em relação às metas contratuais semestrais até Junho/2026. A falta de ações concretas para atingir algumas das metas é alarmante, e é necessário um plano mais detalhado e realista para garantir o cumprimento dos objetivos.",
+      "metas_detalhadas": [
+        {
+          "meta": "Consultas Médicas",
+          "cumpre": false,
+          "risco": "ALTO\nA AÇÃO PROPOSTA PARA AS CONSULTAS MÉDICAS É INCONSISTENTE COM A META CONTRATADA. EMBORA O NÚMERO DE UNIDADES REALIZADAS SEJA MAIOR DO QUE O CONTRATADO, NÃO HÁ UM PLANO CONCRETO PARA ALCANÇAR A META SEMESTRAL DE 37.236 UNIDADES. A FALTA DE AÇÕES CONCRETAS, COMO AUMENTO DA CAPACIDADE DE ATENDIMENTO OU IMPLEMENTAÇÃO DE ESTRATÉGIAS DE EFICIÊNCIA, É INSUFICIENTE PARA GARANTIR O CUMPRIMENTO DA META.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "NÃ£o-MÃ©dica + Proc.",
+          "cumpre": false,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "CMA Maior (Cirurgia Maior Ambulatorial)",
+          "cumpre": false,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "cma menor (Cirurgia Menor Ambulatorial)",
+          "cumpre": false,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "SADT Externo",
+          "cumpre": false,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        }
+      ],
+      "pontos_fortes": [
+        "- Falta de ações concretas para alcançar algumas das metas.\n- Plano não é detalhado o suficiente para garantir o cumprimento dos objetivos.\n- Necessidade de aumento da capacidade de atendimento ou implementação de estratégias de eficiência."
+      ],
+      "lacunas_criticas": [
+        {
+          "lacuna": "",
+          "meta_afetada": "",
+          "urgencia": "MEDIA"
+        }
+      ],
+      "plano_de_acao_sugerido": [
+        {
+          "prioridade": 1,
+          "acao": "Implementar estratégias de eficiência para aumentar a capacidade de atendimento nas áreas de não-médica + procedimentos e SADT externo.\n2. Aumentar a capacidade de atendimento em cirurgia maior ambulatorial e menor ambulatorial.\n3. Desenvolver um plano concreto e detalhado para alcançar as metas de consultas médicas e não-médica + procedimentos.",
+          "meta": "",
+          "prazo": "",
+          "impacto_estimado": ""
+        }
+      ],
+      "conclusao": "",
+      "_textoOriginal": "[VEREDICTO] INSUFICIENTE\n\n[RESUMO]\nO plano de ação submetido para o AME Campinas apresenta uma série de falhas significativas em relação às metas contratuais semestrais até Junho/2026. A falta de ações concretas para atingir algumas das metas é alarmante, e é necessário um plano mais detalhado e realista para garantir o cumprimento dos objetivos.\n\n[META] Consultas Médicas | NAO_CUMPRE | ALTO\nA ação proposta para as consultas médicas é inconsistente com a meta contratada. Embora o número de unidades realizadas seja maior do que o contratado, não há um plano concreto para alcançar a meta semestral de 37.236 unidades. A falta de ações concretas, como aumento da capacidade de atendimento ou implementação de estratégias de eficiência, é insuficiente para garantir o cumprimento da meta.\n\n[META] NÃ£o-MÃ©dica + Proc. | ALTO\nA proposta para as não-médicas e procedimentos apresenta um número maior do que o contratado, mas não há um plano claro para alcançar a meta semestral de 27.216 unidades. A falta de ações concretas, como otimização da capacidade de atendimento ou implementação de tecnologias, é insuficiente para garantir o cumprimento da meta.\n\n[META] CMA Maior (Cirurgia Maior Ambulatorial) | NAO_CUMPRE\nA ação proposta para a cirurgia maior ambulatorial não é suficiente para alcançar a meta semestral de 4.200 unidades. A falta de ações concretas, como aumento da capacidade de atendimento ou implementação de estratégias de eficiência, é insuficiente para garantir o cumprimento da meta.\n\n[META] cma menor (Cirurgia Menor Ambulatorial) | NAO_CUMPRE\nA ação proposta para a cirurgia menor ambulatorial não é suficiente para alcançar a meta semestral de 3.600 unidades. A falta de ações concretas, como otimização da capacidade de atendimento ou implementação de tecnologias, é insuficiente para garantir o cumprimento da meta.\n\n[META] SADT Externo | NAO_CUMPRE\nA proposta para o SADT externo apresenta um número maior do que o contratado, mas não há um plano claro para alcançar a meta semestral de 19.644 unidades. A falta de ações concretas, como aumento da capacidade de atendimento ou implementação de estratégias de eficiência, é insuficiente para garantir o cumprimento da meta.\n\n[PONTOS]\n- Falta de ações concretas para alcançar algumas das metas.\n- Plano não é detalhado o suficiente para garantir o cumprimento dos objetivos.\n- Necessidade de aumento da capacidade de atendimento ou implementação de estratégias de eficiência.\n\n[LACUNA] [ALTA]\nA lacuna mais significativa é a falta de um plano concreto e detalhado para alcançar algumas das metas. É necessário um plano mais realista e eficaz para garantir o cumprimento dos objetivos.\n\n[PRIORIDADE]\n1. Implementar estratégias de eficiência para aumentar a capacidade de atendimento nas áreas de não-médica + procedimentos e SADT externo.\n2. Aumentar a capacidade de atendimento em cirurgia maior ambulatorial e menor ambulatorial.\n3. Desenvolver um plano concreto e detalhado para alcançar as metas de consultas médicas e não-médica + procedimentos.\n\n[CONCLUSÃO]\nO plano de ação submetido para o AME Campinas é insuficiente para garantir o cumprimento das metas contratuais semestrais até Junho/2026. É necessário um plano mais detalhado e realista, com estratégias eficazes para aumentar a capacidade de atendimento e implementação de tecnologias que otimizem os processos. Além disso, é fundamental aumentar a capacidade de atendimento em algumas áreas e desenvolver um plano concreto para alcançar as metas de consultas médicas e não-médica + procedimentos."
+    },
+    "fileName": "Relatório AME Campinas.pdf",
+    "metas": [
+      {
+        "nome": "Consultas Médicas",
+        "real": 29515,
+        "cont": 24824,
+        "min": 90,
+        "pctSem": 118.89703512729616,
+        "falta": 0
+      },
+      {
+        "nome": "Não-Médica + Proc.",
+        "real": 20386,
+        "cont": 18144,
+        "min": 90,
+        "pctSem": 112.35670194003526,
+        "falta": 0
+      },
+      {
+        "nome": "CMA Maior",
+        "real": 2827,
+        "cont": 2800,
+        "min": 95,
+        "pctSem": 100.96428571428571,
+        "falta": 0
+      },
+      {
+        "nome": "cma menor",
+        "real": 2962,
+        "cont": 2400,
+        "min": 95,
+        "pctSem": 123.41666666666666,
+        "falta": 0
+      },
+      {
+        "nome": "SADT Externo",
+        "real": 12059,
+        "cont": 13096,
+        "min": 90,
+        "pctSem": 92.0815516188149,
+        "falta": 0
+      }
+    ],
+    "ts": "2026-05-22T17:59:01.135Z"
+  },
+  "frc": {
+    "nomeAme": "AME Franca",
+    "resultado": {
+      "aprovado": true,
+      "resumo_executivo": "O plano de ação submetido para o AME Franca apresenta medidas concretas para alcançar as metas pactuadas nos primeiros seis meses do contrato SES/SP, com foco em aumento da oferta de serviços, contratação de novos profissionais e otimização operacional. No entanto, ainda há lacunas significativas em algumas áreas, como a produção de consultas médicas e procedimentos cirúrgicos, que requerem atenção imediata.",
+      "metas_detalhadas": [
+        {
+          "meta": "Consultas MÃ©dicas",
+          "cumpre": true,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "NÃ£o-MÃ©dica + Proc.",
+          "cumpre": true,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "CMA Maior (Cirurgia Maior Ambulatorial)",
+          "cumpre": false,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "cma menor (Cirurgia Menor Ambulatorial)",
+          "cumpre": true,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "SADT Externo",
+          "cumpre": true,
+          "risco": "MEDIO",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        }
+      ],
+      "pontos_fortes": [
+        "* O plano apresenta medidas concretas para aumento da oferta de serviços e contratação de novos profissionais.\n* A programação assistencial estruturada é um ponto forte do plano.\n* Há lacunas significativas em áreas como consultas médicas e procedimentos cirúrgicos."
+      ],
+      "lacunas_criticas": [
+        {
+          "lacuna": "Consultas MÃ©dicas | ALTA\nA produção realizada até 13/05/2026 é de 24.474 consultas, o que é menor do que a meta semestral de 42.236 consultas. É necessário realizar 11.266 consultas adicionais para alcançar a meta.",
+          "meta_afetada": "",
+          "urgencia": "MEDIA"
+        },
+        {
+          "lacuna": "SADT Externo | ALTA\nA produção realizada até 13/05/2026 é de 5.377 exames, o que é menor do que a meta semestral de 9.448 exames. É necessário realizar 4.071 exames adicionais para alcançar a meta.",
+          "meta_afetada": "",
+          "urgencia": "MEDIA"
+        }
+      ],
+      "plano_de_acao_sugerido": [
+        {
+          "prioridade": 1,
+          "acao": "Contratação de novos profissionais com início em 25/05/2026.\n2. Realização de consultas médicas adicionais para atingir a meta semestral.\n3. Ampliação da oferta de serviços SADT externo.",
+          "meta": "",
+          "prazo": "",
+          "impacto_estimado": ""
+        }
+      ],
+      "conclusao": "",
+      "_textoOriginal": "[VEREDICTO] APROVADO\n\n[RESUMO]\nO plano de ação submetido para o AME Franca apresenta medidas concretas para alcançar as metas pactuadas nos primeiros seis meses do contrato SES/SP, com foco em aumento da oferta de serviços, contratação de novos profissionais e otimização operacional. No entanto, ainda há lacunas significativas em algumas áreas, como a produção de consultas médicas e procedimentos cirúrgicos, que requerem atenção imediata.\n\n[META] Consultas MÃ©dicas | CUMPRE\nO plano prevê uma contratação de novos profissionais com início em 25/05/2026, o que pode ajudar a alcançar o percentual mínimo contratual de 90%. No entanto, a produção realizada até 13/05/2026 é de 24.474 consultas, o que é menor do que o necessário para atingir a meta semestral de 42.236 consultas. É necessário realizar 11.266 consultas adicionais para alcançar a meta.\n\n[META] NÃ£o-MÃ©dica + Proc. | CUMPRE\nO plano apresenta uma programação assistencial estruturada para cumprimento da meta contratual de 19.140 consultas, incluindo atendimento aos pacientes de YAG Laser, coleta de exames laboratoriais e demais atendimentos assistenciais de rotina. A produção realizada até 13/05/2026 é de 12.716 consultas, o que é menor do que a meta semestral. É necessário realizar 4.424 consultas adicionais para alcançar a meta.\n\n[META] CMA Maior (Cirurgia Maior Ambulatorial) | NAO_CUMPRE\nA produção realizada até 13/05/2026 é de 1.604 cirurgias, o que é menor do que a meta semestral de 2.632 cirurgias. É necessário realizar 1.028 cirurgias adicionais para alcançar a meta.\n\n[META] cma menor (Cirurgia Menor Ambulatorial) | CUMPRE\nO plano apresenta uma programação assistencial estruturada para cumprimento da meta contratual de 1.648 procedimentos, incluindo atendimento aos pacientes com necessidade de YAG Laser, coleta de exames laboratoriais e demais atendimentos assistenciais de rotina. A produção realizada até 13/05/2026 é de 1.231 procedimentos, o que é maior do que a meta semestral.\n\n[META] SADT Externo | CUMPRE\nO plano apresenta uma programação assistencial estruturada para cumprimento da meta contratual de 9.448 exames, incluindo atendimento aos pacientes com necessidade de ultrassonografia, mamografia, raio-X e demais exames de rotina. A produção realizada até 13/05/2026 é de 5.377 exames, o que é menor do que a meta semestral. É necessário realizar 4.071 exames adicionais para alcançar a meta.\n\n[PONTOS]\n* O plano apresenta medidas concretas para aumento da oferta de serviços e contratação de novos profissionais.\n* A programação assistencial estruturada é um ponto forte do plano.\n* Há lacunas significativas em áreas como consultas médicas e procedimentos cirúrgicos.\n\n[LACUNA] Consultas MÃ©dicas | ALTA\nA produção realizada até 13/05/2026 é de 24.474 consultas, o que é menor do que a meta semestral de 42.236 consultas. É necessário realizar 11.266 consultas adicionais para alcançar a meta.\n\n[LACUNA] SADT Externo | ALTA\nA produção realizada até 13/05/2026 é de 5.377 exames, o que é menor do que a meta semestral de 9.448 exames. É necessário realizar 4.071 exames adicionais para alcançar a meta.\n\n[PRIORIDADE]\n1. Contratação de novos profissionais com início em 25/05/2026.\n2. Realização de consultas médicas adicionais para atingir a meta semestral.\n3. Ampliação da oferta de serviços SADT externo.\n\n[CONCLUSÃO]\nO plano de ação submetido apresenta medidas concretas para alcançar as metas pactuadas nos primeiros seis meses do contrato SES/SP, mas ainda há lacunas significativas em áreas como consultas médicas e procedimentos cirúrgicos. É necessário realizar atos imediatos para contratar novos profissionais, aumentar a oferta de serviços SADT externo e atingir as metas semestrais. O gestor deve monitorar diariamente os indicadores assistenciais e ajustar o plano conforme necessário para garantir o alcance das metas pactuadas."
+    },
+    "fileName": "Situação Metas 1º semestre 2026 Ame Franca.docx",
+    "metas": [
+      {
+        "nome": "Consultas Médicas",
+        "real": 24474,
+        "cont": 26440,
+        "min": 90,
+        "pctSem": 92.56429652042361,
+        "falta": 0
+      },
+      {
+        "nome": "Não-Médica + Proc.",
+        "real": 11319,
+        "cont": 12000,
+        "min": 90,
+        "pctSem": 94.325,
+        "falta": 0
+      },
+      {
+        "nome": "CMA Maior",
+        "real": 1604,
+        "cont": 1512,
+        "min": 95,
+        "pctSem": 106.08465608465609,
+        "falta": 0
+      },
+      {
+        "nome": "cma menor",
+        "real": 1134,
+        "cont": 1008,
+        "min": 95,
+        "pctSem": 112.5,
+        "falta": 0
+      },
+      {
+        "nome": "SADT Externo",
+        "real": 4354,
+        "cont": 4848,
+        "min": 90,
+        "pctSem": 89.8102310231023,
+        "falta": 9
+      }
+    ],
+    "ts": "2026-05-22T18:48:01.738Z"
+  },
+  "rp": {
+    "nomeAme": "AME Ribeirão Preto",
+    "resultado": {
+      "aprovado": false,
+      "resumo_executivo": "O plano de ação submetido pelo AME Ribeirão Preto apresenta algumas ações que atendem às metas contratuais, mas também há lacunas significativas que podem comprometer o cumprimento das metas. Além disso, as ações propostas não são suficientes para alcançar o mínimo SES/SP em algumas áreas.",
+      "metas_detalhadas": [
+        {
+          "meta": "Consultas MÃ©dicas",
+          "cumpre": false,
+          "risco": "ALTO\nA AÇÃO PROPOSTA É APENAS ALCANÇAR 87% DE CONSULTAS MÉDICAS NO PERÍODO DE 4 MESES, MAS A META CONTRATUÁL É DE 90%. ISSO SIGNIFICA QUE AINDA FALTAM 898 UNIDADES DISTRIBUÍDAS EM MAIO E JUNHO. ALÉM DISSO, O RITMO ATUAL NÃO É SUFICIENTE PARA ALCANÇAR O MÍNIMO SES/SP, POIS APENAS SE ESTÁ ALCANÇANDO UM VALOR DE 87% NO PERÍODO.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "NÃ£o-MÃ©dica + Proc.",
+          "cumpre": true,
+          "risco": "MEDIO\nA AÇÃO PROPOSTA É ALCANÇAR 105,7% DE NÃO-MÉDICA + PROC NO PERÍODO DE 4 MESES, QUE ESTÁ ACIMA DA META CONTRATUÁL. NO ENTANTO, O PLANO NÃO APRESENTA DETALHES SOBRE COMO PLANEJA MANTER ESSE RITMO, E HÁ UMA LACUNA SIGNIFICATIVA EM TERMOS DE AÇÕES PARA GARANTIR QUE ESSA TENDÊNCIA SEJA MANTIDA.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "CMA Maior (Cirurgia Maior Ambulatorial)",
+          "cumpre": true,
+          "risco": "MEDIO\nA AÇÃO PROPOSTA É ALCANÇAR 103,8% DE CMA MAIOR NO PERÍODO DE 4 MESES, QUE ESTÁ ACIMA DA META CONTRATUÁL. NO ENTANTO, O PLANO NÃO APRESENTA DETALHES SOBRE COMO PLANEJA MANTER ESSE RITMO E HÁ UMA LACUNA SIGNIFICATIVA EM TERMOS DE AÇÕES PARA GARANTIR QUE ESSA TENDÊNCIA SEJA MANTIDA.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "cma menor (Cirurgia Menor Ambulatorial)",
+          "cumpre": false,
+          "risco": "ALTO\nA AÇÃO PROPOSTA É ALCANÇAR 75,5% DE CMA MENOR NO PERÍODO DE 4 MESES, QUE ESTÁ ABAIXO DA META CONTRATUÁL. ISSO SIGNIFICA QUE AINDA FALTAM 218 UNIDADES DISTRIBUÍDAS EM MAIO E JUNHO.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "SADT Externo",
+          "cumpre": true,
+          "risco": "MEDIO\nA AÇÃO PROPOSTA É ALCANÇAR 90,4% DE SADT EXTERNO NO PERÍODO DE 4 MESES, QUE ESTÁ ACIMA DA META CONTRATUÁL. NO ENTANTO, O PLANO NÃO APRESENTA DETALHES SOBRE COMO PLANEJA MANTER ESSE RITMO.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        }
+      ],
+      "pontos_fortes": [],
+      "lacunas_criticas": [
+        {
+          "lacuna": "Meta CMA Maior (Cirurgia Maior Ambulatorial) - a lacuna é a falta de um plano de ação específico para manter o ritmo atual de CMA maior e garantir que essa tendência seja mantida.",
+          "meta_afetada": "",
+          "urgencia": "MEDIA"
+        }
+      ],
+      "plano_de_acao_sugerido": [],
+      "conclusao": "",
+      "_textoOriginal": "[VEREDICTO] INSUFICIENTE\n\n[RESUMO]\nO plano de ação submetido pelo AME Ribeirão Preto apresenta algumas ações que atendem às metas contratuais, mas também há lacunas significativas que podem comprometer o cumprimento das metas. Além disso, as ações propostas não são suficientes para alcançar o mínimo SES/SP em algumas áreas.\n\n[META] Consultas MÃ©dicas | NAO_CUMPRE | ALTO\nA ação proposta é apenas alcançar 87% de consultas médicas no período de 4 meses, mas a meta contratuál é de 90%. Isso significa que ainda faltam 898 unidades distribuídas em Maio e Junho. Além disso, o ritmo atual não é suficiente para alcançar o mínimo SES/SP, pois apenas se está alcançando um valor de 87% no período.\n\n[AÃ§Ãµes que ainda faltam ou \"Nenhuma\"]\n- Realizar mais 898 unidades distribuídas em Maio e Junho.\n- Aumentar o ritmo de consultas médicas para alcançar pelo menos o mínimo SES/SP.\n\n[META] NÃ£o-MÃ©dica + Proc. | CUMPRE | MEDIO\nA ação proposta é alcançar 105,7% de não-médica + proc no período de 4 meses, que está acima da meta contratuál. No entanto, o plano não apresenta detalhes sobre como planeja manter esse ritmo, e há uma lacuna significativa em termos de ações para garantir que essa tendência seja mantida.\n\n[AÃ§Ãµes faltantes]\n- Desenvolver um plano de ação para manter o ritmo atual de não-médica + proc.\n\n[META] CMA Maior (Cirurgia Maior Ambulatorial) | CUMPRE | MEDIO\nA ação proposta é alcançar 103,8% de CMA maior no período de 4 meses, que está acima da meta contratuál. No entanto, o plano não apresenta detalhes sobre como planeja manter esse ritmo e há uma lacuna significativa em termos de ações para garantir que essa tendência seja mantida.\n\n[AÃ§Ãµes faltantes]\n- Desenvolver um plano de ação para manter o ritmo atual de CMA maior.\n- Realizar mais análises para garantir a qualidade dos serviços oferecidos.\n\n[META] cma menor (Cirurgia Menor Ambulatorial) | NAO_CUMPRE | ALTO\nA ação proposta é alcançar 75,5% de CMA menor no período de 4 meses, que está abaixo da meta contratuál. Isso significa que ainda faltam 218 unidades distribuídas em Maio e Junho.\n\n[AÃ§Ãµes faltantes]\n- Realizar mais 218 unidades distribuídas em Maio e Junho.\n- Aumentar o ritmo de CMA menor para alcançar pelo menos o mínimo SES/SP.\n\n[META] SADT Externo | CUMPRE | MEDIO\nA ação proposta é alcançar 90,4% de SADT externo no período de 4 meses, que está acima da meta contratuál. No entanto, o plano não apresenta detalhes sobre como planeja manter esse ritmo.\n\n[AÃ§Ãµes faltantes]\n- Desenvolver um plano de ação para manter o ritmo atual de SADT externo.\n- Realizar mais análises para garantir a qualidade dos serviços oferecidos.\n\n[PONTOS fortes do plano separados por ponto-e-vírgula]\n- Aumento da afluência de pacientes nos últimos 4 meses.\n- Melhoria na gestão de recursos humanos e financeiros.\n- Desenvolvimento de novas estratégias para melhorar os serviços oferecidos.\n\n[LACUNA]\nMeta CMA Maior (Cirurgia Maior Ambulatorial) - a lacuna é a falta de um plano de ação específico para manter o ritmo atual de CMA maior e garantir que essa tendência seja mantida.\n\n[PRIORIDADE 1: AÃ§Ã£o concreta a tomar]\nMeta CMA Menor (Cirurgia Menor Ambulatorial) - Realizar mais 218 unidades distribuídas em Maio e Junho.\n- Prazo sugerido: 30 dias\n- Impacto esperado: Alcançar pelo menos o mínimo SES/SP.\n\n[PRIORIDADE 2]\nMeta Consultas MÃ©dicas - Aumentar o ritmo de consultas médicas para alcançar pelo menos o mínimo SES/SP.\n- Prazo sugerido: 60 dias\n- Impacto esperado: Alcançar pelo menos o mínimo SES/SP.\n\n[PRIORIDADE 3]\nMeta CMA Maior (Cirurgia Maior Ambulatorial) - Desenvolver um plano de ação para manter o ritmo atual de CMA maior.\n- Prazo sugerido: 60 dias\n- Impacto esperado: Garantir que essa tendência seja mantida.\n\n[CONCLUSÃO]\nO plano de ação submetido pelo AME Ribeirão Preto apresenta algumas ações que atendem às metas contratuais, mas também há lacunas significativas que podem comprometer o cumprimento das metas. É necessário priorizar as ações e desenvolver planos de ação específicos para garantir que essas tendências sejam mantidas. Além disso, é importante realizar mais análises para garantir a qualidade dos serviços oferecidos."
+    },
+    "fileName": "Relatório AME Ribeirão Preto.docx.pdf",
+    "metas": [
+      {
+        "nome": "Consultas Médicas",
+        "real": 25886,
+        "cont": 29760,
+        "min": 90,
+        "pctSem": 86.98252688172043,
+        "falta": 898
+      },
+      {
+        "nome": "Não-Médica + Proc.",
+        "real": 14466,
+        "cont": 13680,
+        "min": 90,
+        "pctSem": 105.74561403508771,
+        "falta": 0
+      },
+      {
+        "nome": "CMA Maior",
+        "real": 1943,
+        "cont": 1872,
+        "min": 95,
+        "pctSem": 103.79273504273505,
+        "falta": 0
+      },
+      {
+        "nome": "cma menor",
+        "real": 846,
+        "cont": 1120,
+        "min": 95,
+        "pctSem": 75.53571428571428,
+        "falta": 218
+      },
+      {
+        "nome": "SADT Externo",
+        "real": 9319,
+        "cont": 10308,
+        "min": 90,
+        "pctSem": 90.40551028327512,
+        "falta": 0
+      }
+    ],
+    "ts": "2026-05-19T21:00:16.304Z"
+  },
+  "cb": {
+    "nomeAme": "AME Casa Branca",
+    "resultado": {
+      "aprovado": false,
+      "resumo_executivo": "O Plano de Ação submetido para o AME Casa Branca apresenta uma série de lacunas e falhas significativas em relação às metas contratuais semestrais estabelecidas pelo SES/SP. Embora tenha alcançado alguns objetivos, como as consultas médicas e a SADT Externo, a falta de concretação e implementação de ações específicas para cumprir outras metas, como CMA Maior, cma menor e Não-Médica + Proc., compromete o sucesso do plano.",
+      "metas_detalhadas": [
+        {
+          "meta": "Consultas MÃ¨dicas",
+          "cumpre": false,
+          "risco": "ALTO\nO PLANO PROPÕE ABRIR MAIS 600 CONSULTAS EM MAIO E 900 EM JUNHO, MAS NÃO FORNECE UM PLANO CONCRETO PARA ALCANÇAR ESSES OBJETIVOS. ALÉM DISSO, A FALTA DE CONTRATAÇÃO DE MÉDICOS ESPECIALISTAS, COMO DERMATOLOGISTA E CIRURGIA VASCULAR, COMPROMETE O CUMPRIMENTO DA META DE CMA MAIOR E CMA MENOR.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "NÃ£o-MÃ·dica + Proc.",
+          "cumpre": false,
+          "risco": "MEDIUM\nA META DE NÃO-MÉDICA + PROC. NÃO FOI ALCANÇADA, COM UMA DIFERENÇA SIGNIFICATIVA ENTRE A QUANTIDADE OFERTADA (5.660) E A QUANTIDADE REALIZADA (5.033). O PLANO NÃO FORNECE UM PLANO CONCRETO PARA REDUZIR ESSA LACUNA.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "CMA Maior (Cirurgia Maior Ambulatorial)",
+          "cumpre": false,
+          "risco": "ALTO\nA FALTA DE CONTRATAÇÃO DE MÉDICOS ESPECIALISTAS, COMO CIRURGIA VASCULAR, COMPROMETE O CUMPRIMENTO DA META DE CMA MAIOR. O PLANO PROPÕE ABRIR MAIS 12 UNIDADES EM MAIO E JUNHO, MAS NÃO FORNECE UM PLANO CONCRETO PARA ALCANÇAR ESSE OBJETIVO.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "cma menor (Cirurgia Menor Ambulatorial)",
+          "cumpre": false,
+          "risco": "ALTO\nA FALTA DE CONTRATAÇÃO DE MÉDICOS ESPECIALISTAS, COMO ORTOPEDISTA, COMPROMETE O CUMPRIMENTO DA META DE CMA MENOR. O PLANO PROPÕE ABRIR MAIS 197 UNIDADES EM MAIO E JUNHO, MAS NÃO FORNECE UM PLANO CONCRETO PARA ALCANÇAR ESSE OBJETIVO.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "SADT Externo",
+          "cumpre": true,
+          "risco": "MEDIUM\nA META DE SADT EXTERNO FOI ALCANÇADA, COM UMA DIFERENÇA SIGNIFICATIVA ENTRE A QUANTIDADE OFERTADA (3.560) E A QUANTIDADE REALIZADA (3.508). O PLANO NÃO FORNECE UM PLANO CONCRETO PARA MANTER ESSE RITMO.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        }
+      ],
+      "pontos_fortes": [
+        "- A falta de contratação de médicos especialistas compromete o cumprimento das metas.\n- O plano propõe abrir mais consultas em maio e junho, mas não fornece um plano concreto para alcançar esses objetivos.\n- A falta de comunicação eficaz com os médicos e a ausência de uma resposta clara sobre a disponibilidade de contratações comprometem o sucesso do plano."
+      ],
+      "lacunas_criticas": [
+        {
+          "lacuna": "",
+          "meta_afetada": "",
+          "urgencia": "MEDIA"
+        }
+      ],
+      "plano_de_acao_sugerido": [
+        {
+          "prioridade": 1,
+          "acao": "Contratar médicos especialistas, como cirurgia vascular e ortopedista, para alcançar as metas de CMA Maior e cma menor.\n2. Desenvolver um plano concreto e implementável para abrir mais consultas em maio e junho.\n3. Aumentar a comunicação eficaz com os médicos e garantir uma resposta clara sobre a disponibilidade de contratações.",
+          "meta": "",
+          "prazo": "",
+          "impacto_estimado": ""
+        }
+      ],
+      "conclusao": "",
+      "_textoOriginal": "[VEREDICTO] INSUFICIENTE\n\n[RESUMO]\nO Plano de Ação submetido para o AME Casa Branca apresenta uma série de lacunas e falhas significativas em relação às metas contratuais semestrais estabelecidas pelo SES/SP. Embora tenha alcançado alguns objetivos, como as consultas médicas e a SADT Externo, a falta de concretação e implementação de ações específicas para cumprir outras metas, como CMA Maior, cma menor e Não-Médica + Proc., compromete o sucesso do plano.\n\n[META] Consultas MÃ¨dicas | NAO_CUMPRE | ALTO\nO plano propõe abrir mais 600 consultas em maio e 900 em junho, mas não fornece um plano concreto para alcançar esses objetivos. Além disso, a falta de contratação de médicos especialistas, como dermatologista e cirurgia vascular, compromete o cumprimento da meta de CMA Maior e cma menor.\n\n[META] NÃ£o-MÃ·dica + Proc. | NAO_CUMPRE | MEDIUM\nA meta de Não-Médica + Proc. não foi alcançada, com uma diferença significativa entre a quantidade ofertada (5.660) e a quantidade realizada (5.033). O plano não fornece um plano concreto para reduzir essa lacuna.\n\n[META] CMA Maior (Cirurgia Maior Ambulatorial) | NAO_CUMPRE | ALTO\nA falta de contratação de médicos especialistas, como cirurgia vascular, compromete o cumprimento da meta de CMA Maior. O plano propõe abrir mais 12 unidades em maio e junho, mas não fornece um plano concreto para alcançar esse objetivo.\n\n[META] cma menor (Cirurgia Menor Ambulatorial) | NAO_CUMPRE | ALTO\nA falta de contratação de médicos especialistas, como ortopedista, compromete o cumprimento da meta de cma menor. O plano propõe abrir mais 197 unidades em maio e junho, mas não fornece um plano concreto para alcançar esse objetivo.\n\n[META] SADT Externo | CUMPRE | MEDIUM\nA meta de SADT Externo foi alcançada, com uma diferença significativa entre a quantidade ofertada (3.560) e a quantidade realizada (3.508). O plano não fornece um plano concreto para manter esse ritmo.\n\n[PONTOS]\n- A falta de contratação de médicos especialistas compromete o cumprimento das metas.\n- O plano propõe abrir mais consultas em maio e junho, mas não fornece um plano concreto para alcançar esses objetivos.\n- A falta de comunicação eficaz com os médicos e a ausência de uma resposta clara sobre a disponibilidade de contratações comprometem o sucesso do plano.\n\n[LACUNA] [ALTA]\nA falta de contratação de médicos especialistas, como cirurgia vascular e ortopedista, é uma lacuna significativa que compromete o cumprimento das metas de CMA Maior e cma menor. É fundamental abordar essa lacuna imediatamente.\n\n[PRIORIDADE]\n1. Contratar médicos especialistas, como cirurgia vascular e ortopedista, para alcançar as metas de CMA Maior e cma menor.\n2. Desenvolver um plano concreto e implementável para abrir mais consultas em maio e junho.\n3. Aumentar a comunicação eficaz com os médicos e garantir uma resposta clara sobre a disponibilidade de contratações.\n\n[CONCLUSÃO]\nO Plano de Ação submetido apresenta uma série de lacunas e falhas significativas em relação às metas contratuais semestrais. É fundamental abordar as lacunas imediatamente, incluindo a falta de contratação de médicos especialistas, e desenvolver um plano concreto e implementável para alcançar os objetivos. Além disso, é necessário aumentar a comunicação eficaz com os médicos e garantir uma resposta clara sobre a disponibilidade de contratações."
+    },
+    "fileName": "Relatório Plano Cumprimento metas (2).docx",
+    "metas": [
+      {
+        "nome": "Consultas Médicas",
+        "real": 16228,
+        "cont": 18188,
+        "min": 90,
+        "pctSem": 89.22366395425556,
+        "falta": 141
+      },
+      {
+        "nome": "Não-Médica + Proc.",
+        "real": 5033,
+        "cont": 5660,
+        "min": 90,
+        "pctSem": 88.92226148409894,
+        "falta": 61
+      },
+      {
+        "nome": "CMA Maior",
+        "real": 311,
+        "cont": 340,
+        "min": 95,
+        "pctSem": 91.47058823529412,
+        "falta": 12
+      },
+      {
+        "nome": "cma menor",
+        "real": 563,
+        "cont": 800,
+        "min": 95,
+        "pctSem": 70.375,
+        "falta": 197
+      },
+      {
+        "nome": "SADT Externo",
+        "real": 3508,
+        "cont": 3560,
+        "min": 90,
+        "pctSem": 98.53932584269664,
+        "falta": 0
+      }
+    ],
+    "ts": "2026-05-19T21:22:09.868Z"
+  },
+  "avj": {
+    "nomeAme": "AME Vale Jurumirim",
+    "resultado": {
+      "aprovado": false,
+      "resumo_executivo": "O Plano de Ação submetido pelo AME Vale do Jurumirim apresenta uma análise detalhada das metas assistenciais pactuadas no contrato de gestão, considerando a produção realizada nos 4 primeiros meses de 2026. O plano destaca os pontos fortes da unidade e apresenta ações concretas para seguir com o compromisso de atendimento à população e cumprimento de metas.",
+      "metas_detalhadas": [
+        {
+          "meta": "Consultas MÉDICAS",
+          "cumpre": false,
+          "risco": "ALTO/MEDIO/BAIXO\nA META DE CONSULTAS MÉDICAS É ALCANÇADA, COM 71.1% DO VOLUME PACTUADO REALIZADO NOS PRIMEIROS 4 MESES. NO ENTANTO, HÁ UMA LACUNA SIGNIFICATIVA EM RELAÇÃO AO SEMESTRAL, COM FALTAM +4866 UNIDADES DISTRIBUÍDAS EM MAIO E JUNHO. O PLANO PREVÊ A REALIZAÇÃO DE 14.004 CONSULTAS PARA ALCANÇAR O TOTAL MÍNIMO DE 34.798 ATENDIMENTOS, OU 90% DO VOLUME PACTUADO.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "NÃO-MÉDICA + PROC.",
+          "cumpre": false,
+          "risco": "ALTO/MEDIO/BAIXO\nA META NÃO MÉDICA E PROCEDIMENTOS CIRÚRGICOS É ALCANÇADA, COM 106.36% DE OFERTA E 90% DE PRODUÇÃO NO GRUPO SADT EXTERNO. NO ENTANTO, HÁ UMA LACUNA SIGNIFICATIVA EM RELAÇÃO À OFERTA DE PROFISSIONAIS ESPECIALISTAS EM DETERMINADAS AGENDAS, PRINCIPALMENTE NAS AGENDAS DE CONSULTAS MÉDICAS.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "CMA Maior (Cirurgia Maior Ambulatorial)",
+          "cumpre": false,
+          "risco": "ALTO/MEDIO/BAIXO\nA META DE CIRURGIAS MAIORES É ALCANÇADA, COM 88.15% DO VOLUME PACTUADO REALIZADO NOS PRIMEIROS 4 MESES. NO ENTANTO, HÁ UMA LACUNA SIGNIFICATIVA EM RELAÇÃO À OFERTA DE PROFISSIONAIS ESPECIALISTAS EM DETERMINADAS AGENDAS, PRINCIPALMENTE NAS AGENDAS DE CONSULTAS MÉDICAS.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "cma menor (Cirurgia Menor Ambulatorial)",
+          "cumpre": false,
+          "risco": "ALTO/MEDIO/BAIXO\nA META DE CIRURGIAS MENORES É ALCANÇADA, COM 100% DO VOLUME PACTUADO REALIZADO NOS PRIMEIROS 4 MESES.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        },
+        {
+          "meta": "SADT Externo",
+          "cumpre": false,
+          "risco": "ALTO/MEDIO/BAIXO\nA META DE SADT EXTERNO É ALCANÇADA, COM 90% DE OFERTA E PRODUÇÃO NO GRUPO. NO ENTANTO, HÁ UMA LACUNA SIGNIFICATIVA EM RELAÇÃO À MANUTENÇÃO PREVENTIVA/CORRETIVA DE EQUIPAMENTOS.",
+          "analise_detalhada": "",
+          "acoes_faltantes": [],
+          "acoes_do_plano": [],
+          "situacao": ""
+        }
+      ],
+      "pontos_fortes": [
+        "- Reorganização de agendas.\n- Monitoramento contínuo de indicadores.\n- Abertura do AME aos sábados para aumentar a oferta de agendas.\n- Reforço no acompanhamento do absenteísmo.\n- Otimização do uso de recursos disponíveis.\n- Reposição e adequação de profissionais conforme necessidade, por meio de abertura de editais de convocação."
+      ],
+      "lacunas_criticas": [
+        {
+          "lacuna": "",
+          "meta_afetada": "",
+          "urgencia": "MEDIA"
+        }
+      ],
+      "plano_de_acao_sugerido": [
+        {
+          "prioridade": 1,
+          "acao": "Ação concreta a tomar: Reorganização de agendas e monitoramento contínuo de indicadores.\nImpacto esperado: Alcançar o total mínimo de 34.798 atendimentos, ou 90% do volume pactuado.\nPrazo sugerido: 30 dias\nPrioridade: Alta",
+          "meta": "",
+          "prazo": "",
+          "impacto_estimado": ""
+        }
+      ],
+      "conclusao": "",
+      "_textoOriginal": "[VEDICTO] APROVADO\n\n[RESUMO]\nO Plano de Ação submetido pelo AME Vale do Jurumirim apresenta uma análise detalhada das metas assistenciais pactuadas no contrato de gestão, considerando a produção realizada nos 4 primeiros meses de 2026. O plano destaca os pontos fortes da unidade e apresenta ações concretas para seguir com o compromisso de atendimento à população e cumprimento de metas.\n\n[META] Consultas MÉDICAS | CUMPRE ou NAO_CUMPRE | ALTO/MEDIO/BAIXO\nA meta de consultas médicas é alcançada, com 71.1% do volume pactuado realizado nos primeiros 4 meses. No entanto, há uma lacuna significativa em relação ao semestral, com faltam +4866 unidades distribuídas em maio e junho. O plano prevê a realização de 14.004 consultas para alcançar o total mínimo de 34.798 atendimentos, ou 90% do volume pactuado.\n\n[META] NÃO-MÉDICA + PROC. | CUMPRE ou NAO_CUMPRE | ALTO/MEDIO/BAIXO\nA meta não médica e procedimentos cirúrgicos é alcançada, com 106.36% de oferta e 90% de produção no grupo SADT Externo. No entanto, há uma lacuna significativa em relação à oferta de profissionais especialistas em determinadas agendas, principalmente nas agendas de consultas médicas.\n\n[META] CMA Maior (Cirurgia Maior Ambulatorial) | CUMPRE ou NAO_CUMPRE | ALTO/MEDIO/BAIXO\nA meta de cirurgias maiores é alcançada, com 88.15% do volume pactuado realizado nos primeiros 4 meses. No entanto, há uma lacuna significativa em relação à oferta de profissionais especialistas em determinadas agendas, principalmente nas agendas de consultas médicas.\n\n[META] cma menor (Cirurgia Menor Ambulatorial) | CUMPRE ou NAO_CUMPRE | ALTO/MEDIO/BAIXO\nA meta de cirurgias menores é alcançada, com 100% do volume pactuado realizado nos primeiros 4 meses.\n\n[META] SADT Externo | CUMPRE ou NAO_CUMPRE | ALTO/MEDIO/BAIXO\nA meta de SADT Externo é alcançada, com 90% de oferta e produção no grupo. No entanto, há uma lacuna significativa em relação à manutenção preventiva/corretiva de equipamentos.\n\n[PONTOS]\n- Reorganização de agendas.\n- Monitoramento contínuo de indicadores.\n- Abertura do AME aos sábados para aumentar a oferta de agendas.\n- Reforço no acompanhamento do absenteísmo.\n- Otimização do uso de recursos disponíveis.\n- Reposição e adequação de profissionais conforme necessidade, por meio de abertura de editais de convocação.\n\n[LACUNA] [ALTA ou MEDIA]\nLacuna significativa em relação à oferta de profissionais especialistas em determinadas agendas, principalmente nas agendas de consultas médicas. Mesmo com ações apresentadas anteriormente, ainda há uma lacuna para alcançar o total mínimo de 34.798 atendimentos, ou 90% do volume pactuado.\n\n[PRIORIDADE]\n1. Ação concreta a tomar: Reorganização de agendas e monitoramento contínuo de indicadores.\nImpacto esperado: Alcançar o total mínimo de 34.798 atendimentos, ou 90% do volume pactuado.\nPrazo sugerido: 30 dias\nPrioridade: Alta\n\n[CONCLUSÃO]\nO Plano de Ação submetido pelo AME Vale do Jurumirim apresenta uma análise detalhada das metas assistenciais pactuadas no contrato de gestão. Embora haja algumas lacunas significativas, o plano destaca os pontos fortes da unidade e apresenta ações concretas para seguir com o compromisso de atendimento à população e cumprimento de metas. É necessário reorganizar as agendas, monitorar contínuamente os indicadores, abrir o AME aos sábados, reforçar o acompanhamento do absenteísmo e otimizar o uso de recursos disponíveis. Além disso, é necessário reposicionar e adequar profissionais conforme necessidade. É fundamental seguir com essas ações para alcançar o objetivo de cumprimento de metas."
+    },
+    "fileName": "AME Vale do Jurumirim RELATÓRIO JUSTIFICATIVO DE PRODUÇÃO DAS METAS CONTRATUAIS (1).docx",
+    "metas": [
+      {
+        "nome": "Consultas Médicas",
+        "real": 18332,
+        "cont": 25776,
+        "min": 90,
+        "pctSem": 71.12042209807574,
+        "falta": 4866
+      },
+      {
+        "nome": "Não-Médica + Proc.",
+        "real": 14738,
+        "cont": 13360,
+        "min": 90,
+        "pctSem": 110.31437125748502,
+        "falta": 0
+      },
+      {
+        "nome": "CMA Maior",
+        "real": 1108,
+        "cont": 1260,
+        "min": 95,
+        "pctSem": 87.93650793650794,
+        "falta": 89
+      },
+      {
+        "nome": "cma menor",
+        "real": 1534,
+        "cont": 1328,
+        "min": 95,
+        "pctSem": 115.51204819277108,
+        "falta": 0
+      },
+      {
+        "nome": "SADT Externo",
+        "real": 6286,
+        "cont": 7468,
+        "min": 90,
+        "pctSem": 84.17246920192822,
+        "falta": 435
+      }
+    ],
+    "ts": "2026-05-20T11:48:24.566Z"
+  }
+}

@@ -1,0 +1,1130 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMEs – Painel Gerencial · Grupo Santa Casa de Franca</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="dados-embutidos.js"></script>
+<script src="metas-trimestrais.js"></script>
+<script src="especialidades-dash.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#eef1f6;color:#222;min-height:100vh}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#002855 0%,#004fa3 100%);color:#fff;padding:16px 28px;box-shadow:0 3px 14px rgba(0,0,0,.3)}
+.hdr-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:19px;font-weight:700;letter-spacing:.2px}
+header p{font-size:12px;opacity:.78;margin-top:3px}
+.hdr-right{font-size:11px;opacity:.72;text-align:right;line-height:1.6}
+
+/* TOP KPIs */
+.top-kpis{display:flex;gap:10px;padding:14px 28px;background:#fff;border-bottom:1px solid #dde3ef;flex-wrap:wrap;overflow-x:auto}
+.tkpi{display:flex;flex-direction:column;align-items:center;padding:6px 18px;border-right:1px solid #e8ecf4;white-space:nowrap}
+.tkpi:last-child{border-right:none}
+.tkpi-val{font-size:20px;font-weight:800;color:#002855}
+.tkpi-lbl{font-size:10px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.tkpi-sub{font-size:11px;margin-top:1px}
+.pos{color:#00875a} .neg{color:#c0392b} .warn{color:#e65100}
+
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:10px;padding:12px 28px;background:#fff;border-bottom:1px solid #dde3ef;flex-wrap:wrap}
+.filter-bar label{font-size:12px;font-weight:600;color:#555}
+.btn-filter{font-size:12px;padding:5px 14px;border-radius:16px;border:1.5px solid #ccc;background:#fff;cursor:pointer;font-weight:600;transition:all .15s}
+.btn-filter.active,.btn-filter:hover{background:#002855;color:#fff;border-color:#002855}
+.sort-select{font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
+.search-input{font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;width:180px}
+.btn-expand-all{margin-left:auto;font-size:12px;padding:5px 16px;border-radius:16px;border:1.5px solid #004fa3;color:#004fa3;background:#fff;cursor:pointer;font-weight:600}
+.btn-expand-all:hover{background:#004fa3;color:#fff}
+
+/* AME GRID */
+.ame-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(500px,1fr));gap:18px;padding:20px 28px}
+@media(max-width:600px){.ame-grid{grid-template-columns:1fr;padding:12px}}
+
+/* MATRIZ METAS TRIMESTRAIS */
+.matrix-header{display:flex;justify-content:space-between;align-items:center;padding:12px 28px;background:#002855;color:#fff;font-size:13px;font-weight:700}
+.matrix-score{font-size:12px;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:12px;font-weight:600}
+.trim-matrix-wrap{overflow-x:auto;padding:0 28px 16px;background:#f7f9fc}
+.trim-matrix-tbl{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.08)}
+.trim-matrix-tbl th{background:#002855;color:#fff;padding:8px 12px;text-align:center;font-weight:700;white-space:nowrap;font-size:11px}
+.trim-matrix-tbl th.left{text-align:left;min-width:190px}
+.trim-matrix-tbl td{padding:7px 10px;border-bottom:1px solid #eef1f6;text-align:center;vertical-align:middle}
+.trim-matrix-tbl td.ind-name{text-align:left;font-weight:600;color:#333;font-size:12px;padding-left:14px}
+.trim-matrix-tbl tr:last-child td{border-bottom:none}
+.trim-matrix-tbl tr:hover td{background:#f5f7ff}
+.mc{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:default}
+.mc.sim{background:#e8f5e9;color:#00875a}
+.mc.parcial{background:#fff3e0;color:#e65100}
+.mc.nao{background:#fff0f0;color:#c0392b}
+.mc.na{background:#f5f5f5;color:#aaa;font-size:11px}
+.mc.pendente{background:#e8eaf6;color:#3949ab}
+.mc-val{display:block;font-size:10px;color:#666;margin-top:1px}
+.trim-prog-bar{height:6px;background:#e0e7ff;border-radius:3px;margin:2px 0;overflow:hidden}
+.trim-prog-fill{height:100%;border-radius:3px;background:#002855}
+.trim-ame-col{font-weight:700;color:#002855;font-size:11px;padding-bottom:2px}
+.trim-ame-pct{font-size:13px;font-weight:900}
+.matrix-legend{display:flex;gap:16px;padding:8px 28px 14px;background:#f7f9fc;font-size:11px;flex-wrap:wrap}
+.ml-item{display:flex;align-items:center;gap:5px}
+.ml-dot{width:12px;height:12px;border-radius:50%}
+
+/* AME CARD */
+.ame-card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.09);overflow:hidden;transition:box-shadow .2s}
+.ame-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.14)}
+
+/* Card header */
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;cursor:pointer;user-select:none;border-bottom:3px solid #002855}
+.card-hdr.ok{border-bottom-color:#00875a}
+.card-hdr.warn{border-bottom-color:#ff8b00}
+.card-hdr.risk{border-bottom-color:#c0392b}
+.card-hdr.critico{border-bottom-color:#880e4f}
+.ame-name{font-size:15px;font-weight:700;color:#002855}
+.ame-badge{font-size:11px;padding:3px 10px;border-radius:10px;font-weight:700;margin-top:3px;display:inline-block}
+.b-ok{background:#e8f5e9;color:#00875a}
+.b-warn{background:#fff3e0;color:#e65100}
+.b-risk{background:#fff0f0;color:#c0392b}
+.b-crit{background:#fce4ec;color:#880e4f}
+.chevron{font-size:18px;color:#aaa;transition:transform .25s}
+.chevron.open{transform:rotate(180deg)}
+
+/* Card body preview (always visible) */
+.card-preview{padding:12px 18px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+.meta-item{padding:6px 0;border-bottom:1px solid #f2f4f8}
+.meta-item:last-child{border-bottom:none}
+.meta-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.meta-name{font-size:12px;color:#444;font-weight:500}
+.meta-pct{font-size:13px;font-weight:800}
+.pct-ok{color:#00875a} .pct-w{color:#ff8b00} .pct-r{color:#c0392b}
+.progress-track{height:5px;background:#eee;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s}
+.fill-ok{background:#00875a} .fill-w{background:#ff8b00} .fill-r{background:#c0392b}
+.meta-nums{font-size:10px;color:#888;margin-top:1px}
+
+/* Fin summary row */
+.fin-strip{display:flex;gap:0;border-top:1px solid #eee;margin-top:4px}
+.fin-cell{flex:1;padding:8px 12px;text-align:center;border-right:1px solid #eee}
+.fin-cell:last-child{border-right:none}
+.fin-cell .fl{font-size:11px;color:#666;margin-bottom:2px}
+.fin-cell .fv{font-size:13px;font-weight:700;color:#002855}
+
+/* DETAIL (expandable) */
+.card-detail{display:none;padding:0 18px 18px;border-top:1px solid #eee;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.detail-tabs{display:flex;gap:0;margin:14px 0 12px;border-bottom:2px solid #eee}
+.dtab{padding:8px 16px;font-size:12px;font-weight:600;color:#666;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.dtab.active{color:#002855;border-bottom-color:#002855}
+.dpanel{display:none}
+.dpanel.active{display:block}
+
+/* Charts */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+@media(max-width:640px){.chart-row{grid-template-columns:1fr}}
+.chart-box{background:#f8fafb;border-radius:10px;padding:14px}
+.chart-title{font-size:11px;font-weight:700;color:#002855;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.chart-wrap{height:160px;position:relative}
+
+/* Detalhe produção table */
+.det-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.det-table th{background:#002855;color:#fff;padding:6px 10px;text-align:center;font-size:11px}
+.det-table th.left{text-align:left}
+.det-table td{padding:5px 10px;border-bottom:1px solid #f0f0f0}
+.det-table td.lbl{font-weight:600;color:#002855;background:#f5f7fc}
+.det-table td.r{text-align:right}
+.det-table tr.hdr td{background:#e8edf5;font-weight:700;font-size:11px;color:#002855}
+.det-table tr.tot td{background:#edf2ff;font-weight:700}
+
+/* Detalhe financeiro */
+.fin-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+@media(max-width:640px){.fin-detail-grid{grid-template-columns:1fr}}
+.fin-detail-box{background:#f8fafb;border-radius:10px;padding:14px}
+.fdb-title{font-size:11px;font-weight:700;color:#002855;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px}
+.fdb-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #eee}
+.fdb-row:last-child{border-bottom:none}
+.fdb-row.total{font-weight:700;color:#002855;border-top:2px solid #002855;border-bottom:none;padding-top:8px;margin-top:4px}
+.fdb-row.result{font-weight:700;font-size:14px;padding:6px 0 0}
+.gauge-bar{margin-top:10px}
+.gauge-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
+.gauge-label{width:130px;color:#555;flex-shrink:0}
+.gauge-track{flex:1;height:7px;background:#e8e8e8;border-radius:4px;overflow:hidden}
+.gauge-fill{height:100%;border-radius:4px}
+.gauge-pct{width:40px;text-align:right;font-weight:700;font-size:12px}
+
+/* Projeções Mai/Jun */
+.proj-box{background:#f0f5ff;border-radius:10px;padding:14px;margin-top:12px;font-size:12px}
+.proj-title{font-weight:700;color:#002855;margin-bottom:8px;font-size:13px}
+.proj-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #dce8ff}
+.proj-row:last-child{border-bottom:none}
+.proj-needed{font-weight:700;color:#c0392b}
+.proj-ok{font-weight:700;color:#00875a}
+
+footer{text-align:center;padding:16px;font-size:11px;color:#aaa;margin-top:8px}
+
+/* Especialidades tab */
+.esp-loading{text-align:center;padding:28px;color:#888;font-size:13px}
+.esp-summary{display:flex;gap:0;background:#f5f7fc;border-radius:10px;margin:12px 0;overflow:hidden}
+.esp-skpi{flex:1;padding:10px 14px;border-right:1px solid #e4e9f4;text-align:center}
+.esp-skpi:last-child{border-right:none}
+.esp-skpi-val{font-size:17px;font-weight:800;color:#002855}
+.esp-skpi-lbl{font-size:10px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.esp-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.esp-table th{background:#002855;color:#fff;padding:6px 8px;text-align:center;font-size:10px;white-space:nowrap}
+.esp-table th.left{text-align:left}
+.esp-table td{padding:5px 8px;border-bottom:1px solid #f0f0f0;white-space:nowrap}
+.esp-table td.esp-nome{font-weight:600;color:#222;white-space:normal;min-width:140px}
+.esp-table td.r{text-align:right}
+.esp-table tr:hover td{background:#f8fafb}
+.esp-table tr.esp-sadt-row td{background:#faf5ff}
+.esp-sadt-badge{font-size:9px;padding:1px 6px;border-radius:8px;background:#ede0f8;color:#6a1b9a;font-weight:700;margin-left:5px;vertical-align:middle}
+.esp-comp-ok{color:#00875a;font-weight:700}
+.esp-comp-w{color:#ff8b00;font-weight:700}
+.esp-comp-r{color:#c0392b;font-weight:700}
+.esp-chart-wrap{height:220px;position:relative;margin-top:14px}
+
+/* ── Metas Trimestrais ─────────────────────────────────────── */
+.trim-header{display:flex;align-items:center;gap:10px;margin:10px 0 12px;flex-wrap:wrap}
+.trim-periodo{font-size:12px;font-weight:700;color:#1565c0;background:#e3f2fd;padding:3px 10px;border-radius:12px}
+.trim-save{font-size:11px;padding:5px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:700;background:#00875a;color:#fff}
+.trim-save:hover{opacity:.85}
+.trim-save-msg{font-size:11px;color:#888;font-style:italic}
+.trim-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.trim-table th{background:#1a237e;color:#fff;padding:7px 10px;font-size:11px;text-align:left}
+.trim-table th.c{text-align:center}
+.trim-table td{padding:7px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.trim-table tr:hover td{background:#f5f7ff}
+.trim-table td.nm{font-weight:600;color:#1a237e;max-width:200px}
+.trim-table td.obs-trim{font-size:11px;color:#888}
+.trim-table td.c{text-align:center}
+.st-trim{display:inline-block;font-size:11px;padding:4px 12px;border-radius:12px;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .15s;user-select:none;white-space:nowrap}
+.st-trim:hover:not(.st-na){opacity:.8;transform:scale(1.04)}
+.st-sim{background:#e8f5e9;color:#00875a;border-color:#00875a}
+.st-parcial{background:#fff3e0;color:#e65100;border-color:#e65100}
+.st-nao{background:#fff0f0;color:#c0392b;border-color:#c0392b}
+.st-na{background:#f5f5f5;color:#9e9e9e;border-color:#ddd;cursor:default;opacity:.6}
+.st-pendente{background:#e8eaf6;color:#3949ab;border-color:#3949ab}
+.trim-val-inp{width:65px;font-size:12px;padding:3px 6px;border:1.5px solid #ccc;border-radius:6px;text-align:center}
+.trim-val-inp:focus{outline:none;border-color:#1565c0}
+.trim-obs-inp{width:100%;font-size:11px;padding:3px 6px;border:1.5px solid #eee;border-radius:6px;background:#fafbff}
+.trim-obs-inp:focus{outline:none;border-color:#1565c0;background:#fff}
+.trim-sep{background:#e8eaf6;font-weight:700;color:#1a237e;font-size:11px;padding:5px 10px;text-transform:uppercase;letter-spacing:.5px}
+.trim-analise-box{background:#f0f4ff;border-radius:10px;padding:14px;margin-top:12px;font-size:12px;border-left:4px solid #1a237e}
+.trim-analise-box h4{font-size:13px;font-weight:700;color:#1a237e;margin-bottom:8px}
+.trim-analise-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #dce8ff}
+.trim-analise-item:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-inner">
+    <div>
+      <h1>AMEs – Painel Gerencial · Grupo Santa Casa de Franca</h1>
+      <p>6 Unidades · Contrato SES/SP · 5 Metas · Jan–Abr/2026 (4/6 meses realizados)</p>
+    </div>
+    <div class="hdr-right" id="hdr-meta">
+      OCI: encerrado 2025 – excluído<br>
+      <span id="hdr-data">–</span>
+    </div>
+  </div>
+</header>
+
+<!-- KPIs CONSOLIDADOS -->
+<div class="top-kpis" id="top-kpis"></div>
+
+<!-- BARRA DE FILTROS -->
+<div class="filter-bar">
+  <label>Filtrar:</label>
+  <button class="btn-filter active" onclick="filter('all',this)">Todas (6)</button>
+  <button class="btn-filter" onclick="filter('ok',this)">✓ OK</button>
+  <button class="btn-filter" onclick="filter('atencao',this)">⚠ Atenção</button>
+  <button class="btn-filter" onclick="filter('risco',this)">✗ Risco</button>
+  <button class="btn-filter" onclick="filter('critico',this)">✗ Crítico</button>
+  <select class="sort-select" onchange="sortCards(this.value)">
+    <option value="default">Ordenar: padrão</option>
+    <option value="name">Nome A→Z</option>
+    <option value="pct_asc">Pior desempenho primeiro</option>
+    <option value="pct_desc">Melhor desempenho primeiro</option>
+  </select>
+  <button class="btn-expand-all" id="btn-expand" onclick="toggleAll()">Expandir todas ▼</button>
+</div>
+
+<!-- MATRIZ METAS TRIMESTRAIS -->
+<div id="trim-matrix-section" style="display:none">
+  <div class="matrix-header">
+    <span>📅 Metas Trimestrais — Visão Geral · 1T/2026</span>
+    <span id="matrix-score" class="matrix-score"></span>
+  </div>
+  <div id="trim-matrix"></div>
+</div>
+
+<!-- CARDS -->
+<div class="ame-grid" id="ame-grid"></div>
+
+<footer>Grupo Santa Casa de Franca · Dados: Metas SES/SP 11/05/2026 · Atualizar: node gerar-dados.js</footer>
+
+<script>
+const SADT_INT = {frc:1544,cb:397,cp:2170,avj:751,scl:540,rp:1687};
+const MESES_LABEL = ['Janeiro','Fevereiro','Março','Abril'];
+const KEYS  = ['cp','frc','cb','avj','rp','scl'];
+const NOMES = {cp:'AME Campinas',frc:'AME Franca',cb:'AME Casa Branca',avj:'AME Jurumirim',rp:'AME Ribeirão Preto',scl:'AME São Carlos'};
+const MIN   = {consulta:90,naoMed:90,cmaA:95,cmaM:95,sadt:90};
+
+function ni(v,d=0){ return typeof v==='number'&&!isNaN(v)?v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}):'–'; }
+function pct(real,cont){ return cont>0?real/cont*100:0; }
+function pctFmt(v){ return ni(v,1)+'%'; }
+function pctCls(v,min){ return v>=min?'pct-ok':v>=(min-5)?'pct-w':'pct-r'; }
+function fillCls(v,min){ return v>=min?'fill-ok':v>=(min-5)?'fill-w':'fill-r'; }
+function stCls(s){ return {ok:'ok',atencao:'warn',risco:'risk',critico:'risk critico'}[s]||'ok'; }
+function bCls(s){ return {ok:'b-ok',atencao:'b-warn',risco:'b-risk',critico:'b-crit'}[s]||'b-ok'; }
+function stTxt(s){ return {ok:'✓ OK',atencao:'⚠ ATENÇÃO',risco:'✗ RISCO',critico:'✗ CRÍTICO'}[s]||'OK'; }
+
+// ── Dados ─────────────────────────────────────────────────────────
+const DD = (window.DADOS_DASH||{}).ames||{};
+const gen = (window.DADOS_DASH||{}).geradoEm;
+
+// ── Charts registry ───────────────────────────────────────────────
+const _charts = {};
+
+// ── Especialidades ────────────────────────────────────────────────
+const ESP_MAP = {cp:'AME CAMPINAS',frc:'AME FRANCA',cb:'AME CASA BRANCA',avj:'AME VALE DO JURUMIRIM',rp:'AME RIBEIRAO PRETO',scl:'AME SAO CARLOS'};
+let _espData = null;
+const _espRendered = {};
+
+function compCls(v){ return v>=90?'esp-comp-ok':v>=80?'esp-comp-w':'esp-comp-r'; }
+
+function renderEspContent(k, ameData){
+  if(!ameData){ document.getElementById('esp-content-'+k).innerHTML='<div class="esp-loading" style="color:#c0392b">Dados de especialidades não encontrados.</div>'; return; }
+  const esps = (ameData.especialidades||[]).slice().sort((a,b)=>b.total-a.total);
+  const topNome = esps.find(e=>!e.isSadt)?.nome||'–';
+  const nEsp = esps.filter(e=>!e.isSadt).length;
+
+  const summary = `<div class="esp-summary">
+    <div class="esp-skpi"><div class="esp-skpi-val">${ni(ameData.totalGeral)}</div><div class="esp-skpi-lbl">Total Atendimentos</div></div>
+    <div class="esp-skpi"><div class="esp-skpi-val">${ni(ameData.sadtTotal)}</div><div class="esp-skpi-lbl">SADT Externo</div></div>
+    <div class="esp-skpi"><div class="esp-skpi-val">${nEsp}</div><div class="esp-skpi-lbl">Especialidades</div></div>
+    <div class="esp-skpi"><div class="esp-skpi-val" style="font-size:13px">${topNome}</div><div class="esp-skpi-lbl">Top Especialidade</div></div>
+  </div>`;
+
+  const rows = esps.map(e=>`<tr class="${e.isSadt?'esp-sadt-row':''}">
+    <td class="esp-nome">${e.nome}${e.isSadt?'<span class="esp-sadt-badge">SADT</span>':''}</td>
+    <td class="r">${ni(e.jan)}</td>
+    <td class="r">${ni(e.fev)}</td>
+    <td class="r">${ni(e.mar)}</td>
+    <td class="r">${ni(e.abr)}</td>
+    <td class="r" style="font-weight:700;color:#002855">${ni(e.total)}</td>
+    <td class="r" style="color:#1565c0">${ni(e.projMai)}</td>
+    <td class="r" style="color:#1565c0">${ni(e.projJun)}</td>
+    <td class="r"><span class="${compCls(e.pctComparecimento)}">${e.pctComparecimento}%</span></td>
+  </tr>`).join('');
+
+  const table = `<div style="overflow-x:auto"><table class="esp-table">
+    <thead><tr>
+      <th class="left">Especialidade</th>
+      <th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th>
+      <th>Total 4m</th><th>Proj Mai</th><th>Proj Jun</th><th>% Comp.</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+
+  const chartId = 'ch-esp-'+k;
+  const chartBox = `<div class="chart-box" style="margin-top:14px">
+    <div class="chart-title">Top especialidades por volume (4 meses)</div>
+    <div class="esp-chart-wrap"><canvas id="${chartId}"></canvas></div>
+  </div>`;
+
+  document.getElementById('esp-content-'+k).innerHTML = summary + chartBox + table;
+
+  // render chart
+  const top8 = esps.filter(e=>!e.isSadt).slice(0,8);
+  new Chart(document.getElementById(chartId),{
+    type:'bar',
+    data:{
+      labels:top8.map(e=>e.nome),
+      datasets:[
+        {label:'Jan',data:top8.map(e=>e.jan),backgroundColor:'#90caf9',borderRadius:3},
+        {label:'Fev',data:top8.map(e=>e.fev),backgroundColor:'#42a5f5',borderRadius:3},
+        {label:'Mar',data:top8.map(e=>e.mar),backgroundColor:'#1e88e5',borderRadius:3},
+        {label:'Abr',data:top8.map(e=>e.abr),backgroundColor:'#1565c0',borderRadius:3},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
+      scales:{
+        x:{stacked:true,ticks:{font:{size:9}},grid:{display:false}},
+        y:{stacked:true,ticks:{callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'#f5f5f5'}}
+      }
+    }
+  });
+}
+
+async function loadEsp(k){
+  if(_espRendered[k]) return;
+  _espRendered[k]=true;
+  try{
+    if(!_espData){
+      _espData = window.ESPECIALIDADES_DATA || await fetch('/especialidades-dash.json').then(r=>r.json());
+    }
+    renderEspContent(k, _espData[ESP_MAP[k]]);
+  }catch(e){
+    document.getElementById('esp-content-'+k).innerHTML='<div class="esp-loading" style="color:#c0392b">Erro ao carregar especialidades.</div>';
+    _espRendered[k]=false;
+  }
+}
+
+// ── Construir dados por AME ───────────────────────────────────────
+function buildAme(k){
+  const d=DD[k]||{}, a=d.analise||{}, f=d.fin||{}, q=d.qtde||{};
+  const F=1.5;
+  // 5 metas
+  const metas = [
+    {id:'consulta', nome:'1. Consultas Médicas',       real:a.consultReal||0, cont:a.consultCont||0, min:90},
+    {id:'naoMed',  nome:'2. Não-Médica + Proc.', real:a.s272Real||0,   cont:a.s272Cont||0,   min:90},
+    {id:'cmaA',    nome:'3. CMA Maior (Cirurgia Maior Ambulatorial)',     real:a.cmaAReal||0,   cont:a.cmaACont||0,   min:95},
+    {id:'cmaM',    nome:'4. cma menor (Cirurgia Menor Ambulatorial)',     real:a.cmaMReal||0,   cont:a.cmaMCont||0,   min:95},
+    {id:'sadt',    nome:'5. SADT Externo',              real:a.sadtReal||0,   cont:a.sadtCont||0,   min:90},
+  ];
+  metas.forEach(m=>{
+    m.pct4m = pct(m.real,m.cont);
+    m.proj  = Math.round(m.real*F);
+    m.meta  = Math.round(m.cont*F);
+    m.pctSem= pct(m.proj,m.meta);
+    m.delta = m.proj - m.meta;
+    // necessário por mês (Mai+Jun) para bater a meta mínima
+    const metaMin = m.meta * (m.min/100);
+    m.falta = Math.max(0, Math.ceil((metaMin - m.real) / 2));
+  });
+  const minPctSem = Math.min(...metas.map(m=>m.pctSem));
+  const st = a.status||'ok';
+  return {k, nome:NOMES[k], metas, st, a, f, q, minPctSem,
+    rec4m:f.receita||0, desp4m:f.despesa||0,
+    res4m:(f.receita||0)-(f.despesa||0),
+    pes4m:f.pessoal||0, ass4m:f.assistenciais||0,
+    adm4m:f.administrativos||0, mat4m:f.materiais||0,
+    uti4m:f.utilidades||0, res4mR:f.ressarcimento||0,
+    mensal:f.mensal||{receita:[0,0,0,0],despesa:[0,0,0,0],pessoal:[0,0,0,0],resultado:[0,0,0,0]},
+    saldoJan:f.saldoJan||0, saldoAbr:f.saldoAbr||0,
+    si:SADT_INT[k]||0,
+  };
+}
+
+const AMES = KEYS.map(buildAme);
+let filteredKeys = [...KEYS];
+let allExpanded = false;
+
+// ── Top KPIs ──────────────────────────────────────────────────────
+function renderTopKpis(){
+  const totRec = AMES.reduce((s,a)=>s+a.rec4m,0);
+  const totDesp= AMES.reduce((s,a)=>s+a.desp4m,0);
+  const totRes = totRec-totDesp;
+  const totCons= AMES.reduce((s,a)=>s+(a.a.consultReal||0),0);
+  const totSadt= AMES.reduce((s,a)=>s+(a.a.sadtReal||0),0);
+  const totCmaA     = AMES.reduce((s,a)=>s+(a.a.cmaAReal||0),0);
+  const totCmaACont = AMES.reduce((s,a)=>s+(a.a.cmaACont||0),0);
+  const totCmaM     = AMES.reduce((s,a)=>s+(a.a.cmaMReal||0),0);
+  const totCmaMCont = AMES.reduce((s,a)=>s+(a.a.cmaMCont||0),0);
+  const risco  = AMES.filter(a=>a.st==='risco'||a.st==='critico').length;
+  document.getElementById('top-kpis').innerHTML=`
+    <div class="tkpi"><div class="tkpi-val">${ni(totCons)}</div><div class="tkpi-lbl">Consultas Médicas</div><div class="tkpi-sub" style="color:#555">Proj. sem: ${ni(Math.round(totCons*1.5))}</div></div>
+    <div class="tkpi"><div class="tkpi-val">${ni(totCmaA)}</div><div class="tkpi-lbl">CMA Maior</div><div class="tkpi-sub" style="color:#555">Proj. sem: ${ni(Math.round(totCmaA*1.5))}</div></div>
+    <div class="tkpi"><div class="tkpi-val">${ni(totCmaM)}</div><div class="tkpi-lbl">cma menor</div><div class="tkpi-sub" style="color:#555">Proj. sem: ${ni(Math.round(totCmaM*1.5))}</div></div>
+    <div class="tkpi"><div class="tkpi-val">${ni(totSadt)}</div><div class="tkpi-lbl">SADT Externo</div><div class="tkpi-sub" style="color:#555">Apoio Diagnóstico</div></div>
+    <div class="tkpi"><div class="tkpi-val">R$ ${ni(totRec/1e6,2)}M</div><div class="tkpi-lbl">Receita Total 4m</div><div class="tkpi-sub" style="color:#555">6 AMEs</div></div>
+    <div class="tkpi"><div class="tkpi-val ${totRes>=0?'pos':'neg'}">${totRes>=0?'+':''}R$ ${ni(totRes/1e6,2)}M</div><div class="tkpi-lbl">Resultado 4m</div><div class="tkpi-sub" style="color:#555">Rec. – Despesas</div></div>
+    <div class="tkpi"><div class="tkpi-val ${risco>0?'neg':'pos'}">${risco}</div><div class="tkpi-lbl">Em Risco/Crítico</div><div class="tkpi-sub" style="color:#555">de 6 unidades</div></div>`;
+}
+
+// ── Render progress bar ────────────────────────────────────────────
+function renderMeta(m){
+  const p = Math.min(m.pctSem,130);
+  const cls = pctCls(m.pctSem,m.min);
+  const fcls = fillCls(m.pctSem,m.min);
+  return`<div class="meta-item">
+    <div class="meta-top">
+      <span class="meta-name">${m.nome}</span>
+      <span class="meta-pct ${cls}">${pctFmt(m.pctSem)}</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill ${fcls}" style="width:${Math.min(p,100)}%"></div>
+    </div>
+    <div class="meta-nums">Real: ${ni(m.real)} · Proj: ${ni(m.proj)} · Meta: ${ni(m.meta)} (min ${m.min}%)</div>
+  </div>`;
+}
+
+// ── Render card ───────────────────────────────────────────────────
+function renderCard(ame){
+  const {k,nome,metas,st,rec4m,desp4m,res4m} = ame;
+  const hdCls = stCls(st);
+  return`<div class="ame-card" data-key="${k}" data-st="${st}" data-min="${ame.minPctSem.toFixed(1)}">
+    <div class="card-hdr ${hdCls}" onclick="toggleCard('${k}')">
+      <div>
+        <div class="ame-name">${nome}</div>
+        <span class="ame-badge ${bCls(st)}">${stTxt(st)}</span>
+        ${(ame.a.riscos||[]).length?`<span style="font-size:11px;color:#888;margin-left:8px">${ame.a.riscos.join(' · ')}</span>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="text-align:right;font-size:11px;color:#555">
+          <div>Min: <strong style="font-size:13px;color:#002855">${pctFmt(ame.minPctSem)}</strong></div>
+          <div>${rec4m?'R$ '+ni(rec4m/1e6,2)+'M':''}</div>
+        </div>
+        <div class="chevron" id="chev-${k}">▾</div>
+      </div>
+    </div>
+    <div class="card-preview">
+      ${metas.map(m=>renderMeta(m)).join('')}
+    </div>
+    <div class="fin-strip">
+      <div class="fin-cell"><div class="fl">Receita 4m</div><div class="fv">${rec4m?'R$ '+ni(rec4m/1e6,3)+'M':'–'}</div></div>
+      <div class="fin-cell"><div class="fl">Despesa 4m</div><div class="fv">${desp4m?'R$ '+ni(desp4m/1e6,3)+'M':'–'}</div></div>
+      <div class="fin-cell"><div class="fl">Resultado</div><div class="fv ${res4m>=0?'pos':'neg'}">${res4m>=0?'+':''}R$ ${ni(res4m/1e6,3)}M</div></div>
+      <div class="fin-cell"><div class="fl">% Pessoal</div><div class="fv ${pctCls(rec4m>0?ame.pes4m/rec4m*100:0,0)}">${rec4m>0?ni(ame.pes4m/rec4m*100,1)+'%':'–'}</div></div>
+    </div>
+    <div class="card-detail" id="det-${k}">
+      <div class="detail-tabs">
+        <div class="dtab active" onclick="switchTab('${k}','prod',this)">📋 Produção</div>
+        <div class="dtab" onclick="switchTab('${k}','fin',this)">💰 Financeiro</div>
+        <div class="dtab" onclick="switchTab('${k}','proj',this)">📈 Projeções</div>
+        <div class="dtab" onclick="switchTab('${k}','esp',this)">🏥 Especialidades</div>
+        <div class="dtab" onclick="switchTab('${k}','trim',this)">📅 Trimestrais</div>
+      </div>
+      <div class="dpanel active" id="dp-${k}-prod">
+        <div class="chart-row">
+          <div class="chart-box"><div class="chart-title">% Atingimento das 5 Metas (semestral)</div><div class="chart-wrap"><canvas id="ch-prod-${k}"></canvas></div></div>
+          <div class="chart-box"><div class="chart-title">Volume: Projeção vs Contratado Semestral</div><div class="chart-wrap"><canvas id="ch-vol-${k}"></canvas></div></div>
+        </div>
+        <table class="det-table" style="margin-top:12px">
+          <thead><tr><th class="left">Meta Contratual</th><th>Real 4m</th><th>Proj. Sem.</th><th>Cont. Sem.</th><th>% Sem.</th><th>Min.</th><th>Status</th></tr></thead>
+          <tbody>${metas.map(m=>`<tr>
+            <td class="lbl">${m.nome}</td>
+            <td class="r">${ni(m.real)}</td>
+            <td class="r">${ni(m.proj)}</td>
+            <td class="r" style="background:#eff4ff">${ni(m.meta)}</td>
+            <td class="r"><strong class="${pctCls(m.pctSem,m.min)}">${pctFmt(m.pctSem)}</strong></td>
+            <td class="r" style="font-size:11px;color:#888">${m.min}%</td>
+            <td class="r"><span class="ame-badge ${m.pctSem>=m.min?'b-ok':m.pctSem>=(m.min-5)?'b-warn':'b-risk'}" style="padding:2px 8px">${m.pctSem>=m.min?'✓ OK':m.pctSem>=(m.min-5)?'⚠ Aten.':'✗ Risco'}</span></td>
+          </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="dpanel" id="dp-${k}-fin">
+        <div class="chart-row">
+          <div class="chart-box"><div class="chart-title">Receita vs Despesa mensal (R$ mil)</div><div class="chart-wrap"><canvas id="ch-fin-${k}"></canvas></div></div>
+          <div class="chart-box"><div class="chart-title">Composição das Despesas (R$ mil)</div><div class="chart-wrap"><canvas id="ch-desp-${k}"></canvas></div></div>
+        </div>
+        <div class="fin-detail-grid">
+          <div class="fin-detail-box">
+            <div class="fdb-title">DRE – Jan–Abr/2026 (R$)</div>
+            <div class="fdb-row"><span>Receita Contrato</span><span>${ni(rec4m,0)}</span></div>
+            <div class="fdb-row"><span>Pessoal (CLT)</span><span style="color:#c0392b">−${ni(ame.pes4m,0)}</span></div>
+            <div class="fdb-row"><span>Terceiros Assistenciais</span><span style="color:#c0392b">−${ni(ame.ass4m,0)}</span></div>
+            <div class="fdb-row"><span>Terceiros Administrativos</span><span style="color:#c0392b">−${ni(ame.adm4m,0)}</span></div>
+            <div class="fdb-row"><span>Materiais</span><span style="color:#c0392b">−${ni(ame.mat4m,0)}</span></div>
+            <div class="fdb-row"><span>Utilidades Públicas</span><span style="color:#c0392b">−${ni(ame.uti4m,0)}</span></div>
+            <div class="fdb-row"><span>Ressarcimento/Rateio</span><span style="color:#c0392b">−${ni(ame.res4mR,0)}</span></div>
+            <div class="fdb-row total"><span>Total Despesas</span><span>−${ni(desp4m,0)}</span></div>
+            <div class="fdb-row result ${res4m>=0?'pos':'neg'}"><span>Resultado</span><span>${res4m>=0?'+':''}${ni(res4m,0)}</span></div>
+          </div>
+          <div class="fin-detail-box">
+            <div class="fdb-title">% sobre Receita (tetos orçamentários)</div>
+            <div class="gauge-bar">
+              ${[
+                {lbl:'Pessoal CLT',v:ame.pes4m,teto:35,col:'#1565c0'},
+                {lbl:'Terceiros Assist.',v:ame.ass4m,teto:null,col:'#6a1b9a'},
+                {lbl:'Materiais',v:ame.mat4m,teto:8,col:'#00695c'},
+                {lbl:'Utilidades',v:ame.uti4m,teto:null,col:'#e65100'},
+              ].map(g=>{
+                const p=rec4m>0?g.v/rec4m*100:0;
+                const over=g.teto&&p>g.teto;
+                return`<div class="gauge-row">
+                  <div class="gauge-label">${g.lbl}${g.teto?` (teto ${g.teto}%)`:''}:</div>
+                  <div class="gauge-track"><div class="gauge-fill" style="width:${Math.min(p,100)}%;background:${over?'#c0392b':g.col}"></div></div>
+                  <div class="gauge-pct ${over?'neg':''}">${ni(p,1)}%</div>
+                </div>`;
+              }).join('')}
+            </div>
+            <div style="margin-top:10px;padding:10px;background:#fff;border-radius:8px;font-size:12px">
+              <div style="font-weight:700;color:#002855;margin-bottom:6px">Saldos Conta Custeio</div>
+              <div class="fdb-row"><span>Saldo abertura Jan/2026</span><span>R$ ${ni(ame.saldoJan,0)}</span></div>
+              <div class="fdb-row"><span>Saldo final Abr/2026</span><span style="color:#00875a;font-weight:700">R$ ${ni(ame.saldoAbr,0)}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dpanel" id="dp-${k}-esp">
+        <div id="esp-content-${k}" class="esp-loading">Clique para carregar especialidades…</div>
+      </div>
+      <div class="dpanel" id="dp-${k}-trim">
+        <div id="trim-content-${k}"><div class="esp-loading">Clique para carregar metas trimestrais…</div></div>
+      </div>
+      <div class="dpanel" id="dp-${k}-proj">
+        <div class="proj-box">
+          <div class="proj-title">📅 O que é necessário em Maio e Junho para bater as metas mínimas</div>
+          ${metas.map(m=>{
+            const metaMin = Math.round(m.meta * m.min/100);
+            const falta = Math.max(0, metaMin - m.real);
+            const porMes = Math.ceil(falta/2);
+            const mediaHist = Math.round(m.real/4);
+            const ok = falta===0;
+            return`<div class="proj-row">
+              <span>${m.nome}</span>
+              ${ok
+                ? `<span class="proj-ok">✓ Meta atingida — folga de ${ni(m.real-metaMin)}</span>`
+                : `<span class="proj-needed">Precisa +${ni(porMes)}/mês (hist: ${ni(mediaHist)}/mês · esforço: ${ni(Math.round((porMes/mediaHist-1)*100))}%↑)</span>`
+              }
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="chart-row" style="margin-top:14px">
+          <div class="chart-box"><div class="chart-title">Simulação: projeção acumulada (meta mínima marcada)</div><div class="chart-wrap"><canvas id="ch-proj-${k}"></canvas></div></div>
+          <div class="chart-box"><div class="chart-title">Resultado financeiro mensal (R$ mil)</div><div class="chart-wrap"><canvas id="ch-res-${k}"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Render charts ─────────────────────────────────────────────────
+function renderCharts(k){
+  if(_charts[k]) return; // já renderizado
+  _charts[k]=true;
+  const ame=AMES.find(a=>a.k===k);
+  if(!ame) return;
+  const {metas,mensal,rec4m,desp4m} = ame;
+  const F=1.5;
+
+  // Labels curtos para gráficos (nomes completos no tooltip)
+  const LBLS_CURTOS = {consulta:'Cons. Méd.',naoMed:'Não-Méd.+Proc.',cmaA:'CMA Maior',cmaM:'cma menor',sadt:'SADT'};
+  const lblCurto = m => LBLS_CURTOS[m.id] || m.nome.replace(/^\d\. /,'').substring(0,12);
+
+  // 1. Produção: % atingimento das 5 metas
+  new Chart(document.getElementById('ch-prod-'+k),{
+    type:'bar',
+    data:{
+      labels:metas.map(m=>lblCurto(m)),
+      datasets:[{
+        label:'% atingimento semestral',
+        data:metas.map(m=>+m.pctSem.toFixed(1)),
+        backgroundColor:metas.map(m=>m.pctSem>=m.min?'#00875a':m.pctSem>=(m.min-5)?'#ff8b00':'#c0392b'),
+        borderRadius:5,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{title:ctx=>metas[ctx[0].dataIndex].nome.replace(/^\d\. /,''),label:ctx=>` ${ctx.raw}%`}},
+        annotation:{annotations:metas.map((m,i)=>({type:'line',yMin:m.min,yMax:m.min,borderColor:'rgba(192,57,43,.5)',borderWidth:1.5,borderDash:[4,4]}))}},
+      scales:{y:{min:0,max:135,ticks:{callback:v=>v+'%'},grid:{color:'#f5f5f5'}},x:{ticks:{font:{size:9},maxRotation:30,minRotation:0},grid:{display:false}}}
+    }
+  });
+
+  // 2. Volume: proj vs contratado
+  new Chart(document.getElementById('ch-vol-'+k),{
+    type:'bar',
+    data:{
+      labels:metas.map(m=>lblCurto(m)),
+      datasets:[
+        {label:'Projeção semestral',data:metas.map(m=>m.proj),backgroundColor:'#1565c0',borderRadius:3},
+        {label:'Contratado semestral',data:metas.map(m=>m.meta),backgroundColor:'#e0e7ff',borderRadius:3},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
+      scales:{y:{ticks:{callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'#f5f5f5'}},x:{ticks:{font:{size:9}},grid:{display:false}}}
+    }
+  });
+
+  // 3. Financeiro: Receita vs Despesa mensal
+  new Chart(document.getElementById('ch-fin-'+k),{
+    type:'bar',
+    data:{
+      labels:MESES_LABEL,
+      datasets:[
+        {label:'Receita',data:mensal.receita.map(v=>Math.round(v/1000)),backgroundColor:'#1565c0',borderRadius:4},
+        {label:'Despesa',data:mensal.despesa.map(v=>Math.round(v/1000)),backgroundColor:'#e57373',borderRadius:4},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
+      scales:{y:{ticks:{callback:v=>v+'k'},grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}
+    }
+  });
+
+  // 4. Composição despesas (pizza)
+  const despLabels=['Pessoal CLT','Terceiros Assist.','Terceiros Admin.','Materiais','Utilidades','Ressarcimento','Outros'];
+  const outros=ame.desp4m-ame.pes4m-ame.ass4m-ame.adm4m-ame.mat4m-ame.uti4m-ame.res4mR;
+  new Chart(document.getElementById('ch-desp-'+k),{
+    type:'doughnut',
+    data:{
+      labels:despLabels,
+      datasets:[{
+        data:[ame.pes4m,ame.ass4m,ame.adm4m,ame.mat4m,ame.uti4m,ame.res4mR,Math.max(0,outros)].map(v=>Math.round(v/1000)),
+        backgroundColor:['#1565c0','#6a1b9a','#0097a7','#2e7d32','#f57c00','#795548','#bdbdbd'],
+        borderWidth:2,borderColor:'#fff',
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:6}}}
+    }
+  });
+
+  // 5. Projeção acumulada (Consultas) vs meta mínima
+  const cons=metas[0];
+  const metaMin=Math.round(cons.meta*cons.min/100);
+  const acum=[0,1,2,3].map(i=>Math.round(cons.real/4*(i+1)));
+  const proj5=acum[3]+Math.round(cons.real/4);
+  const proj6=acum[3]+Math.round(cons.real/4)*2;
+  new Chart(document.getElementById('ch-proj-'+k),{
+    type:'line',
+    data:{
+      labels:['Jan','Fev','Mar','Abr','Mai(proj)','Jun(proj)'],
+      datasets:[
+        {label:'Acumulado',data:[...acum,proj5,proj6],borderColor:'#1565c0',backgroundColor:'rgba(21,101,192,.1)',fill:true,tension:.3,pointRadius:4},
+        {label:'Meta mínima semestral',data:[null,null,null,null,null,metaMin],pointStyle:'crossRot',pointRadius:8,borderColor:'#c0392b',borderWidth:2,borderDash:[5,5],fill:false},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
+      scales:{y:{ticks:{callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}
+    }
+  });
+
+  // 6. Resultado mensal
+  new Chart(document.getElementById('ch-res-'+k),{
+    type:'bar',
+    data:{
+      labels:MESES_LABEL,
+      datasets:[{
+        label:'Resultado (R$ mil)',
+        data:mensal.resultado.map(v=>Math.round(v/1000)),
+        backgroundColor:mensal.resultado.map(v=>v>=0?'rgba(0,135,90,.7)':'rgba(192,57,43,.7)'),
+        borderRadius:4,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>v+'k'},grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}
+    }
+  });
+}
+
+// ── Toggle card ───────────────────────────────────────────────────
+function toggleCard(k, force){
+  const det=document.getElementById('det-'+k);
+  const chev=document.getElementById('chev-'+k);
+  const isOpen=det.style.display==='block';
+  const open = force!==undefined ? force : !isOpen;
+  det.style.display=open?'block':'none';
+  if(chev) chev.classList.toggle('open',open);
+  if(open) setTimeout(()=>renderCharts(k),50);
+}
+
+function toggleAll(){
+  allExpanded=!allExpanded;
+  document.getElementById('btn-expand').textContent=allExpanded?'Recolher todas ▲':'Expandir todas ▼';
+  filteredKeys.forEach(k=>toggleCard(k,allExpanded));
+}
+
+// ── Switch detail tab ─────────────────────────────────────────────
+function switchTab(k, id, el){
+  document.querySelectorAll(`#det-${k} .dtab`).forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll(`[id^="dp-${k}-"]`).forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`dp-${k}-${id}`).classList.add('active');
+  if(id==='esp') loadEsp(k);
+  else if(id==='trim') loadTrim(k);
+  else setTimeout(()=>renderCharts(k),50);
+}
+
+// ── Filter ────────────────────────────────────────────────────────
+function filter(st, btn){
+  document.querySelectorAll('.btn-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.ame-card').forEach(card=>{
+    const cst=card.dataset.st;
+    const show = st==='all' || cst===st;
+    card.style.display=show?'':'none';
+  });
+  filteredKeys = st==='all' ? [...KEYS] : KEYS.filter(k=>DD[k]?.analise?.status===st);
+}
+
+// ── Sort ──────────────────────────────────────────────────────────
+function sortCards(mode){
+  const grid=document.getElementById('ame-grid');
+  const cards=[...grid.querySelectorAll('.ame-card')];
+  cards.sort((a,b)=>{
+    if(mode==='name') return a.dataset.key.localeCompare(b.dataset.key);
+    if(mode==='pct_asc') return parseFloat(a.dataset.min)-parseFloat(b.dataset.min);
+    if(mode==='pct_desc') return parseFloat(b.dataset.min)-parseFloat(a.dataset.min);
+    return 0;
+  });
+  cards.forEach(c=>grid.appendChild(c));
+}
+
+// ── METAS TRIMESTRAIS ─────────────────────────────────────────────
+let _trimData   = null;
+let _trimKey    = '1T';   // trimestre ativo: '1T' ou '2T'
+const _trimRendered = {};
+
+const STATUS_CYCLE = ['pendente','sim','parcial','nao'];
+const STATUS_LABEL = {sim:'✓ Sim',parcial:'⚠ Parcial',nao:'✗ Não',na:'N/A',pendente:'● Pendente'};
+const STATUS_CLS   = {sim:'st-sim',parcial:'st-parcial',nao:'st-nao',na:'st-na',pendente:'st-pendente'};
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function setTrimKey(key){
+  _trimKey = key;
+  document.querySelectorAll('.trim-key-btn').forEach(b => b.classList.toggle('active', b.dataset.key===key));
+  // Re-renderiza todos os trimestre abertos
+  Object.keys(_trimRendered).filter(k=>_trimRendered[k]).forEach(k => {
+    _trimRendered[k] = false;
+    renderTrimContent(k);
+    _trimRendered[k] = true;
+  });
+  renderTrimMatrix();
+}
+
+async function loadTrim(k){
+  if(_trimRendered[k]) return;
+  _trimRendered[k] = true;
+  try{
+    if(!_trimData){
+      _trimData = window.METAS_TRIM || await fetch('/metas-trimestrais.json?t='+Date.now()).then(r=>r.json());
+    }
+    renderTrimContent(k);
+  }catch(e){
+    console.error('loadTrim error:', e);
+    document.getElementById('trim-content-'+k).innerHTML =
+      `<div class="esp-loading" style="color:#c0392b">Erro: ${e.message}</div>`;
+    _trimRendered[k] = false;
+  }
+}
+
+function getDadosCruzados(k){
+  // Dados de produção da AME vindos de dados-embutidos.js
+  const a = (window.DADOS_DASH||{}).ames?.[k]?.analise || {};
+  const f = (window.DADOS_DASH||{}).ames?.[k]?.fin     || {};
+  function pS(r,c){ return c>0?+(r/c*1.5*100).toFixed(1):0; }
+  return {
+    consultReal:a.consultReal||0, consultCont:a.consultCont||0,
+    pctConsult: pS(a.consultReal||0, a.consultCont||0),
+    sadtReal:   a.sadtReal||0,    sadtCont:a.sadtCont||0,
+    pctSadt:    pS(a.sadtReal||0,  a.sadtCont||0),
+    cmaAReal:   a.cmaAReal||0,    cmaACont:a.cmaACont||0,
+    pctCmaA:    pS(a.cmaAReal||0,  a.cmaACont||0),
+    cmaMReal:   a.cmaMReal||0,    cmaMCont:a.cmaMCont||0,
+    pctCmaM:    pS(a.cmaMReal||0,  a.cmaMCont||0),
+    receita:    f.receita||0,     despesa:f.despesa||0,
+  };
+}
+
+function renderTrimContent(k){
+  // Suporta tanto estrutura nova (ame['1T']/ame['2T']) quanto legada (ame.metas)
+  const ameBase = _trimData?.ames?.[k];
+  const ame     = ameBase?.[_trimKey] || ameBase;
+  const defs    = _trimData?.metasDef || [];
+  const wrap    = document.getElementById('trim-content-'+k);
+  if(!ame||!wrap){ return; }
+
+  // Seletor de trimestre no topo
+  const selector = `<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
+    <span style="font-size:11px;font-weight:600;color:#555">Trimestre:</span>
+    <button class="trim-key-btn${_trimKey==='1T'?' active':''}" data-key="1T" onclick="setTrimKey('1T')"
+      style="font-size:11px;padding:3px 12px;border-radius:12px;border:1.5px solid #002855;cursor:pointer;font-weight:700;background:${_trimKey==='1T'?'#002855':'#fff'};color:${_trimKey==='1T'?'#fff':'#002855'}">1T/2026</button>
+    <button class="trim-key-btn${_trimKey==='2T'?' active':''}" data-key="2T" onclick="setTrimKey('2T')"
+      style="font-size:11px;padding:3px 12px;border-radius:12px;border:1.5px solid #002855;cursor:pointer;font-weight:700;background:${_trimKey==='2T'?'#002855':'#fff'};color:${_trimKey==='2T'?'#fff':'#002855'}">2T/2026</button>
+  </div>`;
+
+  const metas  = ame.metas || {};
+  const periodo= ame.trimestre || (_trimKey==='1T'?'1T/2026':'2T/2026');
+  const DC     = getDadosCruzados(k);
+
+  // Dado cruzado por indicador (onde temos info dos dados reais)
+  const cruzado = {
+    oferta_consulta: `<span style="font-size:10px;color:#555">Dados reais: <strong>${ni(DC.consultReal)}</strong> realizadas de <strong>${ni(DC.consultCont)}</strong> contratadas → projeção semestral <strong style="color:${DC.pctConsult>=100?'#00875a':'#c0392b'}">${DC.pctConsult}%</strong></span>`,
+    sadt_linha:      `<span style="font-size:10px;color:#555">Dados reais: <strong>${ni(DC.sadtReal)}</strong> SADT realizados de <strong>${ni(DC.sadtCont)}</strong> contratados → projeção <strong style="color:${DC.pctSadt>=90?'#00875a':'#c0392b'}">${DC.pctSadt}%</strong></span>`,
+  };
+
+  const rows = defs.map(m=>{
+    const st   = metas[m.id]?.status || 'pendente';
+    const val  = metas[m.id]?.valor;
+    const obs  = metas[m.id]?.observacao || '';
+    const isNa = st === 'na';
+
+    // Campo de valor numérico
+    const valCell = m.meta != null
+      ? `<td class="c"><input class="trim-val-inp" id="trimval-${k}-${m.id}"
+            type="number" min="0" max="100" step="0.1"
+            value="${val != null ? val : ''}" placeholder="–"
+            ${isNa ? 'disabled' : ''}
+            onchange="updateTrimVal('${k}','${m.id}',this.value)"></td>`
+      : `<td class="c"><input class="trim-val-inp" id="trimval-${k}-${m.id}"
+            type="number" min="0"
+            value="${val != null ? val : ''}" placeholder="–"
+            ${isNa ? 'disabled' : ''}
+            onchange="updateTrimVal('${k}','${m.id}',this.value)"></td>`;
+
+    const dadoCruz = cruzado[m.id] ? `<div style="margin-top:3px">${cruzado[m.id]}</div>` : '';
+    const obsHint  = m.obs ? `<div style="font-size:10px;color:#888">${m.obs}</div>` : '';
+    const metaTag  = m.meta != null
+      ? `<span style="font-size:10px;font-weight:600;color:#1a237e">Meta: ${m.meta}${m.unidade}</span>`
+      : `<span style="font-size:10px;color:#888">Sem meta numérica</span>`;
+
+    return `<tr>
+      <td class="nm">
+        ${m.nome}
+        ${obsHint}
+        ${metaTag}
+        ${dadoCruz}
+      </td>
+      <td class="c">
+        <span class="st-trim ${STATUS_CLS[st]||'st-pendente'}"
+          id="stbadge-${k}-${m.id}"
+          data-k="${k}" data-mid="${m.id}" data-na="${isNa}"
+          title="${isNa?'Não aplicável a esta unidade':'Clique para alterar status'}"
+        >${STATUS_LABEL[st]}</span>
+      </td>
+      ${valCell}
+      <td><input class="trim-obs-inp" id="trimobs-${k}-${m.id}"
+          type="text" placeholder="${isNa?'N/A':'Descreva…'}"
+          value="${escHtml(obs)}"
+          ${isNa ? 'disabled' : ''}
+          onchange="updateTrimObs('${k}','${m.id}',this.value)"></td>
+    </tr>`;
+  }).join('');
+
+  // Linha da meta semestral para referência
+  function colSem(v,min){ const c=v>=min?'#00875a':v>=(min-5)?'#e65100':'#c0392b'; return `<span style="font-weight:700;color:${c}">${v}%</span>`; }
+  const semRef = `CM ${colSem(DC.pctConsult,90)} · SADT ${colSem(DC.pctSadt,90)} · CMA ${colSem(DC.pctCmaA,95)} · cma ${colSem(DC.pctCmaM,95)}`;
+
+  wrap.innerHTML = `
+    ${selector}
+    <div class="trim-header">
+      <span class="trim-periodo">📅 ${periodo}</span>
+      <button class="trim-save" onclick="saveTrim('${k}')">💾 Salvar</button>
+      <span class="trim-save-msg" id="trim-msg-${k}">Clique nos badges para alterar · preencha os campos · salve</span>
+    </div>
+    <table class="trim-table">
+      <thead><tr>
+        <th style="min-width:210px">Indicador</th>
+        <th class="c" style="width:110px">Status</th>
+        <th class="c" style="width:80px">Valor</th>
+        <th>Observação / Justificativa</th>
+      </tr></thead>
+      <tbody>
+        <tr class="trim-sep"><td colspan="4">📅 METAS TRIMESTRAIS — ${NOMES[k]}</td></tr>
+        ${rows}
+        <tr class="trim-sep"><td colspan="4">📈 REFERÊNCIA SEMESTRAL (dados automáticos de Jan–Abr/2026)</td></tr>
+        <tr>
+          <td class="nm" style="font-size:11px">Produção vs contrato · CM ≥90% · SADT ≥90% · CMA ≥95% · cma ≥95%</td>
+          <td colspan="3" style="font-size:12px;padding:8px 10px">${semRef}</td>
+        </tr>
+        <tr>
+          <td class="nm" style="font-size:11px">Financeiro Jan–Abr/2026</td>
+          <td colspan="3" style="font-size:12px;padding:8px 10px">
+            Receita: <strong>R$ ${ni(DC.receita/1e6,3)}M</strong> ·
+            Despesa: <strong>R$ ${DC.despesa/1e6 > 0 ? ni(DC.despesa/1e6,3) : '–'}M</strong> ·
+            Resultado: <strong style="color:${DC.receita-DC.despesa>=0?'#00875a':'#c0392b'}">${DC.receita-DC.despesa>=0?'+':''}R$ ${ni((DC.receita-DC.despesa)/1e6,3)}M</strong>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div id="trim-analise-${k}"></div>`;
+
+  // Adicionar event listeners nos badges (click para ciclar)
+  wrap.querySelectorAll('.st-trim[data-mid]').forEach(badge=>{
+    if(badge.dataset.na === 'true') return;
+    badge.addEventListener('click', ()=>cycleTrimStatus(k, badge.dataset.mid, badge));
+  });
+
+  // Renderizar análise inicial
+  updateTrimAnalise(k);
+}
+
+function updateTrimAnalise(k){
+  const box  = document.getElementById('trim-analise-'+k);
+  if(!box || !_trimData) return;
+  const defs = _trimData.metasDef || [];
+  const metas= _trimData.ames[k]?.metas || {};
+  const periodo = _trimData.ames[k]?.trimestre || '1T/2026';
+
+  const aplicaveis = defs.filter(m=>metas[m.id]?.status !== 'na');
+  const total= aplicaveis.length;
+  const sim  = aplicaveis.filter(m=>metas[m.id]?.status==='sim').length;
+  const parc = aplicaveis.filter(m=>metas[m.id]?.status==='parcial').length;
+  const nao  = aplicaveis.filter(m=>metas[m.id]?.status==='nao').length;
+  const pend = aplicaveis.filter(m=>metas[m.id]?.status==='pendente').length;
+  const pctOk= total>0 ? Math.round((sim + parc*0.5)/total*100) : 0;
+
+  if(pend === total){
+    box.innerHTML = `<div style="background:#fff8e1;border-left:4px solid #ffc107;border-radius:8px;padding:12px 14px;margin-top:12px;font-size:12px;color:#7b5800">
+      <strong>📋 Preencha os indicadores acima</strong> — clique nos badges para marcar o status de cada meta e insira os valores. Após preencher, a análise será gerada automaticamente.
+    </div>`;
+    return;
+  }
+
+  const naoList  = aplicaveis.filter(m=>metas[m.id]?.status==='nao').map(m=>m.nome).join(', ');
+  const parcList = aplicaveis.filter(m=>metas[m.id]?.status==='parcial').map(m=>m.nome).join(', ');
+  const cor = pctOk>=80?'#00875a':pctOk>=60?'#e65100':'#c0392b';
+
+  box.innerHTML = `<div class="trim-analise-box" style="margin-top:12px">
+    <h4>📊 Análise Trimestral — ${NOMES[k]} · ${periodo}</h4>
+    <div class="trim-analise-item">
+      <span><strong>Conformidade geral</strong></span>
+      <span style="font-weight:900;font-size:18px;color:${cor}">${pctOk}%</span>
+    </div>
+    <div class="trim-analise-item">
+      <span>✓ Atendidas</span>
+      <span style="color:#00875a;font-weight:700">${sim} de ${total}</span>
+    </div>
+    ${parc>0?`<div class="trim-analise-item"><span>⚠ Parciais</span><span style="color:#e65100;font-weight:700">${parc}</span></div>`:''}
+    ${nao>0?`<div class="trim-analise-item"><span>✗ Não atendidas</span><span style="color:#c0392b;font-weight:700">${nao}</span></div>`:''}
+    ${pend>0?`<div class="trim-analise-item"><span>● Sem preenchimento</span><span style="color:#3949ab;font-weight:700">${pend}</span></div>`:''}
+    <div style="margin-top:10px;font-size:11px;color:#444;line-height:1.6">
+      ${sim===total?'<strong style="color:#00875a">✓ Todos os indicadores trimestrais atendidos!</strong>':''}
+      ${nao>0?`<div><strong style="color:#c0392b">Pontos críticos:</strong> ${naoList}</div>`:''}
+      ${parc>0?`<div><strong style="color:#e65100">Atenção:</strong> ${parcList}</div>`:''}
+      ${pend>0?`<div style="color:#888">Ainda pendentes de preenchimento: ${pend} indicador(es)</div>`:''}
+    </div>
+  </div>`;
+}
+
+function cycleTrimStatus(k, mid, badge){
+  const cur  = _trimData.ames[k].metas[mid].status;
+  if(cur === 'na') return;
+  const idx  = STATUS_CYCLE.indexOf(cur);
+  const next = STATUS_CYCLE[(idx+1) % STATUS_CYCLE.length];
+  _trimData.ames[k].metas[mid].status = next;
+  if(badge){
+    badge.textContent = STATUS_LABEL[next];
+    badge.className   = `st-trim ${STATUS_CLS[next]||'st-pendente'}`;
+  }
+  updateTrimAnalise(k);   // só atualiza a análise, sem re-render da tabela
+}
+
+function updateTrimVal(k, mid, val){
+  if(!_trimData?.ames?.[k]?.metas?.[mid]) return;
+  _trimData.ames[k].metas[mid].valor = val===''?null:parseFloat(val);
+}
+function updateTrimObs(k, mid, obs){
+  if(!_trimData?.ames?.[k]?.metas?.[mid]) return;
+  _trimData.ames[k].metas[mid].observacao = obs;
+}
+
+async function saveTrim(k){
+  const msg = document.getElementById('trim-msg-'+k);
+  if(msg) msg.textContent='Salvando…';
+  try{
+    const r = await fetch('/api/salvar-metas-trim',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(_trimData)
+    });
+    const res = await r.json();
+    if(msg) msg.textContent = res.ok ? '✓ Salvo em '+new Date().toLocaleTimeString('pt-BR') : 'Erro: '+res.erro;
+  }catch(e){
+    if(msg) msg.textContent='Erro de rede ao salvar';
+  }
+}
+
+// ── MATRIZ GERAL METAS TRIMESTRAIS ────────────────────────────────
+const TRIM_NOMES_CURTOS = {
+  oferta_consulta: '1ª Consultas',
+  monitoramento:   'Monitoramento',
+  esp_drs:         'Especialidades DRS',
+  sadt_linha:      'SADT Externo',
+  avastin:         'Avastin',
+  qualidade_info:  'Qualidade Info',
+  humanizacao:     'Humanização',
+  cdr:             'CDR',
+};
+const MC_ICON = { sim:'✓', parcial:'!', nao:'✗', na:'–', pendente:'…' };
+
+function renderTrimMatrix(){
+  const td = window.METAS_TRIM;
+  if(!td) return;
+  const sec = document.getElementById('trim-matrix-section');
+  sec.style.display = '';
+
+  const defs = td.metasDef || [];
+  const ameKeys = ['cp','frc','cb','avj','rp','scl'];
+  const ameNomes = { cp:'Campinas', frc:'Franca', cb:'Casa Branca', avj:'Vale Jurumirim', rp:'Ribeirão Preto', scl:'São Carlos' };
+
+  // Seletor de trimestre na matriz
+  document.querySelector('.matrix-header span:first-child').innerHTML =
+    `📅 Metas Trimestrais — Visão Geral &nbsp;
+    <button class="trim-key-btn${_trimKey==='1T'?' active':''}" data-key="1T" onclick="setTrimKey('1T')"
+      style="font-size:11px;padding:2px 10px;border-radius:10px;border:1.5px solid #fff;cursor:pointer;font-weight:700;background:${_trimKey==='1T'?'#fff':'transparent'};color:${_trimKey==='1T'?'#002855':'#fff'}">1T/2026</button>
+    <button class="trim-key-btn${_trimKey==='2T'?' active':''}" data-key="2T" onclick="setTrimKey('2T')"
+      style="font-size:11px;padding:2px 10px;border-radius:10px;border:1.5px solid #fff;cursor:pointer;font-weight:700;background:${_trimKey==='2T'?'#fff':'transparent'};color:${_trimKey==='2T'?'#002855':'#fff'}">2T/2026</button>`;
+
+  // Cabeçalho: nomes das AMEs
+  const thCols = ameKeys.map(k => {
+    const ameObj = td.ames[k];
+    const ame    = ameObj?.[_trimKey] || ameObj;
+    const metas  = ame?.metas || {};
+    const total = defs.filter(d => metas[d.id]?.status !== 'na').length;
+    const simC  = defs.filter(d => metas[d.id]?.status === 'sim').length;
+    const pct   = total > 0 ? Math.round(simC/total*100) : 0;
+    const cor   = pct>=80?'#00875a':pct>=60?'#e65100':'#c0392b';
+    return `<th>
+      <div class="trim-ame-col">${ameNomes[k]}</div>
+      <div class="trim-ame-pct" style="color:${cor}">${simC}/${total}</div>
+      <div class="trim-prog-bar"><div class="trim-prog-fill" style="width:${pct}%;background:${cor}"></div></div>
+    </th>`;
+  }).join('');
+
+  // helper: lê metas do trimestre ativo
+  function getTMetas(k){ const b=td.ames[k]; return (b?.[_trimKey]||b)?.metas||{}; }
+
+  // Linhas por indicador
+  const rows = defs.map(def => {
+    const cells = ameKeys.map(k => {
+      const m = getTMetas(k)[def.id] || {};
+      const st = m.status || 'pendente';
+      const val = m.valor != null ? `<span class="mc-val">${m.valor}${def.unidade||''}</span>` : '';
+      const tip = m.observacao ? ` title="${m.observacao.replace(/"/g,'&quot;')}"` : '';
+      return `<td${tip}><span class="mc ${st}">${MC_ICON[st]||'?'}</span>${val}</td>`;
+    }).join('');
+    return `<tr>
+      <td class="ind-name">${TRIM_NOMES_CURTOS[def.id]||def.nome}
+        ${def.meta!=null?`<span style="font-size:10px;color:#888;font-weight:400"> · meta ${def.meta}${def.unidade}</span>`:''}
+      </td>
+      ${cells}
+    </tr>`;
+  }).join('');
+
+  // Score geral
+  const totalAll = ameKeys.reduce((acc,k) => {
+    const metas = getTMetas(k);
+    return acc + defs.filter(d=>metas[d.id]?.status!=='na').length;
+  }, 0);
+  const simAll = ameKeys.reduce((acc,k) => {
+    const metas = getTMetas(k);
+    return acc + defs.filter(d=>metas[d.id]?.status==='sim').length;
+  }, 0);
+  const pctAll = totalAll>0?Math.round(simAll/totalAll*100):0;
+  document.getElementById('matrix-score').textContent =
+    `${simAll}/${totalAll} métricas ✓ (${pctAll}%)`;
+
+  document.getElementById('trim-matrix').innerHTML = `
+    <div class="trim-matrix-wrap">
+      <table class="trim-matrix-tbl">
+        <thead><tr><th class="left">Indicador</th>${thCols}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="matrix-legend">
+      <div class="ml-item"><div class="ml-dot" style="background:#e8f5e9;border:1.5px solid #00875a"></div> ✓ Sim — Atendido</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#fff3e0;border:1.5px solid #e65100"></div> ! Parcial</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#fff0f0;border:1.5px solid #c0392b"></div> ✗ Não Atendido</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#e8eaf6;border:1.5px solid #3949ab"></div> … Pendente</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#f5f5f5;border:1.5px solid #ccc"></div> – Não Aplicável</div>
+    </div>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  if(gen) document.getElementById('hdr-data').textContent='Dados: '+new Date(gen).toLocaleString('pt-BR');
+  renderTopKpis();
+  const grid=document.getElementById('ame-grid');
+  AMES.forEach(ame=>{ grid.innerHTML+=renderCard(ame); });
+  renderTrimMatrix();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+# Dependências Node.js
+node_modules/
+
+# Pastas de dados Excel — grandes e/ou sensíveis
+Fluxo de Caixa/
+Metas Trimestrais/
+Demonstrações Financeiras/
+Benchmarking/
+contrato de gestão/
+Planos de Ação/
+cronoata/
+
+# Pasta deploy (duplicata dos arquivos principais — gerada pelo Vercel)
+deploy/
+
+# PDFs e relatórios binários
+*.pdf
+
+# Scripts de análise exploratória (não fazem parte do produto)
+analise-*.js
+calcular-*.js
+debug*.js
+extrair-*.js
+ler-*.js
+ler-*.mjs
+read-*.mjs
+integrador-*.py
+mcp-server-*.py
+servidor-http-*.py
+validar-*.py
+temp_*.js
+temp_cfg.json
+relatorio-extraido.txt
+patch-*.js
+
+# Arquivos de sistema Windows
+*.log
+Sti_Trace.log

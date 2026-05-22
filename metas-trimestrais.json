@@ -1,0 +1,882 @@
+{
+  "metasDef": [
+    {
+      "id": "oferta_consulta",
+      "nome": "Oferta 1ª Consultas Médicas",
+      "meta": 100,
+      "unidade": "%",
+      "obs": ""
+    },
+    {
+      "id": "monitoramento",
+      "nome": "Quadro de Monitoramento",
+      "meta": 100,
+      "unidade": "%",
+      "obs": ""
+    },
+    {
+      "id": "esp_drs",
+      "nome": "Acompanhamento 3 Especialidades (DRS)",
+      "meta": 100,
+      "unidade": "%",
+      "obs": ""
+    },
+    {
+      "id": "sadt_linha",
+      "nome": "Oferta SADT Externo por linha",
+      "meta": 100,
+      "unidade": "%",
+      "obs": ""
+    },
+    {
+      "id": "avastin",
+      "nome": "Quadro de Retina",
+      "meta": 100,
+      "unidade": "%",
+      "obs": "Ribeirão Preto, Campinas e Avaré (medicação SES-SP)"
+    },
+    {
+      "id": "qualidade_info",
+      "nome": "Qualidade de Informação",
+      "meta": 100,
+      "unidade": "%",
+      "obs": "3 De Para / Informar gestão no prazo / Matriciamento"
+    },
+    {
+      "id": "humanizacao",
+      "nome": "Humanização e Ouvidoria",
+      "meta": 82,
+      "unidade": "% resolvidas",
+      "obs": "Mínimo 82% de reclamações resolvidas"
+    },
+    {
+      "id": "cdr",
+      "nome": "Pacientes no CDR",
+      "meta": null,
+      "unidade": "indiv.",
+      "obs": "Individual por unidade — sem meta numérica fixada"
+    }
+  ],
+  "ames": {
+    "cp": {
+      "label": "AME Campinas",
+      "trimestre": "1T/2026",
+      "metas": {
+        "monitoramento": {
+          "status": "sim",
+          "valor": 120,
+          "observacao": "Todos os procedimentos ≥ 100% da meta"
+        },
+        "esp_drs": {
+          "status": "sim",
+          "valor": 116,
+          "observacao": "Abaixo: Cardiologia 37%"
+        },
+        "qualidade_info": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "NSP: NSP registrado — 19 lançamentos · Mat: Matriciamento registrado — 9 sessões"
+        },
+        "humanizacao": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "PIH enviado"
+        },
+        "cdr": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "CDR Anual enviado"
+        },
+        "oferta_consulta": {
+          "status": "sim",
+          "valor": 119,
+          "observacao": "22.136 de 18.618 consultas (estimativa Q1)"
+        },
+        "sadt_linha": {
+          "status": "parcial",
+          "valor": 92,
+          "observacao": "9.044 de 9.822 exames SADT (estimativa Q1)"
+        },
+        "avastin": {
+          "status": "sim",
+          "valor": 117,
+          "observacao": "Retina 117% — 1 procedimento(s) ≥ meta"
+        }
+      },
+      "1T": {
+        "trimestre": "1T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "sim",
+            "valor": 120,
+            "observacao": "Todos os procedimentos ≥ 100% da meta"
+          },
+          "esp_drs": {
+            "status": "sim",
+            "valor": 116,
+            "observacao": "Abaixo: Cardiologia 37%"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 19 lançamentos · Mat: Matriciamento registrado — 9 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "sim",
+            "valor": 119,
+            "observacao": "22.136 de 18.618 consultas (estimativa Q1)"
+          },
+          "sadt_linha": {
+            "status": "parcial",
+            "valor": 92,
+            "observacao": "9.044 de 9.822 exames SADT (estimativa Q1)"
+          },
+          "avastin": {
+            "status": "sim",
+            "valor": 117,
+            "observacao": "Retina 117% — 1 procedimento(s) ≥ meta"
+          }
+        }
+      },
+      "2T": {
+        "trimestre": "2T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": ""
+          },
+          "esp_drs": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados 2T"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 19 lançamentos · Mat: Matriciamento registrado — 9 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "sadt_linha": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "avastin": {
+            "status": "sim",
+            "valor": 117,
+            "observacao": "Retina 117% — 1 procedimento(s) ≥ meta"
+          }
+        }
+      }
+    },
+    "frc": {
+      "label": "AME Franca",
+      "trimestre": "1T/2026",
+      "metas": {
+        "monitoramento": {
+          "status": "sim",
+          "valor": 142,
+          "observacao": "Todos os procedimentos ≥ 100% da meta"
+        },
+        "esp_drs": {
+          "status": "sim",
+          "valor": 104,
+          "observacao": "Abaixo: Neurologia 91%"
+        },
+        "qualidade_info": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "NSP: NSP registrado — 25 lançamentos · Mat: Matriciamento registrado — 11 sessões"
+        },
+        "humanizacao": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "PIH enviado"
+        },
+        "cdr": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "CDR Anual enviado"
+        },
+        "oferta_consulta": {
+          "status": "parcial",
+          "valor": 93,
+          "observacao": "18.356 de 19.830 consultas (estimativa Q1)"
+        },
+        "sadt_linha": {
+          "status": "parcial",
+          "valor": 90,
+          "observacao": "3.266 de 3.636 exames SADT (estimativa Q1)"
+        },
+        "avastin": {
+          "status": "na",
+          "valor": null,
+          "observacao": "Não aplicável"
+        }
+      },
+      "1T": {
+        "trimestre": "1T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "sim",
+            "valor": 142,
+            "observacao": "Todos os procedimentos ≥ 100% da meta"
+          },
+          "esp_drs": {
+            "status": "sim",
+            "valor": 104,
+            "observacao": "Abaixo: Neurologia 91%"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 25 lançamentos · Mat: Matriciamento registrado — 11 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "parcial",
+            "valor": 93,
+            "observacao": "18.356 de 19.830 consultas (estimativa Q1)"
+          },
+          "sadt_linha": {
+            "status": "parcial",
+            "valor": 90,
+            "observacao": "3.266 de 3.636 exames SADT (estimativa Q1)"
+          },
+          "avastin": {
+            "status": "na",
+            "valor": null,
+            "observacao": "Não aplicável"
+          }
+        }
+      },
+      "2T": {
+        "trimestre": "2T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": ""
+          },
+          "esp_drs": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados 2T"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 25 lançamentos · Mat: Matriciamento registrado — 11 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "sadt_linha": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "avastin": {
+            "status": "na",
+            "valor": null,
+            "observacao": "Não aplicável"
+          }
+        }
+      }
+    },
+    "cb": {
+      "label": "AME Casa Branca",
+      "trimestre": "1T/2026",
+      "metas": {
+        "monitoramento": {
+          "status": "sim",
+          "valor": 137,
+          "observacao": "Todos os procedimentos ≥ 100% da meta"
+        },
+        "esp_drs": {
+          "status": "sim",
+          "valor": 108,
+          "observacao": "Abaixo: Gastroclínica 13%; Neurologia 62%"
+        },
+        "qualidade_info": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "NSP: NSP registrado — 12 lançamentos · Mat: Matriciamento registrado — 8 sessões"
+        },
+        "humanizacao": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "PIH enviado"
+        },
+        "cdr": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "CDR Anual enviado"
+        },
+        "oferta_consulta": {
+          "status": "parcial",
+          "valor": 89,
+          "observacao": "12.171 de 13.641 consultas (estimativa Q1)"
+        },
+        "sadt_linha": {
+          "status": "parcial",
+          "valor": 99,
+          "observacao": "2.631 de 2.670 exames SADT (estimativa Q1)"
+        },
+        "avastin": {
+          "status": "na",
+          "valor": null,
+          "observacao": "Não aplicável"
+        }
+      },
+      "1T": {
+        "trimestre": "1T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "sim",
+            "valor": 137,
+            "observacao": "Todos os procedimentos ≥ 100% da meta"
+          },
+          "esp_drs": {
+            "status": "sim",
+            "valor": 108,
+            "observacao": "Abaixo: Gastroclínica 13%; Neurologia 62%"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 12 lançamentos · Mat: Matriciamento registrado — 8 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "parcial",
+            "valor": 89,
+            "observacao": "12.171 de 13.641 consultas (estimativa Q1)"
+          },
+          "sadt_linha": {
+            "status": "parcial",
+            "valor": 99,
+            "observacao": "2.631 de 2.670 exames SADT (estimativa Q1)"
+          },
+          "avastin": {
+            "status": "na",
+            "valor": null,
+            "observacao": "Não aplicável"
+          }
+        }
+      },
+      "2T": {
+        "trimestre": "2T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": ""
+          },
+          "esp_drs": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados 2T"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 12 lançamentos · Mat: Matriciamento registrado — 8 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "sadt_linha": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "avastin": {
+            "status": "na",
+            "valor": null,
+            "observacao": "Não aplicável"
+          }
+        }
+      }
+    },
+    "avj": {
+      "label": "AME Vale Jurumirim",
+      "trimestre": "1T/2026",
+      "metas": {
+        "monitoramento": {
+          "status": "parcial",
+          "valor": 89,
+          "observacao": "Abaixo de 100%: Facoemulsificação Com Implan…"
+        },
+        "esp_drs": {
+          "status": "sim",
+          "valor": 103,
+          "observacao": "Abaixo: Cirurgia Geral 62%; Endocrinologia 19%; Endocrinologia Infantil 0%; Gastroclínica 8%; Oftalmologia 76%; Ortopedia 88%; Otorrinolaringologia 98%; Reumatologia 44%"
+        },
+        "qualidade_info": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "NSP: NSP registrado — 10 lançamentos · Mat: Matriciamento registrado — 15 sessões"
+        },
+        "humanizacao": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "PIH enviado"
+        },
+        "cdr": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "CDR Anual enviado"
+        },
+        "oferta_consulta": {
+          "status": "nao",
+          "valor": 71,
+          "observacao": "13.749 de 19.332 consultas (estimativa Q1)"
+        },
+        "sadt_linha": {
+          "status": "parcial",
+          "valor": 84,
+          "observacao": "4.715 de 5.601 exames SADT (estimativa Q1)"
+        },
+        "avastin": {
+          "status": "sim",
+          "valor": 111,
+          "observacao": "Retina 111% — 1 procedimento(s) ≥ meta"
+        }
+      },
+      "1T": {
+        "trimestre": "1T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "parcial",
+            "valor": 89,
+            "observacao": "Abaixo de 100%: Facoemulsificação Com Implan…"
+          },
+          "esp_drs": {
+            "status": "sim",
+            "valor": 103,
+            "observacao": "Abaixo: Cirurgia Geral 62%; Endocrinologia 19%; Endocrinologia Infantil 0%; Gastroclínica 8%; Oftalmologia 76%; Ortopedia 88%; Otorrinolaringologia 98%; Reumatologia 44%"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 10 lançamentos · Mat: Matriciamento registrado — 15 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "nao",
+            "valor": 71,
+            "observacao": "13.749 de 19.332 consultas (estimativa Q1)"
+          },
+          "sadt_linha": {
+            "status": "parcial",
+            "valor": 84,
+            "observacao": "4.715 de 5.601 exames SADT (estimativa Q1)"
+          },
+          "avastin": {
+            "status": "sim",
+            "valor": 111,
+            "observacao": "Retina 111% — 1 procedimento(s) ≥ meta"
+          }
+        }
+      },
+      "2T": {
+        "trimestre": "2T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": ""
+          },
+          "esp_drs": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados 2T"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 10 lançamentos · Mat: Matriciamento registrado — 15 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "sadt_linha": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "avastin": {
+            "status": "sim",
+            "valor": 111,
+            "observacao": "Retina 111% — 1 procedimento(s) ≥ meta"
+          }
+        }
+      }
+    },
+    "rp": {
+      "label": "AME Ribeirão Preto",
+      "trimestre": "1T/2026",
+      "metas": {
+        "monitoramento": {
+          "status": "sim",
+          "valor": 132,
+          "observacao": "Abaixo de 100%: Retina…"
+        },
+        "esp_drs": {
+          "status": "sim",
+          "valor": 193,
+          "observacao": "Abaixo: Dermatologia 86%"
+        },
+        "qualidade_info": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "NSP: NSP registrado — 15 lançamentos · Mat: Matriciamento registrado — 26 sessões"
+        },
+        "humanizacao": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "PIH enviado"
+        },
+        "cdr": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "CDR Anual enviado"
+        },
+        "oferta_consulta": {
+          "status": "parcial",
+          "valor": 87,
+          "observacao": "19.415 de 22.320 consultas (estimativa Q1)"
+        },
+        "sadt_linha": {
+          "status": "parcial",
+          "valor": 90,
+          "observacao": "6.989 de 7.731 exames SADT (estimativa Q1)"
+        },
+        "avastin": {
+          "status": "parcial",
+          "valor": 92,
+          "observacao": "Abaixo: Retina…"
+        }
+      },
+      "1T": {
+        "trimestre": "1T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "sim",
+            "valor": 132,
+            "observacao": "Abaixo de 100%: Retina…"
+          },
+          "esp_drs": {
+            "status": "sim",
+            "valor": 193,
+            "observacao": "Abaixo: Dermatologia 86%"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 15 lançamentos · Mat: Matriciamento registrado — 26 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "parcial",
+            "valor": 87,
+            "observacao": "19.415 de 22.320 consultas (estimativa Q1)"
+          },
+          "sadt_linha": {
+            "status": "parcial",
+            "valor": 90,
+            "observacao": "6.989 de 7.731 exames SADT (estimativa Q1)"
+          },
+          "avastin": {
+            "status": "parcial",
+            "valor": 92,
+            "observacao": "Abaixo: Retina…"
+          }
+        }
+      },
+      "2T": {
+        "trimestre": "2T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": ""
+          },
+          "esp_drs": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados 2T"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 15 lançamentos · Mat: Matriciamento registrado — 26 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "sadt_linha": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "avastin": {
+            "status": "parcial",
+            "valor": 92,
+            "observacao": "Abaixo: Retina…"
+          }
+        }
+      }
+    },
+    "scl": {
+      "label": "AME São Carlos",
+      "trimestre": "1T/2026",
+      "metas": {
+        "monitoramento": {
+          "status": "sim",
+          "valor": 181,
+          "observacao": "Abaixo de 100%: Biópsia De Próstata…"
+        },
+        "esp_drs": {
+          "status": "sim",
+          "valor": 105,
+          "observacao": "Abaixo: Neurologia Pediatrica 21%; Reumatologia 28%"
+        },
+        "qualidade_info": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "NSP: NSP registrado — 13 lançamentos · Mat: Matriciamento registrado — 6 sessões"
+        },
+        "humanizacao": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "PIH enviado"
+        },
+        "cdr": {
+          "status": "sim",
+          "valor": null,
+          "observacao": "CDR Anual enviado"
+        },
+        "oferta_consulta": {
+          "status": "sim",
+          "valor": 102,
+          "observacao": "9.142 de 9.000 consultas (estimativa Q1)"
+        },
+        "sadt_linha": {
+          "status": "parcial",
+          "valor": 93,
+          "observacao": "3.844 de 4.113 exames SADT (estimativa Q1)"
+        },
+        "avastin": {
+          "status": "na",
+          "valor": null,
+          "observacao": "Não aplicável"
+        }
+      },
+      "1T": {
+        "trimestre": "1T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "sim",
+            "valor": 181,
+            "observacao": "Abaixo de 100%: Biópsia De Próstata…"
+          },
+          "esp_drs": {
+            "status": "sim",
+            "valor": 105,
+            "observacao": "Abaixo: Neurologia Pediatrica 21%; Reumatologia 28%"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 13 lançamentos · Mat: Matriciamento registrado — 6 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "sim",
+            "valor": 102,
+            "observacao": "9.142 de 9.000 consultas (estimativa Q1)"
+          },
+          "sadt_linha": {
+            "status": "parcial",
+            "valor": 93,
+            "observacao": "3.844 de 4.113 exames SADT (estimativa Q1)"
+          },
+          "avastin": {
+            "status": "na",
+            "valor": null,
+            "observacao": "Não aplicável"
+          }
+        }
+      },
+      "2T": {
+        "trimestre": "2T/2026",
+        "metas": {
+          "monitoramento": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": ""
+          },
+          "esp_drs": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados 2T"
+          },
+          "qualidade_info": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "NSP: NSP registrado — 13 lançamentos · Mat: Matriciamento registrado — 6 sessões"
+          },
+          "humanizacao": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "PIH enviado"
+          },
+          "cdr": {
+            "status": "sim",
+            "valor": null,
+            "observacao": "CDR Anual enviado"
+          },
+          "oferta_consulta": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "sadt_linha": {
+            "status": "pendente",
+            "valor": null,
+            "observacao": "Aguardando dados Mai-Jun/2026"
+          },
+          "avastin": {
+            "status": "na",
+            "valor": null,
+            "observacao": "Não aplicável"
+          }
+        }
+      }
+    }
+  },
+  "trimestres": [
+    "1T/2026",
+    "2T/2026"
+  ]
+}
