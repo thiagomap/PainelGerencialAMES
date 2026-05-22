@@ -152,9 +152,9 @@
         "trimestre": "2T/2026",
         "metas": {
           "monitoramento": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
+            "status": "parcial",
+            "valor": 47,
+            "observacao": "Abaixo de 100%: Biópsia De Próstata…; Biopsia De Tireoide Ou Parat…; Amigdalectomia Com Adenoidec…; Capsulotomia A Yag Laser…; Facoemulsificação Com Implan…; Colecistectomia Videolaparos… (Abr/2026 — estimativa Q2, 1 de 3 meses) (Abr/2026 — 1 de 3 meses)"
           },
           "esp_drs": {
             "status": "pendente",
@@ -424,9 +424,9 @@
         "trimestre": "2T/2026",
         "metas": {
           "monitoramento": {
-            "status": "sim",
-            "valor": 119,
-            "observacao": "Abaixo de 100%: Biopsia De Tireoide Ou Parat… (Abr/2026 — 1 de 3 meses)"
+            "status": "parcial",
+            "valor": 1356,
+            "observacao": "Todos os procedimentos ≥ 100% da meta (Abr/2026 — estimativa Q2, 1 de 3 meses) (Abr/2026 — 1 de 3 meses)"
           },
           "esp_drs": {
             "status": "pendente",
@@ -560,9 +560,9 @@
         "trimestre": "2T/2026",
         "metas": {
           "monitoramento": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
+            "status": "parcial",
+            "valor": 622,
+            "observacao": "Abaixo de 100%: Tratamento Cirurgico De Vari… (Abr/2026 — estimativa Q2, 1 de 3 meses) (Abr/2026 — 1 de 3 meses)"
           },
           "esp_drs": {
             "status": "pendente",
@@ -832,9 +832,9 @@
         "trimestre": "2T/2026",
         "metas": {
           "monitoramento": {
-            "status": "pendente",
-            "valor": null,
-            "observacao": "Quadro de Monitoramento 2T sem dados de Abr ainda"
+            "status": "parcial",
+            "valor": 367,
+            "observacao": "Todos os procedimentos ≥ 100% da meta (Abr/2026 — estimativa Q2, 1 de 3 meses) (Abr/2026 — 1 de 3 meses)"
           },
           "esp_drs": {
             "status": "pendente",

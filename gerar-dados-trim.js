@@ -174,6 +174,108 @@ function calcSadtLinha(k) {
   } catch(e) { return { status: 'pendente', valor: null, observacao: '' }; }
 }
 
+// ─── Lê dados 2T (Abr/Mai/Jun) dos arquivos Planejamento Semestral ─────────────
+const PLAN_FILES = {
+  cp:  'Planejamento Semestral/METAS 2026 - AME CAMPINAS_.xlsx',
+  frc: 'Planejamento Semestral/METAS 2026- AME FRANCA.xlsx',
+  avj: 'Planejamento Semestral/METAS 2026 - AME Vale do Jurumirim.xlsx',
+  cb:  'Planejamento Semestral/METAS 2026 CASA BRANCA.xlsx',
+  scl: 'Planejamento Semestral/METAS 2026 SÃO CARLOS.xlsx',
+  rp:  'Planejamento Semestral/Metas 2026 - Ribeirão Preto.xlsx',
+};
+
+function normNome(s) {
+  return String(s||'').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/cirurgia eletiva ?-? ?/g,'')
+    .replace(/tratamento cirurgico de ?/g,'')
+    .replace(/facoemulsificacao.*/,'facoemulsificacao')
+    .replace(/catarata/,'facoemulsificacao')
+    .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+let _planCache = {};
+function parsePlanejamento2T(key) {
+  if(_planCache[key] !== undefined) return _planCache[key];
+  const fn = PLAN_FILES[key];
+  if(!fn){ _planCache[key]=null; return null; }
+  const fp = path.join(BASE, fn);
+  if(!fs.existsSync(fp)){ _planCache[key]=null; return null; }
+  try {
+    const wb = XLSX.readFile(fp);
+    const cmaName = wb.SheetNames.find(s => s.toLowerCase().includes('cma'));
+    if(!cmaName){ _planCache[key]=null; return null; }
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[cmaName], { header:1, defval:'' });
+    const procs={}, totals=[];
+    rows.forEach(r => {
+      const nome = String(r[0]||'').trim();
+      if(!nome || nome.length < 3) return;
+      const meta2T    = parseFloat(r[18])||0;
+      const abrReal   = parseFloat(r[20])||0;
+      const maiReal   = parseFloat(r[22])||0;
+      const junReal   = parseFloat(r[24])||0;
+      const metaTri2T = parseFloat(r[26])||0;
+      const real2T    = abrReal + maiReal + junReal || parseFloat(r[29])||0;
+      if(nome.toUpperCase().includes('TOTAL')) {
+        totals.push({ meta2T, abrReal, maiReal, junReal, real2T, metaTri2T });
+      } else if(meta2T > 0 || abrReal > 0) {
+        const nk = normNome(nome);
+        if(nk) procs[nk] = { meta2T, abrReal, maiReal, junReal, real2T, metaTri2T, nome };
+      }
+    });
+    const total = totals.length ? totals.reduce((best,t)=>t.real2T>best.real2T?t:best, totals[0]) : null;
+    _planCache[key] = { procs, total };
+    console.log(`  [plan2T-${key}] procs=${Object.keys(procs).length} total=${total?.real2T||0}(Abr:${total?.abrReal||0}+Mai:${total?.maiReal||0})`);
+    return _planCache[key];
+  } catch(e) {
+    console.log(`  [plan2T-${key}] ERRO: ${e.message}`);
+    _planCache[key]=null; return null;
+  }
+}
+
+// Enriquece os rows do Quadro com dados 2T do Planejamento Semestral
+function enriquecerCom2T(rows, key) {
+  const plan = parsePlanejamento2T(key);
+  if(!plan) return rows;
+  const { procs, total } = plan;
+
+  let matchCount = 0;
+  rows.forEach(row => {
+    const nk = normNome(row.nome);
+    // Busca exata ou parcial (prefixo 8 chars)
+    let planRow = procs[nk];
+    if(!planRow) {
+      const k8 = nk.slice(0,8);
+      const found = Object.keys(procs).find(pk => pk.startsWith(k8) || k8.startsWith(pk.slice(0,8)));
+      if(found) planRow = procs[found];
+    }
+    if(planRow && planRow.real2T > 0) {
+      row.real2T = planRow.real2T;
+      if(planRow.metaTri2T > 0) row.meta2T = planRow.metaTri2T;
+      row.pct2T    = row.meta2T > 0 ? Math.round(row.real2T / row.meta2T * 100) : null;
+      row.status2T = statusTri(row.real2T, row.meta2T);
+      row.real2T_parcial = true; // vem do Planejamento, não do Quadro
+      matchCount++;
+    }
+  });
+
+  // Se poucas correspondências mas temos total: distribuir proporcionalmente pelo 1T
+  if(matchCount < rows.length / 2 && total && total.real2T > 0) {
+    const tot1T = rows.reduce((s,r)=>s+(r.real1T||0),0);
+    rows.forEach(row => {
+      if(row.real2T === 0 && tot1T > 0 && row.real1T > 0) {
+        const frac  = row.real1T / tot1T;
+        row.real2T  = Math.round(total.real2T * frac);
+        if(row.meta2T === 0 && total.metaTri2T > 0) row.meta2T = Math.round(total.metaTri2T * frac);
+        row.pct2T   = row.meta2T > 0 ? Math.round(row.real2T / row.meta2T * 100) : null;
+        row.status2T = statusTri(row.real2T, row.meta2T);
+        row.real2T_parcial = true;
+      }
+    });
+  }
+  return rows;
+}
+
 // Lê valores mensais de Abril do CONFIGURACAO.env para uso no 2T parcial
 function lerEnvAbril(ameEnvKey, metricKey) {
   try {
@@ -509,6 +611,8 @@ KEYS.forEach(k => {
   let procs1T = [];
   try { procs1T = parseQuadro(k); }
   catch(e) { console.log(`  1T monitoramento: AVISO ${e.message}`); }
+  // Enriquecer com dados 2T do Planejamento Semestral (Abr/Mai)
+  procs1T = enriquecerCom2T(procs1T, k);
   procedimentos['1T'][k] = procs1T;
   const mon1T    = calcMonitoramentoStatus(procs1T, '1T');
   const esps1T   = consultasPactuadas[k] || [];
