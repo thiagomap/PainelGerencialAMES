@@ -3663,9 +3663,14 @@ async function renderConfigView(){
   if(!loading||!form) return;
   loading.style.display='block'; form.style.display='none'; status.style.display='none';
   try {
-    const r = await fetch('/api/configuracao');
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    _cfgData = await r.json();
+    // Carregar config geral E metas trimestrais em paralelo
+    const [r1, r2] = await Promise.all([
+      fetch('/api/configuracao'),
+      _trimData ? Promise.resolve({ok:true,_data:_trimData}) : fetch('/metas-trimestrais.json?t='+Date.now()),
+    ]);
+    if(!r1.ok) throw new Error('HTTP '+r1.status);
+    _cfgData = await r1.json();
+    if(!_trimData) _trimData = r2._data || await r2.json();
     loading.style.display='none'; form.style.display='block';
     _renderCfgForm(form, _cfgData);
   } catch(e){
@@ -3737,6 +3742,10 @@ function _renderCfgForm(wrap, cfg){
     </div>`;
   });
 
+  // — tab Metas Trimestrais
+  tabs += `<button class="cfg-tab" onclick="cfgTab(this,'TRIM')">📅 Metas Trim.</button>`;
+  panels += _buildTrimConfigPanel(_trimData);
+
   // — tab Hospital (financeiro só)
   tabs += `<button class="cfg-tab" onclick="cfgTab(this,'HOSPITAL')">🏥 Hospital</button>`;
   const hospData = cfg.hospital||{};
@@ -3787,8 +3796,9 @@ function _renderCfgForm(wrap, cfg){
     </style>
     <div class="cfg-tabs">${tabs}</div>
     ${panels}
-    <p class="cfg-nota">💡 Preencha os valores mensais e clique em <strong>Salvar</strong>. O dashboard é atualizado automaticamente em ~30 segundos.</p>
-    <button class="cfg-save-btn" id="cfg-btn-salvar" onclick="salvarConfiguracoes()">💾 Salvar Configurações</button>
+    <p class="cfg-nota">💡 Preencha os valores mensais e clique em <strong>Salvar</strong>. O dashboard é atualizado automaticamente em ~30 segundos. Para Metas Trimestrais, use o botão específico abaixo.</p>
+    <button class="cfg-save-btn" id="cfg-btn-salvar" onclick="salvarConfiguracoes()">💾 Salvar Configurações Financeiras e Produção</button>
+    <button class="cfg-save-btn" id="cfg-btn-salvar-trim" onclick="salvarMetasTrimestrais()" style="margin-top:8px;background:linear-gradient(135deg,#1a237e,#283593)">📅 Salvar Metas Trimestrais</button>
   `;
 
   // auto-calc resultado = receita - despesa
@@ -3809,6 +3819,119 @@ function _renderCfgForm(wrap, cfg){
       r.addEventListener('input',upd); d.addEventListener('input',upd);
     });
   });
+}
+
+function _buildTrimConfigPanel(td){
+  if(!td) return `<div class="cfg-panel" id="cfgtab-TRIM"><p style="color:#888;padding:20px;font-size:13px">Dados trimestrais não carregados.</p></div>`;
+  const defs = td.metasDef || [];
+  const trims = td.trimestres || ['1T/2026'];
+  // sub-tabs por AME
+  const ameKeys = KEYS; // ['cp','frc','cb','avj','rp','scl']
+  let subTabs='', subPanels='';
+  ameKeys.forEach((k,i)=>{
+    const ativo = i===0 ? ' ctab-active' : '';
+    subTabs += `<button class="ctab${ativo}" onclick="ctab(this,'ctrim-${k}')">${NOMES[k]}</button>`;
+    let trimSections = '';
+    trims.forEach(tKey=>{
+      const tShort = tKey.replace('/','');
+      const ameBase = td.ames?.[k];
+      const ameT = ameBase?.[tKey] || ameBase;
+      const metas = ameT?.metas || {};
+      const rows = defs.map(m=>{
+        const v = metas[m.id] || {};
+        const st = v.status || 'pendente';
+        const isNa = st === 'na';
+        const opts = ['sim','parcial','nao','pendente','na'].map(s=>
+          `<option value="${s}" ${s===st?'selected':''}>${TRIM_LBL[s]}</option>`
+        ).join('');
+        return `<tr>
+          <td style="font-size:11px;font-weight:600;color:#333;min-width:130px">${m.nome}</td>
+          <td><select class="cfg-trim-sel" id="cftrim_${k}_${tShort}_${m.id}_st" ${isNa?'disabled':''} style="width:100%;padding:3px 4px;border:1px solid #ddd;border-radius:6px;font-size:11px">${opts}</select></td>
+          <td><input type="number" class="cfg-int" id="cftrim_${k}_${tShort}_${m.id}_val" value="${v.valor??''}" placeholder="–" ${isNa?'disabled':''} style="width:60px;font-size:11px"></td>
+          <td><input type="text" class="cfg-int" id="cftrim_${k}_${tShort}_${m.id}_obs" value="${esc(v.observacao||'')}" placeholder="Observação…" ${isNa?'disabled':''} style="width:100%;font-size:11px"></td>
+        </tr>`;
+      }).join('');
+      trimSections += `
+        <div class="cfg-section-title" style="margin-top:14px">${tKey}</div>
+        <table class="cfg-table">
+          <thead><tr><th>Indicador</th><th>Status</th><th>%</th><th>Observação</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    });
+    subPanels += `<div class="ctrim-panel${ativo?'':' ctrim-hidden'}" id="ctrim-${k}">${trimSections}</div>`;
+  });
+  return `<div class="cfg-panel" id="cfgtab-TRIM">
+    <div class="cfg-section-title">Metas Trimestrais — Status por AME e Trimestre</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${subTabs}</div>
+    <div>${subPanels}</div>
+  </div>
+  <style>
+    .ctab{padding:5px 12px;border:1.5px solid #c5cae9;border-radius:16px;background:#fff;cursor:pointer;font-size:11px;font-weight:600;color:#3949ab;transition:.15s}
+    .ctab.ctab-active{background:#1a237e;color:#fff;border-color:#1a237e}
+    .ctab:hover:not(.ctab-active){background:#e8eaf6;border-color:#3949ab}
+    .ctrim-hidden{display:none}
+    .cfg-trim-sel{transition:border .15s}
+    .cfg-trim-sel:focus{outline:none;border-color:#5c6bc0;box-shadow:0 0 0 2px #c5cae9}
+  </style>`;
+}
+
+function ctab(btn, id){
+  btn.closest('div').querySelectorAll('.ctab').forEach(t=>t.classList.remove('ctab-active'));
+  btn.closest('div').nextElementSibling.querySelectorAll('[id^="ctrim-"]').forEach(p=>{
+    p.classList.add('ctrim-hidden');
+  });
+  btn.classList.add('ctab-active');
+  document.getElementById(id)?.classList.remove('ctrim-hidden');
+}
+
+async function salvarMetasTrimestrais(){
+  const btn    = document.getElementById('cfg-btn-salvar-trim');
+  const status = document.getElementById('cfg-status');
+  if(btn){ btn.disabled=true; btn.textContent='Salvando…'; }
+  if(!_trimData){ if(btn){ btn.disabled=false; btn.textContent='📅 Salvar Metas Trimestrais'; } return; }
+
+  const td = JSON.parse(JSON.stringify(_trimData)); // deep copy
+  const defs = td.metasDef || [];
+  const trims = td.trimestres || ['1T/2026'];
+  KEYS.forEach(k=>{
+    trims.forEach(tKey=>{
+      const tShort = tKey.replace('/','');
+      const ameBase = td.ames?.[k];
+      const ameT = ameBase?.[tKey] || ameBase;
+      if(!ameT?.metas) return;
+      defs.forEach(m=>{
+        const st  = document.getElementById(`cftrim_${k}_${tShort}_${m.id}_st`)?.value;
+        const val = document.getElementById(`cftrim_${k}_${tShort}_${m.id}_val`)?.value;
+        const obs = document.getElementById(`cftrim_${k}_${tShort}_${m.id}_obs`)?.value;
+        if(st !== undefined) {
+          ameT.metas[m.id] = {
+            status: st,
+            valor: val !== '' && val !== undefined ? parseFloat(val) : null,
+            observacao: obs || ''
+          };
+        }
+      });
+    });
+  });
+
+  try {
+    const r = await fetch('/api/salvar-metas-trim', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(td)
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    _trimData = td;
+    status.style.background='#e8f5e9'; status.style.borderLeftColor='#00875a'; status.style.color='#1b5e20';
+    status.style.display='block';
+    status.innerHTML='✅ <strong>Metas Trimestrais salvas!</strong>';
+    setTimeout(()=>{ status.style.display='none'; }, 5000);
+  } catch(e){
+    status.style.display='block';
+    status.style.background='#ffebee'; status.style.borderLeftColor='#c62828'; status.style.color='#b71c1c';
+    status.innerHTML='❌ Erro ao salvar metas: '+e.message;
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='📅 Salvar Metas Trimestrais'; }
+  }
 }
 
 function cfgTab(btn,id){
