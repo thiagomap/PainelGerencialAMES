@@ -248,7 +248,13 @@ function lerMetasEnv() {
   const get = k => { const l = lines.find(l => l.startsWith(k+'=')); return l ? l.slice(k.length+1).trim() : ''; };
   const ENV_AMES = { cp:'CAMPINAS', cb:'CASA_BRANCA', frc:'FRANCA', rp:'RIBEIRAO', scl:'SAO_CARLOS', avj:'JURUMIRIM' };
   Object.entries(ENV_AMES).forEach(([k, ek]) => {
-    result[k] = { mutirao: get(`${ek}_MUTIRAO`) === '1' };
+    result[k] = { mutirao: get(`${ek}_MUTIRAO`) === '1', mutiraoVol: {} };
+    // Volumes mensais do mutirão (extra CMA por mês): REALIZADO|META
+    ['JAN','FEV','MAR','ABR','MAI','JUN'].forEach(m => {
+      const v = get(`${ek}_MUTIRAO_${m}`);
+      const parts = v.split('|');
+      result[k].mutiraoVol[m] = { real: parseFloat(parts[0])||0, meta: parseFloat(parts[1])||0 };
+    });
     ['CONS','NMED','CMA','CMA_MENOR','SADT'].forEach(met => {
       result[k][met] = {};
       ['MAI','JUN'].forEach(m => {
@@ -371,21 +377,35 @@ for (const [key, ame] of Object.entries(ames)) {
       const cm = envMetas[key] || {};
       const avg = v => Math.round(v / MESES);
       const consultMetaSem = q.s271.cont    + (cm.CONS?.MAI     || avg(q.s271.cont))     + (cm.CONS?.JUN     || avg(q.s271.cont));
-      const cmaAMetaSem    = q.cmaA.cont    + (cm.CMA?.MAI      || avg(q.cmaA.cont))     + (cm.CMA?.JUN      || avg(q.cmaA.cont));
       const cmaMMetaSem    = q.cmaM.cont    + (cm.CMA_MENOR?.MAI|| avg(q.cmaM.cont))     + (cm.CMA_MENOR?.JUN|| avg(q.cmaM.cont));
       const sadtMetaSem    = q.sadtExt.cont + (cm.SADT?.MAI     || avg(q.sadtExt.cont))  + (cm.SADT?.JUN     || avg(q.sadtExt.cont));
       const s272MetaSem    = q.s272.cont    + (cm.NMED?.MAI      || avg(q.s272.cont))     + (cm.NMED?.JUN      || avg(q.s272.cont));
+
+      // CMA Maior: meta contratual + volume de mutirão (se ativo)
+      const cmaAMetaContratual = q.cmaA.cont + (cm.CMA?.MAI || avg(q.cmaA.cont)) + (cm.CMA?.JUN || avg(q.cmaA.cont));
+      const mv = cm.mutiraoVol || {};
+      const mutiraoMetaSem = cm.mutirao
+        ? ['JAN','FEV','MAR','ABR','MAI','JUN'].reduce((s, m) => s + (mv[m]?.meta || 0), 0)
+        : 0;
+      const mutiraoRealSem = cm.mutirao
+        ? ['JAN','FEV','MAR','ABR','MAI','JUN'].reduce((s, m) => s + (mv[m]?.real || 0), 0)
+        : 0;
+      const cmaAMetaSem = cmaAMetaContratual + mutiraoMetaSem;
+
       return {
-        // metas semestrais corretas (com variações mensais)
+        // metas semestrais corretas (contratual + mutirão para CMA)
         consultMetaSem, s272MetaSem, cmaAMetaSem, cmaMMetaSem, sadtMetaSem,
+        cmaAMetaContratual,   // meta contratual pura (sem mutirão)
+        mutiraoMetaSem,        // volume meta mutirão do semestre
+        mutiraoRealSem,        // volume realizado mutirão do semestre
         // retrocompat
         consultMeta: consultMetaSem,
         cmaAMeta:    cmaAMetaSem,
         cmaMeta:     cmaMMetaSem,
         sadtMeta:    sadtMetaSem,
-        // projeções ao ritmo atual (real × 1.5)
+        // projeções ao ritmo atual
         consultProj: Math.round(q.s271.real    * FATOR),
-        cmaAProj:    Math.round(q.cmaA.real    * FATOR),
+        cmaAProj:    Math.round((q.cmaA.real + mutiraoRealSem) * FATOR),
         cmaMProj:    Math.round(q.cmaM.real    * FATOR),
         sadtProj:    Math.round(q.sadtExt.real * FATOR),
       };
@@ -399,7 +419,7 @@ for (const [key, ame] of Object.entries(ames)) {
     // semaforo
     riscos,
     status,
-    // mutirao: meta CMA Maior = 100% no semestre (nao 95%)
+    // mutirao: meta CMA Maior = meta contratual + volume mutirão
     mutirao: envMetas[key]?.mutirao || false,
   };
 

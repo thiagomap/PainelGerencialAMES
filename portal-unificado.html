@@ -1117,7 +1117,7 @@ function buildAme(k){
   const metas=[
     {id:'consulta',nome:'1. Consultas Médicas',                       real:a.consultReal||0,cont:a.consultCont||0,metaSem:a.consultMetaSem||(Math.round((a.consultCont||0)*mesesSem/mesesReal)),min:90},
     {id:'naoMed', nome:'2. Não Médica + Proc.',                       real:a.s272Real||0,   cont:a.s272Cont||0,  metaSem:a.s272MetaSem||  (Math.round((a.s272Cont||0)  *mesesSem/mesesReal)),min:90},
-    {id:'cmaA',   nome:'3. CMA Maior (Cirurgia Maior Ambulatorial)',  real:a.cmaAReal||0,   cont:a.cmaACont||0,  metaSem:a.cmaAMetaSem|| (Math.round((a.cmaACont||0)  *mesesSem/mesesReal)),min: a.mutirao?100:95},
+    {id:'cmaA',   nome:`3. CMA Maior${a.mutirao?' 🚀':''}`,  real:(a.cmaAReal||0)+(a.mutiraoRealSem||0),   cont:a.cmaACont||0,  metaSem:a.cmaAMetaSem|| (Math.round((a.cmaACont||0)  *mesesSem/mesesReal)),min: a.mutirao?100:95},
     {id:'cmaM',   nome:'4. cma menor (Cirurgia Menor Ambulatorial)',  real:a.cmaMReal||0,   cont:a.cmaMCont||0,  metaSem:a.cmaMMetaSem|| (Math.round((a.cmaMCont||0)  *mesesSem/mesesReal)),min:95},
     {id:'sadt',   nome:'5. SADT Externo',                             real:a.sadtReal||0,   cont:a.sadtCont||0,  metaSem:a.sadtMetaSem|| (Math.round((a.sadtCont||0)  *mesesSem/mesesReal)),min:90},
   ];
@@ -3760,6 +3760,10 @@ function _renderCfgForm(wrap, cfg){
     </div>`;
   });
 
+  // — tab Mutirão CMA
+  tabs += `<button class="cfg-tab" onclick="cfgTab(this,'MUTIRAO')" style="background:${Object.values(CFG_AME_NOMES).some((_,i)=>cfg.ames?.[CFG_AME_KEYS[i]]?.mutirao)?'#7b1fa2':''}; color:${Object.values(CFG_AME_NOMES).some((_,i)=>cfg.ames?.[CFG_AME_KEYS[i]]?.mutirao)?'#fff':''}">🚀 Mutirão CMA</button>`;
+  panels += _buildMutiraoPanel(cfg);
+
   // — tab Metas Trimestrais
   tabs += `<button class="cfg-tab" onclick="cfgTab(this,'TRIM')">📅 Metas Trim.</button>`;
   panels += _buildTrimConfigPanel(_trimData);
@@ -3837,6 +3841,80 @@ function _renderCfgForm(wrap, cfg){
       r.addEventListener('input',upd); d.addEventListener('input',upd);
     });
   });
+}
+
+function _buildMutiraoPanel(cfg){
+  const amesMut = CFG_AME_KEYS.filter(k => cfg.ames?.[k]?.mutirao);
+  if(!amesMut.length){
+    return `<div class="cfg-panel" id="cfgtab-MUTIRAO">
+      <div style="padding:30px;text-align:center;color:#888;font-size:13px">
+        Nenhum AME com Mutirão ativo.<br>Ative o Mutirão na aba do AME correspondente.
+      </div></div>`;
+  }
+
+  // Sub-tabs por AME (apenas AMEs com mutirão)
+  let subTabs='', subPanels='';
+  amesMut.forEach((ak,i)=>{
+    const label   = CFG_AME_NOMES[ak];
+    const mv      = cfg.ames?.[ak]?.mutiraoVol || {};
+    const ativo   = i===0 ? ' ctab-active' : '';
+    const a       = DD[{CAMPINAS:'cp',CASA_BRANCA:'cb',FRANCA:'frc',JURUMIRIM:'avj',RIBEIRAO:'rp',SAO_CARLOS:'scl'}[ak]]?.analise || {};
+    const metaCont= a.cmaAMetaContratual || a.cmaAMetaSem || 0;
+    subTabs  += `<button class="ctab${ativo}" onclick="ctab(this,'cmut-${ak}')">${label}</button>`;
+
+    const rows = CFG_MESES.slice(0,6).map((m,mi)=>{
+      const v = mv[m] || '';
+      const parts = (typeof v==='string' ? v : '').split('|');
+      const real = parts[0]||'', meta = parts[1]||'';
+      return `<tr>
+        <td class="cfg-mes">${CFG_MESES_PT[mi]}</td>
+        <td><input type="number" class="cfg-int" id="cmut_${ak}_${m}_real" value="${esc(real)}" placeholder="—" style="width:90px"></td>
+        <td><input type="number" class="cfg-int" id="cmut_${ak}_${m}_meta" value="${esc(meta)}" placeholder="0" style="width:90px" oninput="atualizarTotalMut('${ak}')"></td>
+      </tr>`;
+    }).join('');
+
+    subPanels += `<div class="ctrim-panel${ativo?'':' ctrim-hidden'}" id="cmut-${ak}">
+      <div style="background:#f3e5f5;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px">
+        <strong style="color:#4a148c">🚀 ${label} — Mutirão CMA Maior</strong><br>
+        <span style="color:#7b1fa2">Meta contratual semestral: <strong>${ni(metaCont)}</strong> procedimentos</span><br>
+        <span style="color:#555">Meta Total = Contratual + Mutirão = <strong id="cmut_total_${ak}">${ni(metaCont + CFG_MESES.slice(0,6).reduce((s,m)=>s+(parseFloat((mv[m]||'').split('|')[1])||0),0))}</strong></span>
+      </div>
+      <table class="cfg-table">
+        <thead><tr><th>Mês</th><th>Realizado Mutirão</th><th>Meta Mutirão (extra)</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr>
+          <td class="cfg-mes" style="font-weight:700">Total</td>
+          <td id="cmut_real_tot_${ak}" style="font-size:12px;color:#1b5e20;font-weight:700;padding:4px 6px">${ni(CFG_MESES.slice(0,6).reduce((s,m)=>s+(parseFloat((mv[m]||'').split('|')[0])||0),0))}</td>
+          <td id="cmut_meta_tot_${ak}" style="font-size:12px;color:#7b1fa2;font-weight:700;padding:4px 6px">${ni(CFG_MESES.slice(0,6).reduce((s,m)=>s+(parseFloat((mv[m]||'').split('|')[1])||0),0))}</td>
+        </tr></tfoot>
+      </table>
+    </div>`;
+  });
+
+  return `<div class="cfg-panel" id="cfgtab-MUTIRAO">
+    <div class="cfg-section-title">Volumes de Mutirão — CMA Maior (procedimentos extras)</div>
+    <p style="font-size:11px;color:#7b1fa2;margin:0 0 12px;padding:8px 12px;background:#f3e5f5;border-radius:8px">
+      💡 <strong>Meta Total = Meta Contratual + Meta Mutirão.</strong>
+      O meta contratual já está cadastrado acima (aba do AME). Aqui insira apenas os procedimentos <em>adicionais</em> do mutirão.
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${subTabs}</div>
+    ${subPanels}
+  </div>`;
+}
+
+function atualizarTotalMut(ak){
+  const metaCont = DD[{CAMPINAS:'cp',CASA_BRANCA:'cb',FRANCA:'frc',JURUMIRIM:'avj',RIBEIRAO:'rp',SAO_CARLOS:'scl'}[ak]]?.analise?.cmaAMetaContratual || 0;
+  let sumMeta=0, sumReal=0;
+  ['JAN','FEV','MAR','ABR','MAI','JUN'].forEach(m=>{
+    sumReal += parseFloat(document.getElementById(`cmut_${ak}_${m}_real`)?.value)||0;
+    sumMeta += parseFloat(document.getElementById(`cmut_${ak}_${m}_meta`)?.value)||0;
+  });
+  const elTot = document.getElementById(`cmut_total_${ak}`);
+  const elRealTot = document.getElementById(`cmut_real_tot_${ak}`);
+  const elMetaTot = document.getElementById(`cmut_meta_tot_${ak}`);
+  if(elTot) elTot.textContent = ni(metaCont + sumMeta);
+  if(elRealTot) elRealTot.textContent = ni(sumReal);
+  if(elMetaTot) elMetaTot.textContent = ni(sumMeta);
 }
 
 function _buildTrimConfigPanel(td){
@@ -3999,7 +4077,14 @@ async function salvarConfiguracoes(){
   CFG_AME_KEYS.forEach(ak=>{
     const mutBtn = document.getElementById(`cfg_mut_${ak}`);
     const mutVal = mutBtn ? (mutBtn.dataset.mutirao !== undefined ? mutBtn.dataset.mutirao==='1' : mutBtn.textContent.includes('ATIVO')) : false;
-    payload.ames[ak]={ financeiro:{}, producao:{}, mutirao: mutVal };
+    // Capturar volumes de mutirão
+    const mutVol = {};
+    CFG_MESES.slice(0,6).forEach(m=>{
+      const real = document.getElementById(`cmut_${ak}_${m}_real`)?.value||'';
+      const meta = document.getElementById(`cmut_${ak}_${m}_meta`)?.value||'';
+      mutVol[m] = `${real}|${meta||'0'}`;
+    });
+    payload.ames[ak]={ financeiro:{}, producao:{}, mutirao: mutVal, mutiraoVol: mutVol };
     CFG_MESES.forEach(m=>{
       const rec=document.getElementById(`cfg_${ak}_${m}_rec`)?.value||'';
       const desp=document.getElementById(`cfg_${ak}_${m}_desp`)?.value||'';

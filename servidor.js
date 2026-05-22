@@ -534,8 +534,14 @@ function lerConfiguracaoEnv() {
   try { lines = fs.readFileSync(CONFIG_FILE, 'utf8').split('\n'); } catch(e) { return result; }
   const get = key => { const l = lines.find(l => l.startsWith(key+'=')); return l ? l.slice(key.length+1).trim() : ''; };
   result.periodo = { PERIODO_ATUAL: get('PERIODO_ATUAL'), MESES_REALIZADOS: get('MESES_REALIZADOS'), ANO: get('ANO'), MODELO_IA: get('MODELO_IA')||'llama3.2:3b', ANTHROPIC_API_KEY: get('ANTHROPIC_API_KEY') };
+  const MESES_SEM = ['JAN','FEV','MAR','ABR','MAI','JUN'];
   AMES_CONFIG.forEach(ame => {
-    result.ames[ame] = { financeiro: {}, producao: { CONS:{}, NMED:{}, CMA:{}, CMA_MENOR:{}, SADT:{} }, mutirao: get(`${ame}_MUTIRAO`) === '1' };
+    const mutiraoAtivo = get(`${ame}_MUTIRAO`) === '1';
+    const mutiraoVol = {};
+    if (mutiraoAtivo) {
+      MESES_SEM.forEach(m => { mutiraoVol[m] = get(`${ame}_MUTIRAO_${m}`); });
+    }
+    result.ames[ame] = { financeiro: {}, producao: { CONS:{}, NMED:{}, CMA:{}, CMA_MENOR:{}, SADT:{} }, mutirao: mutiraoAtivo, mutiraoVol };
     MESES_CFG.forEach(m => { result.ames[ame].financeiro[m] = get(`${ame}_${m}`); });
     ['CONS','NMED','CMA','CMA_MENOR','SADT'].forEach(met => {
       MESES_CFG.forEach(m => { result.ames[ame].producao[met][m] = get(`${ame}_${met}_${m}`); });
@@ -572,6 +578,11 @@ function handleSalvarConfiguracao(req, res) {
           MESES_CFG.forEach(m => setVal(`${ame}_${met}_${m}`, a.producao?.[met]?.[m]||''));
         });
         if(a.mutirao !== undefined) setVal(`${ame}_MUTIRAO`, a.mutirao ? '1' : '0');
+        if(a.mutiraoVol) {
+          ['JAN','FEV','MAR','ABR','MAI','JUN'].forEach(m => {
+            setVal(`${ame}_MUTIRAO_${m}`, a.mutiraoVol[m] || '|0');
+          });
+        }
       });
       if(cfg.hospital) MESES_CFG.forEach(m => setVal(`HOSPITAL_${m}`, cfg.hospital[m]||''));
       fs.writeFileSync(CONFIG_FILE, lines.join('\n'), 'utf8');
