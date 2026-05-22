@@ -1774,11 +1774,13 @@ function renderTrimContent(k){
   const procData = window.PROCEDIMENTOS_TRIM?.ames?.[k] || [];
   const espData  = window.PROCEDIMENTOS_TRIM?.consultasPactuadas?.[k] || [];
 
-  function triCell(pct, real, meta){
-    if(real==null||meta==null||meta===0) return '<td class="tc">–</td><td class="tc" style="color:#aaa">–</td>';
-    const cor = pct>=100?'#00875a':pct>=75?'#e65100':'#c0392b';
-    const p = real===0?'●':pct+'%';
-    return `<td class="tc">${ni(real)}<span style="font-size:9px;color:#888">/${ni(meta)}</span></td><td class="tc"><strong style="color:${cor}">${p}</strong></td>`;
+  // min: SES mín 95% para CMA/cma (monitoramento), 90% padrão para outros
+  function triCell(pct, real, meta, min){
+    if(real==null||meta==null||meta===0) return '<td class="tc" style="color:#aaa">–</td><td class="tc" style="color:#aaa">–</td>';
+    if(real===0) return `<td class="tc" style="color:#aaa">0<span style="font-size:9px">/${ni(meta)}</span></td><td class="tc"><span title="Aguardando dados" style="color:#888;font-size:10px">Ag.</span></td>`;
+    const m = min || 95; // Quadro = CMA/cma → SES mín 95%
+    const cor = pct>=100?'#00875a':pct>=m?'#e65100':'#c0392b';
+    return `<td class="tc">${ni(real)}<span style="font-size:9px;color:#888">/${ni(meta)}</span></td><td class="tc"><strong style="color:${cor}">${pct}%</strong></td>`;
   }
 
   const procCharts = procData.length ? (() => {
@@ -1790,7 +1792,8 @@ function renderTrimContent(k){
     const p2T  = tot2T.meta>0 && tot2T.real>0 ? Math.round(tot2T.real/tot2T.meta*100) : null;
     const pSem = (tot1T.meta+tot2T.meta)>0 ? Math.round((tot1T.real+tot2T.real)/(tot1T.meta+tot2T.meta)*100) : null;
     const pAno = totAno.meta>0 ? Math.round(totAno.real/totAno.meta*100) : null;
-    function badge(p){ if(p==null) return '<span style="color:#aaa">–</span>'; const c=p>=100?'#00875a':p>=75?'#e65100':'#c0392b'; return `<strong style="color:${c}">${p}%</strong>`; }
+    // CMA/cma → SES mín 95%. Usa 95% como padrão para Quadro de Monitoramento.
+    function badge(p){ if(p==null) return '<span style="color:#aaa">–</span>'; const c=p>=100?'#00875a':p>=95?'#e65100':'#c0392b'; return `<strong style="color:${c}">${p}%</strong>`; }
 
     const rows = procData.map(p=>`<tr>
       <td style="font-size:11px;font-weight:600;color:#001f5b;padding:4px 8px">${p.nome.length>38?p.nome.substring(0,37)+'…':p.nome}</td>
@@ -1932,11 +1935,11 @@ function renderTrimContent(k){
           metaPorMes[i]>0 && v>0 ? Math.round(v/metaPorMes[i]*100) : null
         );
 
-        // Cor por performance: verde ≥100%, laranja 75-99%, vermelho <75%, cinza = sem dados
+        // Cores: verde ≥100%, laranja ≥95% (SES mín CMA), vermelho <95%, cinza = sem dados
         const barColors = pctMes.map(p =>
           p === null ? 'rgba(180,180,180,0.4)'
           : p >= 100  ? 'rgba(0,135,90,0.8)'
-          : p >= 75   ? 'rgba(230,81,0,0.8)'
+          : p >= 95   ? 'rgba(230,81,0,0.8)'
           : 'rgba(192,57,43,0.8)'
         );
 

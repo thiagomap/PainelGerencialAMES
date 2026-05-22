@@ -301,16 +301,25 @@ function parseQuadro(key, filePath) {
       const nome = String(r[1]||'').trim();
       if (!nome || nome.startsWith('Quadro') || nome.startsWith('AME')) continue;
 
-      // Mensais (Jan=col2 … Dez=col13)
+      // Mensais (Jan=col2…Dez=col13): mensal[0]=Jan, mensal[1]=Fev, mensal[2]=Mar, mensal[3]=Abr
       const mensal = [2,3,4,5,6,7,8,9,10,11,12,13].map(c => numTri(r[c]));
 
-      // Trimestres — usando colunas fixas confirmadas
+      // Trimestres — colunas fixas confirmadas
       const meta1T = numTri(r[14]), real1T = numTri(r[15]);
-      const meta2T = numTri(r[18]), real2T = numTri(r[19]);
       const meta3T = numTri(r[21]), real3T = numTri(r[22]);
       const meta4T = numTri(r[24]), real4T = numTri(r[25]);
       const metaAno = numTri(r[27]), realAno = numTri(r[28]);
       const metaMes = numTri(r[17]);
+      const meta2T = numTri(r[18]);
+
+      // real2T: usa col 19 se preenchida; caso contrário estima da soma mensal Abr+Mai+Jun
+      // (Q2 parcial: só Abril disponível → mensal[3])
+      const real2T_col = numTri(r[19]);
+      const real2T_mensal = mensal[3] + mensal[4] + mensal[5]; // Abr+Mai+Jun
+      const real2T = real2T_col > 0 ? real2T_col
+                   : real2T_mensal > 0 ? real2T_mensal
+                   : 0;
+      const real2T_parcial = real2T_col === 0 && real2T_mensal > 0; // flag: estimado dos mensais
 
       const pct1T = meta1T > 0 ? Math.round(real1T / meta1T * 100) : null;
       const pct2T = meta2T > 0 ? Math.round(real2T / meta2T * 100) : null;
@@ -326,7 +335,7 @@ function parseQuadro(key, filePath) {
         nome, cod: String(r[0]||''), aba: sn,
         mensal, metaMes,
         meta1T, real1T, pct1T, status1T: statusTri(real1T, meta1T),
-        meta2T, real2T, pct2T, status2T: statusTri(real2T, meta2T),
+        meta2T, real2T, pct2T, real2T_parcial, status2T: statusTri(real2T, meta2T),
         meta3T, real3T, pct3T, status3T: statusTri(real3T, meta3T),
         meta4T, real4T, pct4T, status4T: statusTri(real4T, meta4T),
         metaAno, realAno, pctAno, statusAno: statusTri(realAno, metaAno),
@@ -373,7 +382,6 @@ function parseConsultasPactuadas() {
 
 // ─── 3. Calcula status consolidado do Quadro de Monitoramento ─────────────────
 function calcMonitoramentoStatus(procs, triKey) {
-  // triKey: '1T' (default), '2T', etc.
   const mk = triKey === '2T' ? 'meta2T' : 'meta1T';
   const rk = triKey === '2T' ? 'real2T' : 'real1T';
   const pk = triKey === '2T' ? 'pct2T'  : 'pct1T';
@@ -383,12 +391,14 @@ function calcMonitoramentoStatus(procs, triKey) {
   const totalMeta = procs.reduce((s, p) => s + (p[mk]||0), 0);
   const totalReal = procs.reduce((s, p) => s + (p[rk]||0), 0);
   const p = pct(totalReal, totalMeta);
-  // Monitoramento = procedimentos CMA/cma → SES mín 95%
+  // CMA/cma → SES mín 95%
   const abaixo = procs.filter(pr => pr[pk] !== null && pr[pk] < 100 && pr[pk] > 0);
+  const isParcial2T = triKey === '2T' && procs.some(pr => pr.real2T_parcial);
+  const sufixo = isParcial2T ? ' (Abr/2026 — estimativa Q2, 1 de 3 meses)' : '';
   const obs = abaixo.length > 0
-    ? `Abaixo de 100%: ${abaixo.map(x => x.nome.substring(0,28)+'…').join('; ')}`
-    : 'Todos os procedimentos ≥ 100% da meta';
-  return { status: status(p, 95), pct: p, obs };
+    ? `Abaixo de 100%: ${abaixo.map(x => x.nome.substring(0,28)+'…').join('; ')}${sufixo}`
+    : `Todos os procedimentos ≥ 100% da meta${sufixo}`;
+  return { status: isParcial2T ? 'parcial' : status(p, 95), pct: p, obs };
 }
 
 // ─── 4. Calcula status esp_drs ─────────────────────────────────────────────────
