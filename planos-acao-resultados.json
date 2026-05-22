@@ -3,12 +3,12 @@
     "nomeAme": "AME Campinas",
     "resultado": {
       "aprovado": false,
-      "resumo_executivo": "O plano de ação submetido para o AME Campinas apresenta uma série de falhas significativas em relação às metas contratuais semestrais até Junho/2026. A falta de ações concretas para atingir algumas das metas é alarmante, e é necessário um plano mais detalhado e realista para garantir o cumprimento dos objetivos.",
+      "resumo_executivo": "O plano de ação submetido para o AME Campinas apresenta um desempenho insatisfatório em relação às metas contratuais, especialmente em Consultas Médicas e SADT Externo. A falta de ações concretas para alcançar essas metas pode comprometer a cumprimento do contrato.",
       "metas_detalhadas": [
         {
           "meta": "Consultas Médicas",
           "cumpre": false,
-          "risco": "ALTO\nA AÇÃO PROPOSTA PARA AS CONSULTAS MÉDICAS É INCONSISTENTE COM A META CONTRATADA. EMBORA O NÚMERO DE UNIDADES REALIZADAS SEJA MAIOR DO QUE O CONTRATADO, NÃO HÁ UM PLANO CONCRETO PARA ALCANÇAR A META SEMESTRAL DE 37.236 UNIDADES. A FALTA DE AÇÕES CONCRETAS, COMO AUMENTO DA CAPACIDADE DE ATENDIMENTO OU IMPLEMENTAÇÃO DE ESTRATÉGIAS DE EFICIÊNCIA, É INSUFICIENTE PARA GARANTIR O CUMPRIMENTO DA META.",
+          "risco": "BAIXO\nA META PROPOSTA É DE 37.236 UNIDADES, MAS O PLANO PREVÊ APENAS UM AUMENTO DE 44.273 UNIDADES, O QUE NÃO É SUFICIENTE PARA ALCANÇAR A META DE 90% CONTRATUADA. A FALTA DE AÇÕES CONCRETAS PARA REDUZIR AS CONSULTAS MÉDICAS E AUMENTAR A EFICIÊNCIA DA EQUIPE É UMA LACUNA SIGNIFICATIVA.",
           "analise_detalhada": "",
           "acoes_faltantes": [],
           "acoes_do_plano": [],
@@ -16,8 +16,8 @@
         },
         {
           "meta": "NÃ£o-MÃ©dica + Proc.",
-          "cumpre": false,
-          "risco": "MEDIO",
+          "cumpre": true,
+          "risco": "MEDITADO\nA META PROPOSTA É DE 27.216 UNIDADES, E O PLANO PREVÊ UM AUMENTO DE 30.579 UNIDADES, O QUE SUPERA A META DE 90% CONTRATUADA. NO ENTANTO, É IMPORTANTE NOTAR QUE A EFICIÊNCIA DA EQUIPE NÃO FOI COMPROVADA, E HÁ NECESSIDADE DE AÇÕES CONCRETAS PARA MANTER ESSA TENDÊNCIA.",
           "analise_detalhada": "",
           "acoes_faltantes": [],
           "acoes_do_plano": [],
@@ -26,7 +26,7 @@
         {
           "meta": "CMA Maior (Cirurgia Maior Ambulatorial)",
           "cumpre": false,
-          "risco": "MEDIO",
+          "risco": "MEDITADO\nA META PROPOSTA É DE 4.200 UNIDADES, E O PLANO PREVÊ UM AUMENTO DE 4.241 UNIDADES, QUE É LIGEIRAMENTE SUPERIOR À META DE 95% CONTRATUADA. NO ENTANTO, A FALTA DE AÇÕES CONCRETAS PARA REDUZIR O TEMPO MÉDICO DOS PACIENTES E AUMENTAR A EFICIÊNCIA DA EQUIPE É UMA LACUNA SIGNIFICATIVA.",
           "analise_detalhada": "",
           "acoes_faltantes": [],
           "acoes_do_plano": [],
@@ -35,7 +35,7 @@
         {
           "meta": "cma menor (Cirurgia Menor Ambulatorial)",
           "cumpre": false,
-          "risco": "MEDIO",
+          "risco": "MEDITADO\nA META PROPOSTA É DE 3.600 UNIDADES, E O PLANO PREVÊ UM AUMENTO DE 4.443 UNIDADES, O QUE SUPERA A META DE 95% CONTRATUADA. NO ENTANTO, A FALTA DE AÇÕES CONCRETAS PARA REDUZIR O TEMPO MÉDICO DOS PACIENTES E AUMENTAR A EFICIÊNCIA DA EQUIPE É UMA LACUNA SIGNIFICATIVA.",
           "analise_detalhada": "",
           "acoes_faltantes": [],
           "acoes_do_plano": [],
@@ -44,7 +44,7 @@
         {
           "meta": "SADT Externo",
           "cumpre": false,
-          "risco": "MEDIO",
+          "risco": "BAIXO\nA META PROPOSTA É DE 19.644 UNIDADES, MAS O PLANO PREVÊ APENAS UM AUMENTO DE 18.089 UNIDADES, O QUE NÃO É SUFICIENTE PARA ALCANÇAR A META DE 90% CONTRATUADA. A FALTA DE AÇÕES CONCRETAS PARA REDUZIR AS DEPENDÊNCIAS DOS PACIENTES EM SERVIÇOS EXTERNOS E AUMENTAR A EFICIÊNCIA DA EQUIPE É UMA LACUNA SIGNIFICATIVA.",
           "analise_detalhada": "",
           "acoes_faltantes": [],
           "acoes_do_plano": [],
@@ -52,7 +52,7 @@
         }
       ],
       "pontos_fortes": [
-        "- Falta de ações concretas para alcançar algumas das metas.\n- Plano não é detalhado o suficiente para garantir o cumprimento dos objetivos.\n- Necessidade de aumento da capacidade de atendimento ou implementação de estratégias de eficiência."
+        "• O plano apresenta um desempenho insatisfatório em relação às metas contratuais.\n• Há falta de ações concretas para alcançar as metas de Consultas Médicas e SADT Externo.\n• A eficiência da equipe não foi comprovada em algumas áreas."
       ],
       "lacunas_criticas": [
         {
@@ -64,14 +64,14 @@
       "plano_de_acao_sugerido": [
         {
           "prioridade": 1,
-          "acao": "Implementar estratégias de eficiência para aumentar a capacidade de atendimento nas áreas de não-médica + procedimentos e SADT externo.\n2. Aumentar a capacidade de atendimento em cirurgia maior ambulatorial e menor ambulatorial.\n3. Desenvolver um plano concreto e detalhado para alcançar as metas de consultas médicas e não-médica + procedimentos.",
+          "acao": "Ação concreta a tomar: Reduzir as consultas médicas e aumentar a eficiência da equipe.\nMeta impactada: Consultas Médicas\nPrazo sugerido: 2 meses\nImpacto esperado: Redução de 3.997 unidades em 2 meses.",
           "meta": "",
           "prazo": "",
           "impacto_estimado": ""
         }
       ],
       "conclusao": "",
-      "_textoOriginal": "[VEREDICTO] INSUFICIENTE\n\n[RESUMO]\nO plano de ação submetido para o AME Campinas apresenta uma série de falhas significativas em relação às metas contratuais semestrais até Junho/2026. A falta de ações concretas para atingir algumas das metas é alarmante, e é necessário um plano mais detalhado e realista para garantir o cumprimento dos objetivos.\n\n[META] Consultas Médicas | NAO_CUMPRE | ALTO\nA ação proposta para as consultas médicas é inconsistente com a meta contratada. Embora o número de unidades realizadas seja maior do que o contratado, não há um plano concreto para alcançar a meta semestral de 37.236 unidades. A falta de ações concretas, como aumento da capacidade de atendimento ou implementação de estratégias de eficiência, é insuficiente para garantir o cumprimento da meta.\n\n[META] NÃ£o-MÃ©dica + Proc. | ALTO\nA proposta para as não-médicas e procedimentos apresenta um número maior do que o contratado, mas não há um plano claro para alcançar a meta semestral de 27.216 unidades. A falta de ações concretas, como otimização da capacidade de atendimento ou implementação de tecnologias, é insuficiente para garantir o cumprimento da meta.\n\n[META] CMA Maior (Cirurgia Maior Ambulatorial) | NAO_CUMPRE\nA ação proposta para a cirurgia maior ambulatorial não é suficiente para alcançar a meta semestral de 4.200 unidades. A falta de ações concretas, como aumento da capacidade de atendimento ou implementação de estratégias de eficiência, é insuficiente para garantir o cumprimento da meta.\n\n[META] cma menor (Cirurgia Menor Ambulatorial) | NAO_CUMPRE\nA ação proposta para a cirurgia menor ambulatorial não é suficiente para alcançar a meta semestral de 3.600 unidades. A falta de ações concretas, como otimização da capacidade de atendimento ou implementação de tecnologias, é insuficiente para garantir o cumprimento da meta.\n\n[META] SADT Externo | NAO_CUMPRE\nA proposta para o SADT externo apresenta um número maior do que o contratado, mas não há um plano claro para alcançar a meta semestral de 19.644 unidades. A falta de ações concretas, como aumento da capacidade de atendimento ou implementação de estratégias de eficiência, é insuficiente para garantir o cumprimento da meta.\n\n[PONTOS]\n- Falta de ações concretas para alcançar algumas das metas.\n- Plano não é detalhado o suficiente para garantir o cumprimento dos objetivos.\n- Necessidade de aumento da capacidade de atendimento ou implementação de estratégias de eficiência.\n\n[LACUNA] [ALTA]\nA lacuna mais significativa é a falta de um plano concreto e detalhado para alcançar algumas das metas. É necessário um plano mais realista e eficaz para garantir o cumprimento dos objetivos.\n\n[PRIORIDADE]\n1. Implementar estratégias de eficiência para aumentar a capacidade de atendimento nas áreas de não-médica + procedimentos e SADT externo.\n2. Aumentar a capacidade de atendimento em cirurgia maior ambulatorial e menor ambulatorial.\n3. Desenvolver um plano concreto e detalhado para alcançar as metas de consultas médicas e não-médica + procedimentos.\n\n[CONCLUSÃO]\nO plano de ação submetido para o AME Campinas é insuficiente para garantir o cumprimento das metas contratuais semestrais até Junho/2026. É necessário um plano mais detalhado e realista, com estratégias eficazes para aumentar a capacidade de atendimento e implementação de tecnologias que otimizem os processos. Além disso, é fundamental aumentar a capacidade de atendimento em algumas áreas e desenvolver um plano concreto para alcançar as metas de consultas médicas e não-médica + procedimentos."
+      "_textoOriginal": "[VEREDICTO] INSUFICIENTE\n\n[RESUMO]\nO plano de ação submetido para o AME Campinas apresenta um desempenho insatisfatório em relação às metas contratuais, especialmente em Consultas Médicas e SADT Externo. A falta de ações concretas para alcançar essas metas pode comprometer a cumprimento do contrato.\n\n[META] Consultas Médicas | NAO_CUMPRE | BAIXO\nA meta proposta é de 37.236 unidades, mas o plano prevê apenas um aumento de 44.273 unidades, o que não é suficiente para alcançar a meta de 90% contratuada. A falta de ações concretas para reduzir as consultas médicas e aumentar a eficiência da equipe é uma lacuna significativa.\n\n[META] NÃ£o-MÃ©dica + Proc. | CUMPRE | MEDITADO\nA meta proposta é de 27.216 unidades, e o plano prevê um aumento de 30.579 unidades, o que supera a meta de 90% contratuada. No entanto, é importante notar que a eficiência da equipe não foi comprovada, e há necessidade de ações concretas para manter essa tendência.\n\n[META] CMA Maior (Cirurgia Maior Ambulatorial) | NAO_CUMPRE | MEDITADO\nA meta proposta é de 4.200 unidades, e o plano prevê um aumento de 4.241 unidades, que é ligeiramente superior à meta de 95% contratuada. No entanto, a falta de ações concretas para reduzir o tempo médico dos pacientes e aumentar a eficiência da equipe é uma lacuna significativa.\n\n[META] cma menor (Cirurgia Menor Ambulatorial) | NAO_CUMPRE | MEDITADO\nA meta proposta é de 3.600 unidades, e o plano prevê um aumento de 4.443 unidades, o que supera a meta de 95% contratuada. No entanto, a falta de ações concretas para reduzir o tempo médico dos pacientes e aumentar a eficiência da equipe é uma lacuna significativa.\n\n[META] SADT Externo | NAO_CUMPRE | BAIXO\nA meta proposta é de 19.644 unidades, mas o plano prevê apenas um aumento de 18.089 unidades, o que não é suficiente para alcançar a meta de 90% contratuada. A falta de ações concretas para reduzir as dependências dos pacientes em serviços externos e aumentar a eficiência da equipe é uma lacuna significativa.\n\n[PONTOS]\n• O plano apresenta um desempenho insatisfatório em relação às metas contratuais.\n• Há falta de ações concretas para alcançar as metas de Consultas Médicas e SADT Externo.\n• A eficiência da equipe não foi comprovada em algumas áreas.\n\n[LACUNA] [ALTA]\nA lacuna mais significativa é a falta de ações concretas para reduzir as consultas médicas e aumentar a eficiência da equipe. Além disso, a falta de ações concretas para reduzir as dependências dos pacientes em serviços externos e aumentar a eficiência da equipe também é uma lacuna importante.\n\n[PRIORIDADE]\n1. Ação concreta a tomar: Reduzir as consultas médicas e aumentar a eficiência da equipe.\nMeta impactada: Consultas Médicas\nPrazo sugerido: 2 meses\nImpacto esperado: Redução de 3.997 unidades em 2 meses.\n\n[CONCLUSÃO]\nO plano de ação submetido para o AME Campinas apresenta um desempenho insatisfatório em relação às metas contratuais, especialmente em Consultas Médicas e SADT Externo. É fundamental tomar medidas concretas para reduzir as consultas médicas e aumentar a eficiência da equipe, além de reduzir as dependências dos pacientes em serviços externos. Além disso, é importante revisar e ajustar o plano regularmente para garantir que as metas sejam alcançadas dentro do prazo estabelecido."
     },
     "fileName": "Relatório AME Campinas.pdf",
     "metas": [
@@ -116,7 +116,7 @@
         "falta": 0
       }
     ],
-    "ts": "2026-05-22T17:59:01.135Z"
+    "ts": "2026-05-22T19:05:55.465Z"
   },
   "frc": {
     "nomeAme": "AME Franca",

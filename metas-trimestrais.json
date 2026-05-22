@@ -90,12 +90,12 @@
         "oferta_consulta": {
           "status": "sim",
           "valor": 119,
-          "observacao": "22.136 de 18.618 consultas (estimativa Q1)"
+          "observacao": "22.136 de 18.618 consultas — Q1 (mín SES 90%)"
         },
         "sadt_linha": {
           "status": "parcial",
           "valor": 92,
-          "observacao": "9.044 de 9.822 exames SADT (estimativa Q1)"
+          "observacao": "9.044 de 9.822 exames SADT — Q1 (mín SES 90%)"
         },
         "avastin": {
           "status": "sim",
@@ -134,12 +134,12 @@
           "oferta_consulta": {
             "status": "sim",
             "valor": 119,
-            "observacao": "22.136 de 18.618 consultas (estimativa Q1)"
+            "observacao": "22.136 de 18.618 consultas — Q1 (mín SES 90%)"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 92,
-            "observacao": "9.044 de 9.822 exames SADT (estimativa Q1)"
+            "observacao": "9.044 de 9.822 exames SADT — Q1 (mín SES 90%)"
           },
           "avastin": {
             "status": "sim",
@@ -179,12 +179,12 @@
           "oferta_consulta": {
             "status": "parcial",
             "valor": 119,
-            "observacao": "7.368 de 6.206 consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 7.368 (119% da meta mensal 6.206) — proj Q2: 22.104 de 18.618 (119%) | mín SES 90% — 1 de 3 meses"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 92,
-            "observacao": "3.016 de 3.274 exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 3.016 (92% da meta mensal 3.274) — proj Q2: 9.048 de 9.822 (92%) | mín SES 90% — 1 de 3 meses"
           },
           "avastin": {
             "status": "sim",
@@ -226,12 +226,12 @@
         "oferta_consulta": {
           "status": "parcial",
           "valor": 93,
-          "observacao": "18.356 de 19.830 consultas (estimativa Q1)"
+          "observacao": "18.356 de 19.830 consultas — Q1 (mín SES 90%)"
         },
         "sadt_linha": {
           "status": "parcial",
           "valor": 90,
-          "observacao": "3.266 de 3.636 exames SADT (estimativa Q1)"
+          "observacao": "3.266 de 3.636 exames SADT — Q1 (mín SES 90%)"
         },
         "avastin": {
           "status": "na",
@@ -270,12 +270,12 @@
           "oferta_consulta": {
             "status": "parcial",
             "valor": 93,
-            "observacao": "18.356 de 19.830 consultas (estimativa Q1)"
+            "observacao": "18.356 de 19.830 consultas — Q1 (mín SES 90%)"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 90,
-            "observacao": "3.266 de 3.636 exames SADT (estimativa Q1)"
+            "observacao": "3.266 de 3.636 exames SADT — Q1 (mín SES 90%)"
           },
           "avastin": {
             "status": "na",
@@ -315,12 +315,12 @@
           "oferta_consulta": {
             "status": "parcial",
             "valor": 89,
-            "observacao": "5.883 de 6.610 consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 5.883 (89% da meta mensal 6.610) — proj Q2: 17.649 de 19.830 (89%) | mín SES 90% — 1 de 3 meses"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 90,
-            "observacao": "1.096 de 1.212 exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 1.096 (90% da meta mensal 1.212) — proj Q2: 3.288 de 3.636 (90%) | mín SES 90% — 1 de 3 meses"
           },
           "avastin": {
             "status": "na",
@@ -360,14 +360,14 @@
           "observacao": "CDR Anual enviado"
         },
         "oferta_consulta": {
-          "status": "parcial",
+          "status": "nao",
           "valor": 89,
-          "observacao": "12.171 de 13.641 consultas (estimativa Q1)"
+          "observacao": "12.171 de 13.641 consultas — Q1 (mín SES 90%)"
         },
         "sadt_linha": {
           "status": "parcial",
           "valor": 99,
-          "observacao": "2.631 de 2.670 exames SADT (estimativa Q1)"
+          "observacao": "2.631 de 2.670 exames SADT — Q1 (mín SES 90%)"
         },
         "avastin": {
           "status": "na",
@@ -404,14 +404,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "parcial",
+            "status": "nao",
             "valor": 89,
-            "observacao": "12.171 de 13.641 consultas (estimativa Q1)"
+            "observacao": "12.171 de 13.641 consultas — Q1 (mín SES 90%)"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 99,
-            "observacao": "2.631 de 2.670 exames SADT (estimativa Q1)"
+            "observacao": "2.631 de 2.670 exames SADT — Q1 (mín SES 90%)"
           },
           "avastin": {
             "status": "na",
@@ -451,12 +451,12 @@
           "oferta_consulta": {
             "status": "parcial",
             "valor": 90,
-            "observacao": "4.098 de 4.547 consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 4.098 (90% da meta mensal 4.547) — proj Q2: 12.294 de 13.641 (90%) | mín SES 90% — 1 de 3 meses"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 97,
-            "observacao": "864 de 890 exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 864 (97% da meta mensal 890) — proj Q2: 2.592 de 2.670 (97%) | mín SES 90% — 1 de 3 meses"
           },
           "avastin": {
             "status": "na",
@@ -471,7 +471,7 @@
       "trimestre": "1T/2026",
       "metas": {
         "monitoramento": {
-          "status": "parcial",
+          "status": "nao",
           "valor": 89,
           "observacao": "Abaixo de 100%: Facoemulsificação Com Implan…"
         },
@@ -498,12 +498,12 @@
         "oferta_consulta": {
           "status": "nao",
           "valor": 71,
-          "observacao": "13.749 de 19.332 consultas (estimativa Q1)"
+          "observacao": "13.749 de 19.332 consultas — Q1 (mín SES 90%)"
         },
         "sadt_linha": {
-          "status": "parcial",
+          "status": "nao",
           "valor": 84,
-          "observacao": "4.715 de 5.601 exames SADT (estimativa Q1)"
+          "observacao": "4.715 de 5.601 exames SADT — Q1 (mín SES 90%)"
         },
         "avastin": {
           "status": "sim",
@@ -515,7 +515,7 @@
         "trimestre": "1T/2026",
         "metas": {
           "monitoramento": {
-            "status": "parcial",
+            "status": "nao",
             "valor": 89,
             "observacao": "Abaixo de 100%: Facoemulsificação Com Implan…"
           },
@@ -542,12 +542,12 @@
           "oferta_consulta": {
             "status": "nao",
             "valor": 71,
-            "observacao": "13.749 de 19.332 consultas (estimativa Q1)"
+            "observacao": "13.749 de 19.332 consultas — Q1 (mín SES 90%)"
           },
           "sadt_linha": {
-            "status": "parcial",
+            "status": "nao",
             "valor": 84,
-            "observacao": "4.715 de 5.601 exames SADT (estimativa Q1)"
+            "observacao": "4.715 de 5.601 exames SADT — Q1 (mín SES 90%)"
           },
           "avastin": {
             "status": "sim",
@@ -587,12 +587,12 @@
           "oferta_consulta": {
             "status": "parcial",
             "valor": 78,
-            "observacao": "5.012 de 6.444 consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 5.012 (78% da meta mensal 6.444) — proj Q2: 15.036 de 19.332 (78%) | mín SES 90% — 1 de 3 meses"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 87,
-            "observacao": "1.621 de 1.867 exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 1.621 (87% da meta mensal 1.867) — proj Q2: 4.863 de 5.601 (87%) | mín SES 90% — 1 de 3 meses"
           },
           "avastin": {
             "status": "sim",
@@ -632,14 +632,14 @@
           "observacao": "CDR Anual enviado"
         },
         "oferta_consulta": {
-          "status": "parcial",
+          "status": "nao",
           "valor": 87,
-          "observacao": "19.415 de 22.320 consultas (estimativa Q1)"
+          "observacao": "19.415 de 22.320 consultas — Q1 (mín SES 90%)"
         },
         "sadt_linha": {
           "status": "parcial",
           "valor": 90,
-          "observacao": "6.989 de 7.731 exames SADT (estimativa Q1)"
+          "observacao": "6.989 de 7.731 exames SADT — Q1 (mín SES 90%)"
         },
         "avastin": {
           "status": "parcial",
@@ -676,14 +676,14 @@
             "observacao": "CDR Anual enviado"
           },
           "oferta_consulta": {
-            "status": "parcial",
+            "status": "nao",
             "valor": 87,
-            "observacao": "19.415 de 22.320 consultas (estimativa Q1)"
+            "observacao": "19.415 de 22.320 consultas — Q1 (mín SES 90%)"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 90,
-            "observacao": "6.989 de 7.731 exames SADT (estimativa Q1)"
+            "observacao": "6.989 de 7.731 exames SADT — Q1 (mín SES 90%)"
           },
           "avastin": {
             "status": "parcial",
@@ -722,13 +722,13 @@
           },
           "oferta_consulta": {
             "status": "parcial",
-            "valor": 89,
-            "observacao": "6.550 de 7.400 consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "valor": 88,
+            "observacao": "Abr: 6.550 (88% da meta mensal 7.440) — proj Q2: 19.650 de 22.320 (88%) | mín SES 90% — 1 de 3 meses"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 91,
-            "observacao": "2.346 de 2.577 exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 2.346 (91% da meta mensal 2.577) — proj Q2: 7.038 de 7.731 (91%) | mín SES 90% — 1 de 3 meses"
           },
           "avastin": {
             "status": "parcial",
@@ -770,12 +770,12 @@
         "oferta_consulta": {
           "status": "sim",
           "valor": 102,
-          "observacao": "9.142 de 9.000 consultas (estimativa Q1)"
+          "observacao": "9.142 de 9.000 consultas — Q1 (mín SES 90%)"
         },
         "sadt_linha": {
           "status": "parcial",
           "valor": 93,
-          "observacao": "3.844 de 4.113 exames SADT (estimativa Q1)"
+          "observacao": "3.844 de 4.113 exames SADT — Q1 (mín SES 90%)"
         },
         "avastin": {
           "status": "na",
@@ -814,12 +814,12 @@
           "oferta_consulta": {
             "status": "sim",
             "valor": 102,
-            "observacao": "9.142 de 9.000 consultas (estimativa Q1)"
+            "observacao": "9.142 de 9.000 consultas — Q1 (mín SES 90%)"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 93,
-            "observacao": "3.844 de 4.113 exames SADT (estimativa Q1)"
+            "observacao": "3.844 de 4.113 exames SADT — Q1 (mín SES 90%)"
           },
           "avastin": {
             "status": "na",
@@ -859,12 +859,12 @@
           "oferta_consulta": {
             "status": "parcial",
             "valor": 101,
-            "observacao": "3.036 de 3.000 consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 3.036 (101% da meta mensal 3.000) — proj Q2: 9.108 de 9.000 (101%) | mín SES 90% — 1 de 3 meses"
           },
           "sadt_linha": {
             "status": "parcial",
             "valor": 94,
-            "observacao": "1.292 de 1.371 exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)"
+            "observacao": "Abr: 1.292 (94% da meta mensal 1.371) — proj Q2: 3.876 de 4.113 (94%) | mín SES 90% — 1 de 3 meses"
           },
           "avastin": {
             "status": "na",

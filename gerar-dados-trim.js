@@ -25,11 +25,13 @@ function readSheet(file, sheetName) {
 
 function num(v) { return typeof v === 'number' ? v : (parseFloat(String(v||'').replace(',','.')) || 0); }
 function pct(r, m) { return m > 0 ? Math.round(r / m * 100) : null; }
-function status(p) {
-  if (p === null) return 'pendente';
-  if (p >= 100)   return 'sim';
-  if (p >= 75)    return 'parcial';
-  return 'nao';
+// min = limiar SES mínimo aceitável: 90 para Consultas/SADT/NMed, 95 para CMA Maior/cma menor
+function status(p, min) {
+  const m = min || 90; // padrão SES = 90%
+  if (p === null || p === undefined) return 'pendente';
+  if (p >= 100) return 'sim';
+  if (p >= m)   return 'parcial'; // dentro da tolerância SES mas abaixo do ideal
+  return 'nao';                   // abaixo do mínimo SES
 }
 
 // ─── NEW: Mapeamento de pastas por AME ────────────────────────────────────────
@@ -143,15 +145,19 @@ function getDash() {
   return _dashCache;
 }
 
+// Meses realizados: 4 (Jan-Abr). Q1=3 meses (Jan-Mar), Q2=1 mês feito (Abr).
+// Meta semestral = cont_4m × 6/4. Meta trimestral = meta_sem / 2. Meta mensal = meta_sem / 6.
+
 function calcOfertaConsulta(k) {
   try {
     const s271 = getDash().ames[k]?.qtde?.s271;
     if (!s271 || !s271.cont) return { status: 'pendente', valor: null, observacao: '' };
-    // cont e real são de 4 meses (Jan-Abr); Q1 = 3/4 do total
-    const real1T = Math.round(s271.real * 3 / 4);
-    const meta1T = Math.round(s271.cont * 3 / 4);
-    const p = pct(real1T, meta1T);
-    return { status: status(p), valor: p, observacao: `${real1T.toLocaleString('pt-BR')} de ${meta1T.toLocaleString('pt-BR')} consultas (estimativa Q1)` };
+    const metaSem  = Math.round(s271.cont * 6 / 4);   // meta semestral real
+    const metaQ1   = Math.round(metaSem / 2);           // meta Q1 = sem ÷ 2
+    const real1T   = Math.round(s271.real * 3 / 4);    // realizado Q1 = 3/4 dos 4m
+    const p = pct(real1T, metaQ1);
+    return { status: status(p, 90), valor: p,
+      observacao: `${real1T.toLocaleString('pt-BR')} de ${metaQ1.toLocaleString('pt-BR')} consultas — Q1 (mín SES 90%)` };
   } catch(e) { return { status: 'pendente', valor: null, observacao: '' }; }
 }
 
@@ -159,10 +165,12 @@ function calcSadtLinha(k) {
   try {
     const sadt = getDash().ames[k]?.qtde?.sadtExt;
     if (!sadt || !sadt.cont) return { status: 'pendente', valor: null, observacao: '' };
-    const real1T = Math.round(sadt.real * 3 / 4);
-    const meta1T = Math.round(sadt.cont * 3 / 4);
-    const p = pct(real1T, meta1T);
-    return { status: status(p), valor: p, observacao: `${real1T.toLocaleString('pt-BR')} de ${meta1T.toLocaleString('pt-BR')} exames SADT (estimativa Q1)` };
+    const metaSem  = Math.round(sadt.cont * 6 / 4);
+    const metaQ1   = Math.round(metaSem / 2);
+    const real1T   = Math.round(sadt.real * 3 / 4);
+    const p = pct(real1T, metaQ1);
+    return { status: status(p, 90), valor: p,
+      observacao: `${real1T.toLocaleString('pt-BR')} de ${metaQ1.toLocaleString('pt-BR')} exames SADT — Q1 (mín SES 90%)` };
   } catch(e) { return { status: 'pendente', valor: null, observacao: '' }; }
 }
 
@@ -183,32 +191,47 @@ function lerEnvAbril(ameEnvKey, metricKey) {
 
 const ENV_AME_KEYS = { cp:'CAMPINAS', cb:'CASA_BRANCA', frc:'FRANCA', rp:'RIBEIRAO', scl:'SAO_CARLOS', avj:'JURUMIRIM' };
 
+// Q2: Apenas Abril realizado (1 de 3 meses).
+// meta_Q2 = meta_sem / 2. Projeta o Q2 completo = real_abr × 3.
+// SES mín Consultas/SADT = 90% da meta Q2.
 function calcOfertaConsulta2T(k) {
   try {
+    const s271   = getDash().ames[k]?.qtde?.s271;
     const envKey = ENV_AME_KEYS[k];
-    const abr = lerEnvAbril(envKey, 'CONS');
+    const abr    = lerEnvAbril(envKey, 'CONS');
     if (!abr || !abr.meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
-    const p = pct(abr.real, abr.meta);
-    const metaQ2 = abr.meta * 3; // estimativa meta trimestral = meta mensal × 3
-    const progQ2 = pct(abr.real, metaQ2); // % da meta trimestral com apenas Abr
+    const metaSem = s271 ? Math.round(s271.cont * 6 / 4) : abr.meta * 6;
+    const metaQ2  = Math.round(metaSem / 2);              // meta Q2 = sem ÷ 2
+    const metaMes = Math.round(metaSem / 6);               // meta mensal = sem ÷ 6
+    const projQ2  = abr.real * 3;                          // projeção Q2 ao ritmo de Abr × 3
+    const pMes    = pct(abr.real, metaMes);                // % vs meta mensal de Abr
+    const pProjQ2 = pct(projQ2, metaQ2);                   // % projeção Q2 vs meta Q2
+    // status: avaliar se projeção Q2 atinge o mínimo SES 90%
+    const stProj = pProjQ2 !== null ? (pProjQ2 >= 100 ? 'sim' : pProjQ2 >= 90 ? 'parcial' : 'nao') : 'pendente';
     return {
-      status: 'parcial', // sempre parcial pois faltam 2 meses
-      valor: p, // % vs meta mensal de Abr
-      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)`
+      status: 'parcial', // Q2 incompleto = sempre parcial na exibição
+      valor: pMes,
+      observacao: `Abr: ${abr.real.toLocaleString('pt-BR')} (${pMes}% da meta mensal ${metaMes.toLocaleString('pt-BR')}) — proj Q2: ${projQ2.toLocaleString('pt-BR')} de ${metaQ2.toLocaleString('pt-BR')} (${pProjQ2}%) | mín SES 90% — 1 de 3 meses`
     };
   } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
 }
 
 function calcSadtLinha2T(k) {
   try {
+    const sadt   = getDash().ames[k]?.qtde?.sadtExt;
     const envKey = ENV_AME_KEYS[k];
-    const abr = lerEnvAbril(envKey, 'SADT');
+    const abr    = lerEnvAbril(envKey, 'SADT');
     if (!abr || !abr.meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
-    const p = pct(abr.real, abr.meta);
+    const metaSem = sadt ? Math.round(sadt.cont * 6 / 4) : abr.meta * 6;
+    const metaQ2  = Math.round(metaSem / 2);
+    const metaMes = Math.round(metaSem / 6);
+    const projQ2  = abr.real * 3;
+    const pMes    = pct(abr.real, metaMes);
+    const pProjQ2 = pct(projQ2, metaQ2);
     return {
       status: 'parcial',
-      valor: p,
-      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)`
+      valor: pMes,
+      observacao: `Abr: ${abr.real.toLocaleString('pt-BR')} (${pMes}% da meta mensal ${metaMes.toLocaleString('pt-BR')}) — proj Q2: ${projQ2.toLocaleString('pt-BR')} de ${metaQ2.toLocaleString('pt-BR')} (${pProjQ2}%) | mín SES 90% — 1 de 3 meses`
     };
   } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
 }
@@ -360,11 +383,12 @@ function calcMonitoramentoStatus(procs, triKey) {
   const totalMeta = procs.reduce((s, p) => s + (p[mk]||0), 0);
   const totalReal = procs.reduce((s, p) => s + (p[rk]||0), 0);
   const p = pct(totalReal, totalMeta);
+  // Monitoramento = procedimentos CMA/cma → SES mín 95%
   const abaixo = procs.filter(pr => pr[pk] !== null && pr[pk] < 100 && pr[pk] > 0);
   const obs = abaixo.length > 0
     ? `Abaixo de 100%: ${abaixo.map(x => x.nome.substring(0,28)+'…').join('; ')}`
     : 'Todos os procedimentos ≥ 100% da meta';
-  return { status: status(p), pct: p, obs };
+  return { status: status(p, 95), pct: p, obs };
 }
 
 // ─── 4. Calcula status esp_drs ─────────────────────────────────────────────────
@@ -377,7 +401,7 @@ function calcEspDrsStatus(esps) {
   const obs = abaixo.length > 0
     ? `Abaixo: ${abaixo.map(e => e.esp + ' ' + e.pct1T + '%').join('; ')}`
     : 'Todas as especialidades ≥ 100% da meta';
-  return { status: status(p), pct: p, obs };
+  return { status: status(p, 90), pct: p, obs }; // DRS = sem limiar específico SES, usa 90%
 }
 
 // ─── Retina: controlado à parte pela SES-SP ───────────────────────────────────

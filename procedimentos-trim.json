@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-05-22T18:30:07.150Z",
+  "geradoEm": "2026-05-22T19:49:02.252Z",
   "ames": {
     "cp": [
       {
@@ -990,7 +990,7 @@
         "meta1T": 540,
         "real1T": 415,
         "pct1T": 77,
-        "status1T": "parcial",
+        "status1T": "nao",
         "meta2T": 540,
         "real2T": 0,
         "pct2T": 0,
@@ -1948,7 +1948,7 @@
         "metaTri": 2397,
         "real1T": 1813,
         "pct1T": 76,
-        "status1T": "parcial"
+        "status1T": "nao"
       },
       {
         "esp": "Ortopedia",
@@ -1956,7 +1956,7 @@
         "metaTri": 300,
         "real1T": 264,
         "pct1T": 88,
-        "status1T": "parcial"
+        "status1T": "nao"
       },
       {
         "esp": "Otorrinolaringologia",
@@ -2032,7 +2032,7 @@
         "metaTri": 540,
         "real1T": 464,
         "pct1T": 86,
-        "status1T": "parcial"
+        "status1T": "nao"
       },
       {
         "esp": "Oftalmologia",
