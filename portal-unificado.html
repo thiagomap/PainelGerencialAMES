@@ -1117,7 +1117,7 @@ function buildAme(k){
   const metas=[
     {id:'consulta',nome:'1. Consultas Médicas',                       real:a.consultReal||0,cont:a.consultCont||0,metaSem:a.consultMetaSem||(Math.round((a.consultCont||0)*mesesSem/mesesReal)),min:90},
     {id:'naoMed', nome:'2. Não Médica + Proc.',                       real:a.s272Real||0,   cont:a.s272Cont||0,  metaSem:a.s272MetaSem||  (Math.round((a.s272Cont||0)  *mesesSem/mesesReal)),min:90},
-    {id:'cmaA',   nome:'3. CMA Maior (Cirurgia Maior Ambulatorial)',  real:a.cmaAReal||0,   cont:a.cmaACont||0,  metaSem:a.cmaAMetaSem|| (Math.round((a.cmaACont||0)  *mesesSem/mesesReal)),min:95},
+    {id:'cmaA',   nome:'3. CMA Maior (Cirurgia Maior Ambulatorial)',  real:a.cmaAReal||0,   cont:a.cmaACont||0,  metaSem:a.cmaAMetaSem|| (Math.round((a.cmaACont||0)  *mesesSem/mesesReal)),min: a.mutirao?100:95},
     {id:'cmaM',   nome:'4. cma menor (Cirurgia Menor Ambulatorial)',  real:a.cmaMReal||0,   cont:a.cmaMCont||0,  metaSem:a.cmaMMetaSem|| (Math.round((a.cmaMCont||0)  *mesesSem/mesesReal)),min:95},
     {id:'sadt',   nome:'5. SADT Externo',                             real:a.sadtReal||0,   cont:a.sadtCont||0,  metaSem:a.sadtMetaSem|| (Math.round((a.sadtCont||0)  *mesesSem/mesesReal)),min:90},
   ];
@@ -1131,7 +1131,7 @@ function buildAme(k){
     m.porMes = mesesRest > 0 ? Math.ceil(m.falta / mesesRest) : 0;
   });
   const minP=Math.min(...metas.map(m=>m.pctSem));
-  return {k,nome:NOMES[k],metas,st:a.status||'ok',minP,
+  return {k,nome:NOMES[k],metas,st:a.status||'ok',minP,mutirao:a.mutirao||false,
     rec:f.receita||0,desp:f.despesa||0,res:(f.receita||0)-(f.despesa||0),
     pes:f.pessoal||0,ass:f.assistenciais||0,adm:f.administrativos||0,
     mat:f.materiais||0,uti:f.utilidades||0,ressarc:f.ressarcimento||0,
@@ -1151,13 +1151,14 @@ function renderAmesView(targetAme){
 }
 
 function buildAmeCard(ame){
-  const {k,nome,metas,st,rec,desp,res,pes,minP} = ame;
+  const {k,nome,metas,st,rec,desp,res,pes,minP,mutirao} = ame;
   const hdCls = ST_CCL[st]||'ok';
   return `<div class="ame-card" data-key="${k}" data-st="${st}" data-min="${minP.toFixed(1)}">
     <div class="card-hdr ${hdCls}" onclick="toggleCard('${k}')">
       <div>
-        <div class="card-title">${nome}</div>
+        <div class="card-title">${nome}${mutirao?` <span style="font-size:10px;background:#7b1fa2;color:#fff;padding:2px 7px;border-radius:10px;vertical-align:middle;font-weight:700">🚀 MUTIRÃO</span>`:''}</div>
         <span class="badge ${ST_BCL[st]||'b-ok'}" style="margin-top:3px;display:inline-block">${ST_TXT[st]||'OK'}</span>
+        ${mutirao?`<span style="font-size:9px;color:#9c27b0;font-weight:600;display:block;margin-top:2px">CMA Maior: meta 100%</span>`:''}
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <div style="text-align:right;font-size:11px;color:#555">
@@ -3708,10 +3709,11 @@ function _renderCfgForm(wrap, cfg){
 
   // — tabs AMEs (financeiro + producao)
   CFG_AME_KEYS.forEach(ameKey=>{
-    const label = CFG_AME_NOMES[ameKey];
+    const label    = CFG_AME_NOMES[ameKey];
     const finData  = cfg.ames?.[ameKey]?.financeiro || {};
     const prodData = cfg.ames?.[ameKey]?.producao   || {};
-    tabs += `<button class="cfg-tab" onclick="cfgTab(this,'${ameKey}')">${label}</button>`;
+    const isMut    = cfg.ames?.[ameKey]?.mutirao === true;
+    tabs += `<button class="cfg-tab" onclick="cfgTab(this,'${ameKey}')">${label}${isMut?' 🚀':''}</button>`;
     const finRows = CFG_MESES.map((m,mi)=>{
       const v = _parseFin(finData[m]);
       const cls = v.res ? (parseFloat(v.res)<0?'neg':'pos') : '';
@@ -3735,7 +3737,19 @@ function _renderCfgForm(wrap, cfg){
       return `<div class="cfg-section-title" style="margin-top:16px">${p.label}</div>
         <table class="cfg-table"><thead><tr><th>Mês</th><th>Realizado</th><th>Meta</th></tr></thead><tbody>${rows}</tbody></table>`;
     }).join('');
+    const mutBtnCls = isMut ? 'background:#7b1fa2;color:#fff;border-color:#7b1fa2' : 'background:#fff;color:#7b1fa2;border-color:#ce93d8';
+    const mutBtnTxt = isMut ? '🚀 MUTIRÃO ATIVO — CMA Maior: meta 100%' : '⚪ Mutirão inativo — CMA Maior: meta 95%';
     panels += `<div class="cfg-panel" id="cfgtab-${ameKey}">
+      <div style="display:flex;align-items:center;justify-content:space-between;background:#f3e5f5;border:2px solid #ce93d8;border-radius:10px;padding:10px 16px;margin-bottom:14px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#4a148c">🚀 Mutirão CMA Maior</div>
+          <div style="font-size:11px;color:#7b1fa2;margin-top:2px">Quando ativo: meta CMA Maior = 100% do semestre (não 95%)</div>
+        </div>
+        <button id="cfg_mut_${ameKey}" onclick="toggleMutirao('${ameKey}',this)"
+          style="padding:8px 18px;border-radius:20px;border:2px solid;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;${mutBtnCls}">
+          ${mutBtnTxt}
+        </button>
+      </div>
       <div class="cfg-section-title">Financeiro — ${label}</div>
       <table class="cfg-table">
         <thead><tr><th>Mês</th><th>Receita (R$)</th><th>Despesa (R$)</th><th>Resultado (R$)</th></tr></thead>
@@ -3948,6 +3962,26 @@ function cfgTab(btn,id){
   document.getElementById('cfgtab-'+id)?.classList.add('active');
 }
 
+function toggleMutirao(ameKey, btn){
+  const isNow = btn.style.background.includes('7b1fa2') && btn.textContent.includes('ATIVO');
+  const newState = !isNow;
+  if(newState){
+    btn.style.cssText = 'padding:8px 18px;border-radius:20px;border:2px solid;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;background:#7b1fa2;color:#fff;border-color:#7b1fa2';
+    btn.textContent = '🚀 MUTIRÃO ATIVO — CMA Maior: meta 100%';
+  } else {
+    btn.style.cssText = 'padding:8px 18px;border-radius:20px;border:2px solid;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;background:#fff;color:#7b1fa2;border-color:#ce93d8';
+    btn.textContent = '⚪ Mutirão inativo — CMA Maior: meta 95%';
+  }
+  // Armazena estado no dataset do botão para o salvar capturar
+  btn.dataset.mutirao = newState ? '1' : '0';
+  // Atualiza tab label
+  const tab = document.querySelector(`.cfg-tab[onclick*="${ameKey}"]`);
+  if(tab){
+    const lbl = CFG_AME_NOMES[ameKey] || ameKey;
+    tab.textContent = lbl + (newState ? ' 🚀' : '');
+  }
+}
+
 async function salvarConfiguracoes(){
   const btn    = document.getElementById('cfg-btn-salvar');
   const status = document.getElementById('cfg-status');
@@ -3963,7 +3997,9 @@ async function salvarConfiguracoes(){
 
   // AMEs — reconstruct raw pipe strings for servidor.js
   CFG_AME_KEYS.forEach(ak=>{
-    payload.ames[ak]={ financeiro:{}, producao:{} };
+    const mutBtn = document.getElementById(`cfg_mut_${ak}`);
+    const mutVal = mutBtn ? (mutBtn.dataset.mutirao !== undefined ? mutBtn.dataset.mutirao==='1' : mutBtn.textContent.includes('ATIVO')) : false;
+    payload.ames[ak]={ financeiro:{}, producao:{}, mutirao: mutVal };
     CFG_MESES.forEach(m=>{
       const rec=document.getElementById(`cfg_${ak}_${m}_rec`)?.value||'';
       const desp=document.getElementById(`cfg_${ak}_${m}_desp`)?.value||'';

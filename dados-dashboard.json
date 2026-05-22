@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-05-22T19:56:40.912Z",
+  "geradoEm": "2026-05-22T20:03:42.736Z",
   "periodo": "Janeiro-Abril 2026",
   "meses": 4,
   "mesesRealizados": 4,
@@ -1448,7 +1448,8 @@
         "pctCmaM": 123.4,
         "pctSadt": 92.1,
         "riscos": [],
-        "status": "ok"
+        "status": "ok",
+        "mutirao": true
       }
     },
     "cb": {
@@ -2900,7 +2901,8 @@
           "CMA 91%",
           "cma 70%"
         ],
-        "status": "critico"
+        "status": "critico",
+        "mutirao": false
       }
     },
     "frc": {
@@ -4349,7 +4351,8 @@
         "riscos": [
           "SADT 90%"
         ],
-        "status": "atencao"
+        "status": "atencao",
+        "mutirao": true
       }
     },
     "rp": {
@@ -5799,7 +5802,8 @@
           "Consultas 87%",
           "cma 76%"
         ],
-        "status": "risco"
+        "status": "risco",
+        "mutirao": true
       }
     },
     "scl": {
@@ -7248,7 +7252,8 @@
         "riscos": [
           "cma 61%"
         ],
-        "status": "critico"
+        "status": "critico",
+        "mutirao": false
       }
     },
     "avj": {
@@ -8699,7 +8704,8 @@
           "CMA 88%",
           "SADT 84%"
         ],
-        "status": "critico"
+        "status": "critico",
+        "mutirao": true
       }
     }
   },

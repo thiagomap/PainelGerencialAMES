@@ -1,6 +1,6 @@
-/* Gerado automaticamente por gerar-dados.js em 2026-05-22T19:56:40.912Z */
+/* Gerado automaticamente por gerar-dados.js em 2026-05-22T20:03:42.736Z */
 window.DADOS_DASH = {
- "geradoEm": "2026-05-22T19:56:40.912Z",
+ "geradoEm": "2026-05-22T20:03:42.736Z",
  "periodo": "Janeiro-Abril 2026",
  "meses": 4,
  "mesesRealizados": 4,
@@ -1449,7 +1449,8 @@ window.DADOS_DASH = {
     "pctCmaM": 123.4,
     "pctSadt": 92.1,
     "riscos": [],
-    "status": "ok"
+    "status": "ok",
+    "mutirao": true
    }
   },
   "cb": {
@@ -2901,7 +2902,8 @@ window.DADOS_DASH = {
      "CMA 91%",
      "cma 70%"
     ],
-    "status": "critico"
+    "status": "critico",
+    "mutirao": false
    }
   },
   "frc": {
@@ -4350,7 +4352,8 @@ window.DADOS_DASH = {
     "riscos": [
      "SADT 90%"
     ],
-    "status": "atencao"
+    "status": "atencao",
+    "mutirao": true
    }
   },
   "rp": {
@@ -5800,7 +5803,8 @@ window.DADOS_DASH = {
      "Consultas 87%",
      "cma 76%"
     ],
-    "status": "risco"
+    "status": "risco",
+    "mutirao": true
    }
   },
   "scl": {
@@ -7249,7 +7253,8 @@ window.DADOS_DASH = {
     "riscos": [
      "cma 61%"
     ],
-    "status": "critico"
+    "status": "critico",
+    "mutirao": false
    }
   },
   "avj": {
@@ -8700,7 +8705,8 @@ window.DADOS_DASH = {
      "CMA 88%",
      "SADT 84%"
     ],
-    "status": "critico"
+    "status": "critico",
+    "mutirao": true
    }
   }
  },

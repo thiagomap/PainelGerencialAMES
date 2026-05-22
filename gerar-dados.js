@@ -248,7 +248,7 @@ function lerMetasEnv() {
   const get = k => { const l = lines.find(l => l.startsWith(k+'=')); return l ? l.slice(k.length+1).trim() : ''; };
   const ENV_AMES = { cp:'CAMPINAS', cb:'CASA_BRANCA', frc:'FRANCA', rp:'RIBEIRAO', scl:'SAO_CARLOS', avj:'JURUMIRIM' };
   Object.entries(ENV_AMES).forEach(([k, ek]) => {
-    result[k] = {};
+    result[k] = { mutirao: get(`${ek}_MUTIRAO`) === '1' };
     ['CONS','NMED','CMA','CMA_MENOR','SADT'].forEach(met => {
       result[k][met] = {};
       ['MAI','JUN'].forEach(m => {
@@ -399,6 +399,8 @@ for (const [key, ame] of Object.entries(ames)) {
     // semaforo
     riscos,
     status,
+    // mutirao: meta CMA Maior = 100% no semestre (nao 95%)
+    mutirao: envMetas[key]?.mutirao || false,
   };
 
   console.log(`  ${key}: ${status.toUpperCase()} | ${riscos.length ? riscos.join(', ') : 'OK'}`);
