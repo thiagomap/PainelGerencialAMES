@@ -194,7 +194,7 @@ function calcOfertaConsulta2T(k) {
     return {
       status: 'parcial', // sempre parcial pois faltam 2 meses
       valor: p, // % vs meta mensal de Abr
-      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} consultas (Abr/2026) — 1 de 3 meses`
+      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} consultas (Abr/2026 — estimativa Q2, 1 de 3 meses)`
     };
   } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
 }
@@ -208,7 +208,7 @@ function calcSadtLinha2T(k) {
     return {
       status: 'parcial',
       valor: p,
-      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} exames SADT (Abr/2026) — 1 de 3 meses`
+      observacao: `${abr.real.toLocaleString('pt-BR')} de ${abr.meta.toLocaleString('pt-BR')} exames SADT (Abr/2026 — estimativa Q2, 1 de 3 meses)`
     };
   } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
 }

@@ -3664,13 +3664,14 @@ async function renderConfigView(){
   loading.style.display='block'; form.style.display='none'; status.style.display='none';
   try {
     // Carregar config geral E metas trimestrais em paralelo
+    // Sempre busca metas-trimestrais frescos (sem cache) para o painel de configuração
     const [r1, r2] = await Promise.all([
       fetch('/api/configuracao'),
-      _trimData ? Promise.resolve({ok:true,_data:_trimData}) : fetch('/metas-trimestrais.json?t='+Date.now()),
+      fetch('/metas-trimestrais.json?t='+Date.now()),
     ]);
     if(!r1.ok) throw new Error('HTTP '+r1.status);
     _cfgData = await r1.json();
-    if(!_trimData) _trimData = r2._data || await r2.json();
+    _trimData = await r2.json(); // atualiza cache com dados frescos
     loading.style.display='none'; form.style.display='block';
     _renderCfgForm(form, _cfgData);
   } catch(e){
