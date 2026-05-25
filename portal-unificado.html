@@ -4291,7 +4291,7 @@ async function loginSiresp() {
         if(ehSenha) {
           statusEl.innerHTML = `❌ <strong>${data.erro}</strong><br>
             <span style="font-size:11px">Atualize a senha em
-              <a href="#" onclick="showView('config');return false" style="color:#1565c0">⚙️ Configurações → Gestão SES</a>
+              <a href="#" onclick="irParaAcessos();return false" style="color:#1565c0">⚙️ Configurações → 🔐 Acessos</a>
             </span>`;
         } else {
           statusEl.innerHTML = `❌ ${data.erro || 'CAPTCHA incorreto'} — <a href="#" onclick="carregarCaptchaSiresp();return false" style="color:#1565c0">🔄 Novo CAPTCHA</a>`;
@@ -4351,6 +4351,20 @@ async function buscarDadosSiresp() {
       Se pedir login novamente, clique em <strong>Sair / Nova sessão</strong> para renovar o CAPTCHA.
     </div>`;
   if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Atualizar dados'; }
+}
+
+function irParaAcessos() {
+  showView('config');
+  // Aguarda renderização e navega para aba Hospital → sub-tab Acessos
+  setTimeout(() => {
+    const hospBtn = document.querySelector('.cfg-tab[onclick*="HOSPITAL"]');
+    if(hospBtn) { hospBtn.click(); }
+    setTimeout(() => {
+      const acessosBtn = document.getElementById('hst-acessos');
+      if(acessosBtn) { acessosBtn.click(); }
+    }, 200);
+  }, 300);
+  return false;
 }
 
 function logoutSiresp() {
