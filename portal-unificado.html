@@ -888,7 +888,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
           <button onclick="carregarCaptchaSiresp()" style="background:#1565c0;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px">🔄 Novo CAPTCHA</button>
         </div>
         <input id="siresp-captcha-input" type="text" placeholder="Digite os caracteres do CAPTCHA" autocomplete="off"
-          style="width:100%;box-sizing:border-box;font-size:14px;border:2px solid #9fa8da;border-radius:6px;padding:7px 12px;font-family:monospace;letter-spacing:3px;text-transform:uppercase"
+          style="width:100%;box-sizing:border-box;font-size:14px;border:2px solid #9fa8da;border-radius:6px;padding:7px 12px;font-family:monospace;letter-spacing:3px"
           onkeydown="if(event.key==='Enter') loginSiresp()">
       </div>
       <div style="display:flex;gap:8px;margin-top:10px">
@@ -4253,7 +4253,7 @@ async function loginSiresp() {
   const userSel = document.getElementById('siresp-user-select');
   const statusEl= document.getElementById('siresp-login-status');
   const btnEl   = document.getElementById('btn-siresp-login');
-  const captcha = capInp ? capInp.value.trim().toUpperCase() : '';
+  const captcha = capInp ? capInp.value.trim() : ''; // mantém case original — CAPTCHA é case-sensitive
   const user    = userSel ? parseInt(userSel.value) : 1;
   if(!captcha) { alert('Digite o código CAPTCHA primeiro!'); capInp && capInp.focus(); return; }
 

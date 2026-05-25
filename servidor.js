@@ -1272,27 +1272,54 @@ async function handleGestaoLogin(req, res) {
     try { params = JSON.parse(body); } catch {}
     const userNum = params.user === 2 ? 2 : 1;
     const cfg = lerConfiguracaoEnv();
-    const login = userNum === 2 ? (cfg.gestaoLogin2 || 'vmedeiros') : (cfg.gestaoLogin || 'vmedeiros');
-    const senha = userNum === 2 ? (cfg.gestaoSenha2 || '1118901') : (cfg.gestaoSenha || '1118901');
-    const captcha = params.captcha || '';
+    const login = userNum === 2 ? (cfg.gestaoLogin2 || 'ddgsilva') : (cfg.gestaoLogin || 'vmedeiros');
+    const senha = userNum === 2 ? (cfg.gestaoSenha2 || '260718')  : (cfg.gestaoSenha || '1118901');
+    const captcha = params.captcha || ''; // mantém case original — CAPTCHA é case-sensitive
     if (params.cookie) _gestaoSession.cookie = params.cookie;
+
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔑 Gestão SES tentativa: ${login} | captcha="${captcha}" | cookie=${(_gestaoSession.cookie||'').substring(0,30)}…`);
 
     const postData = `LOGIN=${encodeURIComponent(login)}&SENHA=${encodeURIComponent(senha)}&captcha=${encodeURIComponent(captcha)}&g-recaptcha-response=`;
     const r = await _gestaoReq('POST', '/index.php', postData, {
       Referer: 'https://gestao.saude.sp.gov.br/',
-      Origin: 'https://gestao.saude.sp.gov.br',
+      Origin:  'https://gestao.saude.sp.gov.br',
     });
 
-    if (r.status === 302 && (r.headers.location || '').includes('principal')) {
+    const location = r.headers.location || '';
+    const html = r.body.toString('latin1');
+
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 📡 Gestão SES resposta: HTTP ${r.status} | Location: ${location || '(nenhum)'} | HTML length: ${html.length}`);
+
+    // Sucesso: 302 redirect para qualquer página que não seja o login/index
+    const redirectOk = r.status === 302 && location && !location.includes('index.php') && !location.includes('logout');
+    // Sucesso alternativo: 200 com conteúdo logado (tem "sair" ou "logout" mas não tem form de login)
+    const htmlLower = html.toLowerCase();
+    const temFormLogin = htmlLower.includes('name="captcha"') || htmlLower.includes('name="login"') || htmlLower.includes('id="captcha"');
+    const temAreaLogada = htmlLower.includes('sair') || htmlLower.includes('logout') || htmlLower.includes('principal') || htmlLower.includes('bem-vindo');
+    const loginOk200 = r.status === 200 && temAreaLogada && !temFormLogin;
+
+    if (redirectOk || loginOk200) {
       _gestaoSession.expira = Date.now() + 30 * 60 * 1000;
-      console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ Gestão SES login OK (usuário ${login})`);
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ Gestão SES login OK (${login}) via ${redirectOk ? 'redirect' : 'HTTP 200'}`);
       res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
       return res.end(JSON.stringify({ ok: true, usuario: login }));
     }
-    const html = r.body.toString('utf8');
-    const msgMatch = html.match(/class="[^"]*erro[^"]*"[^>]*>([^<]+)/i);
-    const msg = msgMatch ? msgMatch[1].trim() : `HTTP ${r.status}`;
+
+    // Extrai mensagem de erro do HTML
+    const errMatch = html.match(/(?:class="[^"]*(?:erro|error|alert)[^"]*"[^>]*>|<[^>]*color[^>]*red[^>]*>)\s*([^<]{5,80})/i)
+                  || html.match(/captcha\s+inv[aá]lid|captcha incorret|senha inv[aá]lid|usu[aá]rio inv[aá]lid|login inv[aá]lid/i);
+    let msg;
+    if (errMatch) {
+      msg = errMatch[1] ? errMatch[1].trim() : errMatch[0].trim();
+    } else if (temFormLogin) {
+      msg = 'CAPTCHA incorreto ou expirado — carregue um novo CAPTCHA';
+    } else {
+      msg = `Resposta inesperada HTTP ${r.status} — tente novamente`;
+    }
+
     console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ Gestão SES login falhou: ${msg}`);
+    // Log trecho do HTML para diagnóstico
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔍 HTML snippet: ${html.substring(0, 400).replace(/\s+/g,' ')}`);
     res.writeHead(401, {'Content-Type':'application/json;charset=utf-8',...cors});
     res.end(JSON.stringify({ ok: false, erro: msg }));
   });
