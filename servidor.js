@@ -138,8 +138,44 @@ const server = http.createServer((req, res) => {
     if (req.url === '/api/configuracao') {
       return handleSalvarConfiguracao(req, res);
     }
+    if (req.url === '/api/cnes-buscar') {
+      return handleBuscarCNES(req, res);
+    }
+    if (req.url === '/api/kpih-buscar') {
+      let body = '';
+      req.on('data', d => body += d);
+      req.on('end', async () => {
+        let params = {};
+        try { params = JSON.parse(body); } catch {}
+        const competencia = params.competencia || '3/2026';
+        console.log(`${new Date().toLocaleTimeString('pt-BR')} 📡 Buscando dados KPIH — competência ${competencia}…`);
+        const resultado = await kpihBuscarRelatorios(competencia);
+        res.writeHead(resultado.erro ? 400 : 200, {'Content-Type':'application/json;charset=utf-8',...cors});
+        res.end(JSON.stringify(resultado));
+      });
+      return;
+    }
+    if (req.url === '/api/kpih-auto-fill') {
+      let body = '';
+      req.on('data', d => body += d);
+      req.on('end', async () => {
+        let dados = {};
+        try { dados = JSON.parse(body); } catch {}
+        // Se não enviou dados no body, lê do cache
+        if (!dados.relatorios) {
+          try { dados = JSON.parse(fs.readFileSync(path.join(ROOT, 'kpih-dados.json'), 'utf8')); } catch {}
+        }
+        const r = await kpihAutoFill(dados);
+        res.writeHead(r.ok ? 200 : 400, {'Content-Type':'application/json;charset=utf-8',...cors});
+        res.end(JSON.stringify(r));
+      });
+      return;
+    }
+    if (req.url === '/api/gestao-login') {
+      return handleGestaoLogin(req, res);
+    }
     res.writeHead(404, {'Content-Type': 'application/json; charset=utf-8', ...cors});
-    res.end(JSON.stringify({ok: false, erro: 'Endpoint nÃ£o encontrado'}));
+    res.end(JSON.stringify({ok: false, erro: 'Endpoint não encontrado'}));
     return;
   }
 
@@ -175,10 +211,20 @@ const server = http.createServer((req, res) => {
       return res.end(JSON.stringify({ ok: false, msg: 'Nenhum dado CNES disponível — clique em Consultar CNES' }));
     }
   }
-  if (req.method === 'POST' && req.url === '/api/cnes-buscar') {
-    return handleBuscarCNES(req, res);
+  if (req.method === 'GET' && req.url.startsWith('/api/gestao-captcha')) {
+    return handleGestaoCaptcha(req, res);
   }
-
+  if (req.method === 'GET' && req.url.startsWith('/api/kpih-dados')) {
+    const kpihFile = path.join(ROOT, 'kpih-dados.json');
+    try {
+      const data = JSON.parse(fs.readFileSync(kpihFile, 'utf8'));
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(JSON.stringify(data));
+    } catch {
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(JSON.stringify({ ok: false, msg: 'Sem dados KPIH em cache — clique em Buscar KPIH' }));
+    }
+  }
   // â”€â”€ GET estÃ¡tico â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let url = req.url.split('?')[0];
   if (url === '/') url = '/portal-unificado.html';  // portal Ãºnico integrado
@@ -592,6 +638,14 @@ function lerConfiguracaoEnv() {
     cancer:    get('CNES_CANCER'),
     coracao:   get('CNES_CORACAO'),
   };
+  // Credenciais KPIH (retornadas apenas internamente — não expostas ao frontend)
+  result.kpihLogin = get('KPIH_LOGIN');
+  result.kpihSenha = get('KPIH_SENHA');
+  // Credenciais Gestão SES / SIRESP (interno)
+  result.gestaoLogin  = get('GESTAO_LOGIN')  || 'vmedeiros';
+  result.gestaoSenha  = get('GESTAO_SENHA')  || '1118901';
+  result.gestaoLogin2 = get('SIRESP_LOGIN')  || 'ddgsilva';
+  result.gestaoSenha2 = get('SIRESP_SENHA')  || '260718';
   // Leitos
   const leitos = (get('HOSPITAL_LEITOS') || '200|62|75').split('|');
   result.leitos = { sc: parseInt(leitos[0])||200, cancer: parseInt(leitos[1])||62, coracao: parseInt(leitos[2])||75 };
@@ -917,6 +971,331 @@ async function handleBuscarCNES(req, res) {
   fs.writeFileSync(cnesFile, JSON.stringify(resultado, null, 2), 'utf8');
   res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
   res.end(JSON.stringify(resultado));
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INTEGRAÇÃO KPIH — www.kpih.com.br
+// Credenciais lidas de KPIH_LOGIN e KPIH_SENHA no CONFIGURACAO.env
+// ══════════════════════════════════════════════════════════════════
+let _kpihSession = { cookie: null, expira: 0 };
+
+// IDs de competência KPIH (mês/ano → id numérico)
+const KPIH_COMP = {
+  '1/2025':29370,'2/2025':29763,'3/2025':30163,'4/2025':30513,'5/2025':30853,
+  '6/2025':31207,'7/2025':31588,'8/2025':31985,'9/2025':32400,'10/2025':32777,
+  '11/2025':33134,'12/2025':33614,
+  '1/2026':33958,'2/2026':34281,'3/2026':34760,'4/2026':35068
+};
+
+function _kpihReq(method, path, postData, extraHeaders) {
+  return new Promise((resolve) => {
+    const hdrs = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124',
+      'Accept': 'text/html,application/xhtml+xml,*/*',
+      'Accept-Encoding': 'identity',
+      ...(extraHeaders || {}),
+    };
+    if (_kpihSession.cookie) hdrs['Cookie'] = _kpihSession.cookie;
+    if (postData) {
+      hdrs['Content-Type'] = 'application/x-www-form-urlencoded';
+      hdrs['Content-Length'] = Buffer.byteLength(postData);
+    }
+    const req = https.request({ hostname: 'www.kpih.com.br', port: 443, method, path, headers: hdrs, timeout: 20000 }, (res) => {
+      const sc = res.headers['set-cookie'];
+      if (sc) {
+        const js = Array.isArray(sc) ? sc.find(c => c.includes('JSESSIONID')) : (sc.includes('JSESSIONID') ? sc : null);
+        if (js) { _kpihSession.cookie = js.split(';')[0]; _kpihSession.expira = Date.now() + 25 * 60 * 1000; }
+      }
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        const buf = Buffer.concat(chunks);
+        // KPIH envia CSV em Windows-1252 (ISO-8859-1) — decode como latin1 para preservar acentos
+        const ct = (res.headers['content-type'] || '').toLowerCase();
+        const encoding = ct.includes('csv') || path.includes('/CSV') ? 'latin1' : 'utf8';
+        resolve({ status: res.statusCode, headers: res.headers, body: buf.toString(encoding) });
+      });
+    });
+    req.on('error', () => resolve({ status: 0, body: '' }));
+    req.on('timeout', () => { req.destroy(); resolve({ status: 0, body: 'timeout' }); });
+    if (postData) req.write(postData);
+    req.end();
+  });
+}
+
+async function kpihLogin() {
+  const cfg = lerConfiguracaoEnv();
+  const login = cfg.kpihLogin || process.env.KPIH_LOGIN || '';
+  const senha = cfg.kpihSenha || process.env.KPIH_SENHA || '';
+  if (!login || !senha) return false;
+  _kpihSession.cookie = null;
+  const loginData = `username=${encodeURIComponent(login)}&password=${encodeURIComponent(senha)}&idioma=PORTUGUES`;
+  const r1 = await _kpihReq('POST', '/acesso', loginData);
+  if (r1.status !== 302 || !(r1.headers.location || '').includes('selecionarUnidade')) {
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ KPIH login falhou`);
+    return false;
+  }
+  const unidadeData = `unidade=118&funcionalidade=acesso/paginaInicial`;
+  await _kpihReq('POST', '/selecionarUnidade', unidadeData);
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ KPIH login OK (Santa Casa #118)`);
+  return true;
+}
+
+async function kpihEnsureAuth() {
+  if (_kpihSession.cookie && Date.now() < _kpihSession.expira) return true;
+  return kpihLogin();
+}
+
+function _parseCSV(csv) {
+  // Remove BOM UTF-8 se presente
+  const clean = csv.replace(/^﻿/, '');
+  return clean.split('\n')
+    .map(row => row.split(';').map(c => c.replace(/[\r"]/g, '').trim()))
+    .filter(r => r.some(c => c.length > 0));
+}
+
+async function kpihBuscarRelatorios(competencia) {
+  if (!await kpihEnsureAuth()) return { erro: 'Falha no login KPIH — verifique KPIH_LOGIN e KPIH_SENHA' };
+  const compId = KPIH_COMP[competencia];
+  if (!compId) return { erro: `Competência ${competencia} não encontrada` };
+
+  // Mudar competência da sessão
+  await _kpihReq('GET', `/competenciaDaSessao/definir/${compId}`);
+
+  const formPeriodo = `competenciaInicial=${compId}&competenciaFinal=${compId}&orientacao=RETRATO`;
+  const formSingular = `competencia=${compId}&orientacao=RETRATO`;
+  const hdrsRef = (page) => ({ Referer: `https://www.kpih.com.br/${page}` });
+
+  const resultado = { competencia, geradoEm: new Date().toISOString(), relatorios: {}, status: {} };
+
+  // 1. Ranking SES (custos por centro de custo)
+  const r1 = await _kpihReq('POST', '/relatoriosSES/rankingSES/CSV', formPeriodo, hdrsRef('relatoriosSES/rankingSES'));
+  resultado.status.rankingSES = r1.status;
+  if (r1.status === 200 && r1.body && r1.body.length > 10) {
+    resultado.relatorios.rankingSES = _parseCSV(r1.body);
+  }
+
+  // 2. Eficiência produtiva SES — usa campo "competencia" (singular)
+  const r2 = await _kpihReq('POST', '/relatoriosSES/eficienciaProdutiva/CSV', formSingular, hdrsRef('relatoriosSES/eficienciaProdutiva'));
+  resultado.status.eficienciaProdutiva = r2.status;
+  if (r2.status === 200 && r2.body && r2.body.length > 10) {
+    resultado.relatorios.eficienciaProdutiva = _parseCSV(r2.body);
+  }
+
+  // 3. Custo por especialidade SES
+  const r3 = await _kpihReq('POST', '/relatoriosSES/custoPorEspecialidade/CSV', formPeriodo, hdrsRef('relatoriosSES/custoPorEspecialidade'));
+  resultado.status.custoPorEspecialidade = r3.status;
+  if (r3.status === 200 && r3.body && r3.body.length > 10) {
+    resultado.relatorios.custoPorEspecialidade = _parseCSV(r3.body);
+  }
+
+  // 4. DRE Gerencial — Demonstrativo de Resultados
+  const formDRE = `competenciaInicial=${compId}&competenciaFinal=${compId}&orientacao=PAISAGEM&tipoRelatorioDre=DRE_GERAL`;
+  const r4 = await _kpihReq('POST', '/relatoriosGerenciais/demonstrativoDeResultados/CSV', formDRE, hdrsRef('relatoriosGerenciais/demonstrativoDeResultados'));
+  resultado.status.dre = r4.status;
+  if (r4.status === 200 && r4.body && r4.body.length > 10) {
+    resultado.relatorios.dre = _parseCSV(r4.body);
+  }
+
+  const nRel = Object.keys(resultado.relatorios).length;
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 📊 KPIH: ${nRel}/4 relatórios baixados para ${competencia} | Status: ${JSON.stringify(resultado.status)}`);
+  const kpihFile = path.join(ROOT, 'kpih-dados.json');
+  fs.writeFileSync(kpihFile, JSON.stringify(resultado, null, 2), 'utf8');
+  return resultado;
+}
+
+// ── Auto-fill KPIH: extrai totais do rankingSES/DRE e preenche CONFIGURACAO.env ──
+async function kpihAutoFill(dados) {
+  const MESES = ['','JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  let mesAbrev = 'MAR';
+  if (dados.competencia) {
+    const m = parseInt(dados.competencia.split('/')[0]);
+    if (m >= 1 && m <= 12) mesAbrev = MESES[m];
+  }
+
+  const campos = {};
+
+  // Função auxiliar: parse de valor monetário brasileiro → número
+  function parseBR(v) {
+    if (!v) return 0;
+    const s = v.replace(/[^\d,.]/g, '').replace(/\./g,'').replace(',','.');
+    return parseFloat(s) || 0;
+  }
+
+  // ── Tenta parsear DRE por unidade de negócio (melhor fonte) ──
+  const dreRows = (dados.relatorios && dados.relatorios.dre) || [];
+  if (dreRows.length > 3) {
+    // Mapas de nome de unidade no DRE → chave env
+    const UNIT_MAP = [
+      { keys: ['SANTA CASA','S.CASA','S CASA'], code: 'SC' },
+      { keys: ['CORA'], code: 'CO' },
+      { keys: ['CANCER','CÂNCER','ONCO'], code: 'CA' },
+      { keys: ['SADT','AUXILIAR','APOIO'], code: 'SADT' },
+      { keys: ['HEMODI'], code: 'HEMO' },
+      { keys: ['REAB'], code: 'REAB' },
+    ];
+    // Estrutura DRE: linhas com "Receita", "Custo" por coluna de unidade
+    // Tenta extrair colunas de unidade a partir do cabeçalho
+    const hdRow = dreRows.find(r => UNIT_MAP.some(u => u.keys.some(k => (r[0]||'').toUpperCase().includes(k))));
+    if (!hdRow) {
+      // Fallback: busca linhas "Receita Bruta" e "Custo Total" com valores por unidade
+      // (formato depende do relatório — registramos para diagnóstico)
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ⚠️ KPIH auto-fill: DRE disponível mas estrutura não reconhecida (${dreRows.length} linhas)`);
+    }
+  }
+
+  // ── Fallback: rankingSES — agrega custo por hospital via nome do centro ──
+  const rankRows = (dados.relatorios && dados.relatorios.rankingSES) || [];
+  if (rankRows.length > 3) {
+    const CENTRO_MAP = [
+      { keys: ['SANTA CASA','MATERNIDADE','OBST','UTIN','UTI ADULTO','PRONTO ATEND','LACTARIO','BERÇARIO','BERCAR','ALOJAMENTO CONJUNTO','BANCO DE LEITE'], code: 'SC' },
+      { keys: ['CORAC','HEMODIN'], code: 'CO' },
+      { keys: ['QUIMIO','RADIOT','ONCOLO','CANCER','CÂNCER'], code: 'CA' },
+      { keys: ['LABORAT','IMAGEM','RX','TOMOG','RESSONA','ULTRAS','ECG','ECO','SADT'], code: 'SADT' },
+      { keys: ['HEMODI'], code: 'HEMO' },
+      { keys: ['REAB','FISIO'], code: 'REAB' },
+    ];
+
+    const acumCusto = {};
+    CENTRO_MAP.forEach(m => { acumCusto[m.code] = 0; });
+
+    let totalGeral = 0;
+    for (const row of rankRows) {
+      if (row.length < 2) continue;
+      const nome = (row[0] || '').toUpperCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
+      const valStr = row[1] || '';
+      const val = parseBR(valStr);
+      if (!nome || val === 0) continue;
+      if (nome.includes('TOTAL') || nome.includes('SUB-TOTAL') || nome.includes('OUTROS CENTROS')) {
+        if (nome === 'TOTAL') totalGeral = val;
+        continue;
+      }
+      let matched = false;
+      for (const m of CENTRO_MAP) {
+        if (m.keys.some(k => nome.includes(k))) {
+          acumCusto[m.code] += val;
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    // Grava custo por unidade (sem receita — usa pipe como separador)
+    for (const [code, custo] of Object.entries(acumCusto)) {
+      if (custo > 0) {
+        const envKey = `KPIH_${code}_${mesAbrev}`;
+        // Preserva receita existente: lê env, mantém valor antes do pipe
+        let lines2 = [];
+        try { lines2 = fs.readFileSync(CONFIG_FILE, 'utf8').split('\n'); } catch {}
+        const existing = lines2.find(l => l.startsWith(`${envKey}=`));
+        const existingRec = existing ? (existing.split('=')[1]||'').split('|')[0] : '';
+        campos[envKey] = `${existingRec}|${Math.round(custo)}`;
+      }
+    }
+    if (totalGeral > 0) campos[`KPIH_TOTAL_${mesAbrev}`] = String(Math.round(totalGeral));
+  }
+
+  if (!Object.keys(campos).length) return { ok: false, erro: 'Nenhum dado extraível dos relatórios KPIH disponíveis. Execute "Buscar KPIH Online" primeiro.' };
+
+  // Atualizar CONFIGURACAO.env
+  let lines = [];
+  try { lines = fs.readFileSync(CONFIG_FILE, 'utf8').split('\n'); } catch(e) { return { ok: false, erro: e.message }; }
+  for (const [key, val] of Object.entries(campos)) {
+    const idx = lines.findIndex(l => l.startsWith(`${key}=`));
+    if (idx >= 0) {
+      lines[idx] = `${key}=${val}`;
+    } else {
+      lines.push(`${key}=${val}`);
+    }
+  }
+  fs.writeFileSync(CONFIG_FILE, lines.join('\n'), 'utf8');
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} ⚡ KPIH auto-fill: ${Object.keys(campos).length} campos atualizados`);
+  return { ok: true, campos, competencia: dados.competencia };
+}
+
+// ── Proxy Gestão SES / SIRESP ────────────────────────────────────────────────
+let _gestaoSession = { cookie: null, expira: 0, sessionCookie: null };
+
+function _gestaoReq(method, urlPath, postData, extraHeaders) {
+  return new Promise((resolve) => {
+    const hdrs = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+      'Accept': 'text/html,application/xhtml+xml,*/*;q=0.9',
+      'Accept-Encoding': 'identity',
+      'Accept-Language': 'pt-BR,pt;q=0.9',
+      ...(extraHeaders || {}),
+    };
+    if (_gestaoSession.cookie) hdrs['Cookie'] = _gestaoSession.cookie;
+    if (postData) {
+      hdrs['Content-Type'] = 'application/x-www-form-urlencoded';
+      hdrs['Content-Length'] = Buffer.byteLength(postData);
+    }
+    const opts = {
+      hostname: 'gestao.saude.sp.gov.br', port: 443,
+      method, path: urlPath, headers: hdrs, timeout: 15000,
+    };
+    const req = https.request(opts, (res) => {
+      const sc = res.headers['set-cookie'];
+      if (sc) {
+        const all = Array.isArray(sc) ? sc : [sc];
+        const cookieParts = all.map(c => c.split(';')[0]);
+        _gestaoSession.cookie = cookieParts.join('; ');
+      }
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
+    });
+    req.on('error', (e) => resolve({ status: 0, headers: {}, body: Buffer.from('') }));
+    req.on('timeout', () => { req.destroy(); resolve({ status: 0, headers: {}, body: Buffer.from('timeout') }); });
+    if (postData) req.write(postData);
+    req.end();
+  });
+}
+
+async function handleGestaoCaptcha(req, res) {
+  // Busca a imagem CAPTCHA do servidor remoto, guarda o session cookie, retorna base64
+  const r = await _gestaoReq('GET', '/captcha.php');
+  if (r.status !== 200) {
+    res.writeHead(502, {'Content-Type':'application/json;charset=utf-8',...cors});
+    return res.end(JSON.stringify({ ok: false, erro: `captcha.php retornou HTTP ${r.status}` }));
+  }
+  const b64 = r.body.toString('base64');
+  res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+  res.end(JSON.stringify({ ok: true, imagem: `data:image/jpeg;base64,${b64}`, cookie: _gestaoSession.cookie }));
+}
+
+async function handleGestaoLogin(req, res) {
+  let body = '';
+  req.on('data', d => body += d);
+  req.on('end', async () => {
+    let params = {};
+    try { params = JSON.parse(body); } catch {}
+    const userNum = params.user === 2 ? 2 : 1;
+    const cfg = lerConfiguracaoEnv();
+    const login = userNum === 2 ? (cfg.gestaoLogin2 || 'vmedeiros') : (cfg.gestaoLogin || 'vmedeiros');
+    const senha = userNum === 2 ? (cfg.gestaoSenha2 || '1118901') : (cfg.gestaoSenha || '1118901');
+    const captcha = params.captcha || '';
+    if (params.cookie) _gestaoSession.cookie = params.cookie;
+
+    const postData = `LOGIN=${encodeURIComponent(login)}&SENHA=${encodeURIComponent(senha)}&captcha=${encodeURIComponent(captcha)}&g-recaptcha-response=`;
+    const r = await _gestaoReq('POST', '/index.php', postData, {
+      Referer: 'https://gestao.saude.sp.gov.br/',
+      Origin: 'https://gestao.saude.sp.gov.br',
+    });
+
+    if (r.status === 302 && (r.headers.location || '').includes('principal')) {
+      _gestaoSession.expira = Date.now() + 30 * 60 * 1000;
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ Gestão SES login OK (usuário ${login})`);
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(JSON.stringify({ ok: true, usuario: login }));
+    }
+    const html = r.body.toString('utf8');
+    const msgMatch = html.match(/class="[^"]*erro[^"]*"[^>]*>([^<]+)/i);
+    const msg = msgMatch ? msgMatch[1].trim() : `HTTP ${r.status}`;
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ Gestão SES login falhou: ${msg}`);
+    res.writeHead(401, {'Content-Type':'application/json;charset=utf-8',...cors});
+    res.end(JSON.stringify({ ok: false, erro: msg }));
+  });
 }
 
 server.listen(PORT, '0.0.0.0', () => {

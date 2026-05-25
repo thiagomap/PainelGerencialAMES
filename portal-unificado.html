@@ -530,6 +530,8 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     <div class="sb-item" data-view="hosp-cancer" data-title="Hospital do Câncer"><span class="ico">🧬</span><span class="lbl">H. do Câncer</span></div>
     <div class="sb-item" data-view="hosp-coracao" data-title="Hospital do Coração"><span class="ico">❤️</span><span class="lbl">H. do Coração</span></div>
     <div class="sb-item" data-view="hosp-kpih" data-title="Resultado por Unidade KPIH"><span class="ico">📊</span><span class="lbl">KPIH por Unidade</span></div>
+    <div class="sb-item" data-view="hosp-cnes" data-title="CNES – Cadastro Nacional"><span class="ico">🆔</span><span class="lbl">CNES</span></div>
+    <div class="sb-item" data-view="hosp-gestao-ses" data-title="Gestão SES / SIRESP"><span class="ico">🏛️</span><span class="lbl">Gestão SES</span></div>
   </div>
   <div class="sb-sec">
     <div class="sb-lbl">AMEs – SES/SP</div>
@@ -799,23 +801,107 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
 
   <!-- ═══ RESULTADO KPIH POR UNIDADE ═══ -->
   <div id="view-hosp-kpih" class="view">
-    <div class="sec-title">📊 Resultado por Unidade de Negócio – KPIH · Jan–Abr/2026</div>
+    <div class="sec-title">📊 Resultado por Unidade de Negócio – KPIH</div>
+
+    <!-- Barra de controles online -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#f1f8e9;border:1px solid #aed581;border-radius:8px;padding:10px 14px;margin-bottom:14px">
+      <span style="font-size:12px;font-weight:700;color:#33691e">🔌 KPIH Online:</span>
+      <select id="kpih-comp-select" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px;background:#fff">
+        <option value="4/2026">4/2026 — Abr</option>
+        <option value="3/2026" selected>3/2026 — Mar</option>
+        <option value="2/2026">2/2026 — Fev</option>
+        <option value="1/2026">1/2026 — Jan</option>
+        <option value="12/2025">12/2025 — Dez</option>
+        <option value="11/2025">11/2025 — Nov</option>
+        <option value="10/2025">10/2025 — Out</option>
+      </select>
+      <button onclick="buscarKPIHOnline()" id="btn-kpih-buscar" style="background:#2e7d32;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Buscar KPIH Online</button>
+      <button onclick="autoFillKPIH()" id="btn-kpih-fill" style="background:#f57f17;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">⚡ Auto-preencher Env</button>
+      <span id="kpih-ultima-busca" style="font-size:11px;color:#555;margin-left:auto">Último: —</span>
+    </div>
+
     <div style="background:#e8f5e9;border-left:4px solid #2e7d32;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1b5e20">
       <strong>Sistema de Custos KPIH:</strong> Resultado por unidade de negócio com rateios dos setores administrativos e auxiliares.
-      Fonte: Relatório Gerencial Março/2026. Preencha outros meses em <strong>Configurações → 🏥 Hospital → 📊 KPIH</strong>.
+      Clique em <strong>Buscar KPIH Online</strong> para buscar dados atualizados, ou preencha manualmente em <strong>Configurações → 🏥 Hospital → 📊 KPIH</strong>.
     </div>
+
     <div class="kpi-row" id="kpih-kpis"></div>
     <div class="chart-row">
-      <div class="chart-box" style="flex:2"><div class="chart-box-title">Receita × Custo por Unidade (R$ M) – Último mês disponível</div><div class="chart-wrap" style="height:240px"><canvas id="ch-kpih-main"></canvas></div></div>
+      <div class="chart-box" style="flex:2"><div class="chart-box-title">Receita × Custo por Unidade (R$ M)</div><div class="chart-wrap" style="height:240px"><canvas id="ch-kpih-main"></canvas></div></div>
       <div class="chart-box"><div class="chart-box-title">Resultado por Unidade (R$ M)</div><div class="chart-wrap" style="height:240px"><canvas id="ch-kpih-res"></canvas></div></div>
     </div>
-    <div class="sec-title" style="margin-top:8px">Detalhamento por Unidade</div>
+
+    <!-- Ranking ao vivo (preenchido quando busca online) -->
+    <div id="kpih-ranking-box" style="display:none;margin-top:12px">
+      <div class="sec-title" style="display:flex;align-items:center;gap:8px">
+        🏆 Ranking de Custos por Centro de Custo
+        <span style="background:#e53935;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.5px">🔴 AO VIVO</span>
+        <span id="kpih-ranking-comp" style="font-size:11px;color:#666;font-weight:400"></span>
+      </div>
+      <div style="overflow-x:auto"><table class="det-table" id="kpih-ranking-table">
+        <thead><tr><th>#</th><th class="l">Centro de Custo</th><th>Custo Total</th><th>% do Total</th><th>Tipo</th></tr></thead>
+        <tbody id="kpih-ranking-tbody"></tbody>
+      </table></div>
+    </div>
+
+    <div class="sec-title" style="margin-top:12px">Detalhamento por Unidade</div>
     <div style="overflow-x:auto"><table class="det-table" id="kpih-table">
       <thead><tr><th class="l">Unidade de Negócio</th><th>Receita Op. Líq.</th><th>Custo Total</th><th>Resultado</th><th>Margem %</th><th>Status</th></tr></thead>
       <tbody id="kpih-tbody">
         <tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">Carregando dados KPIH…</td></tr>
       </tbody>
     </table></div>
+    <div id="kpih-timestamp" style="font-size:10px;color:#aaa;text-align:right;margin-top:6px"></div>
+  </div>
+
+  <!-- ═══ GESTÃO SES / SIRESP ═══ -->
+  <div id="view-hosp-gestao-ses" class="view">
+    <div class="sec-title">🏛️ Gestão SES – Contrato de Gestão OSS · SIRESP</div>
+    <div style="background:#e8eaf6;border-left:4px solid #3949ab;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1a237e">
+      <strong>Sistema de Gestão SES/SP:</strong> Acesso aos dados do contrato de gestão OSS via portal <em>gestao.saude.sp.gov.br</em>.
+      O login requer CAPTCHA visual — clique em <strong>Carregar CAPTCHA</strong>, digite o código e clique em <strong>Entrar</strong>.
+    </div>
+
+    <!-- Box de login -->
+    <div id="siresp-login-box" style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:18px;max-width:420px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:12px">🔐 Login SIRESP</div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;color:#888;margin-bottom:4px">Usuário</div>
+        <select id="siresp-user-select" style="width:100%;font-size:12px;border:1px solid #ccc;border-radius:6px;padding:6px 10px">
+          <option value="1">vmedeiros (Gestão SES)</option>
+          <option value="2">ddgsilva (SIRESP Ambulatorial / AMEs)</option>
+        </select>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;color:#888;margin-bottom:4px">CAPTCHA</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <img id="siresp-captcha-img" src="" alt="CAPTCHA" style="height:48px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;min-width:120px;display:none">
+          <span id="siresp-captcha-loading" style="font-size:11px;color:#aaa">Clique em carregar para ver o CAPTCHA</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input id="siresp-captcha-input" type="text" placeholder="Digite o código do CAPTCHA" style="flex:1;font-size:12px;border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-family:monospace;letter-spacing:2px">
+          <button onclick="carregarCaptchaSiresp()" style="background:#1565c0;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;white-space:nowrap">🔄 Carregar</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="loginSiresp()" id="btn-siresp-login" style="flex:1;background:#1b5e20;color:#fff;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">🚀 Entrar no SIRESP</button>
+        <button onclick="abrirSirespExterno()" style="background:#455a64;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:11px">↗ Abrir no browser</button>
+      </div>
+      <div id="siresp-login-status" style="margin-top:10px;font-size:12px;display:none"></div>
+    </div>
+
+    <!-- Dados após login -->
+    <div id="siresp-dados-box" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span id="siresp-usuario-logado" style="font-size:12px;background:#e8f5e9;color:#2e7d32;padding:4px 12px;border-radius:12px;font-weight:700"></span>
+        <button onclick="buscarDadosSiresp()" style="background:#1565c0;color:#fff;border:none;padding:5px 14px;border-radius:16px;cursor:pointer;font-size:11px">🔄 Atualizar dados</button>
+        <button onclick="logoutSiresp()" style="background:#ccc;color:#333;border:none;padding:5px 12px;border-radius:16px;cursor:pointer;font-size:11px">Sair</button>
+      </div>
+      <div class="kpi-row" id="siresp-kpis"></div>
+      <div id="siresp-content" style="font-size:12px;color:#555;padding:10px 0">
+        <em>Clique em "Atualizar dados" para buscar os dados do contrato de gestão.</em>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ PLANOS DE AÇÃO ═══ -->
@@ -1063,7 +1149,8 @@ function showView(viewId, label, targetAme){
   if(viewId==='hosp-sc')          setTimeout(()=>renderHospView('sc'), 60);
   if(viewId==='hosp-cancer')      setTimeout(()=>renderHospView('cancer'), 60);
   if(viewId==='hosp-coracao')     setTimeout(()=>renderHospView('coracao'), 60);
-  if(viewId==='hosp-kpih')        setTimeout(()=>renderHospView('kpih'), 60);
+  if(viewId==='hosp-kpih')        setTimeout(()=>{ renderHospView('kpih'); _kpihCarregarCache(); }, 60);
+  if(viewId==='hosp-gestao-ses')  { /* view estática, sem render automático */ }
   // Clínica
   if(viewId==='clinica'){ _clinTab=_clinTab||'visao'; renderClinView(_clinTab); }
 }
@@ -3539,6 +3626,22 @@ function mkH(id,cfg){ const el=document.getElementById(id); if(!el)return; retur
 function _fmtM(v){ const m=v/1e6; return (m>=0?'R$ ':'−R$ ')+Math.abs(m).toFixed(1)+'M'; }
 function _fmtK(v){ const k=v/1e3; return (v>=0?'R$ ':'−R$ ')+Math.abs(k>=1000?v/1e6:k).toFixed(k>=1000?1:0)+(k>=1000?'M':'K'); }
 
+// Seta de tendência: compara atual vs anterior
+function _tendencia(atual, anterior) {
+  if(!anterior || anterior === 0) return '';
+  const pct = ((atual - anterior) / Math.abs(anterior)) * 100;
+  if(Math.abs(pct) < 0.5) return '<span style="color:#888;font-size:10px;margin-left:2px">→</span>';
+  const up = atual > anterior;
+  const cor = up ? '#2e7d32' : '#c0392b';
+  const seta = up ? '↑' : '↓';
+  return `<span style="color:${cor};font-size:10px;margin-left:2px">${seta}${Math.abs(pct).toFixed(1)}%</span>`;
+}
+function _mesAnterior(mesKey) {
+  const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const idx = MESES_ORD.indexOf(mesKey);
+  return idx > 0 ? MESES_ORD[idx-1] : null;
+}
+
 // Pega último mês com dados de um objeto {JAN:{rec,desp,res}, ...}
 function _ultimoMes(dataObj, chave='rec') {
   const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
@@ -3601,11 +3704,16 @@ function renderHospSC(){
   const ultSC = _ultimoMes(hd);
   if(ultSC.data) {
     const d = ultSC.data;
-    document.getElementById('sc-kpi-rec').textContent  = _fmtM(d.rec);
+    const mesAnt = _mesAnterior(ultSC.mes);
+    const dAnt = mesAnt ? (() => { const v = hd[mesAnt]; if(typeof v === 'string') { const p=v.split('|'); return {rec:parseFloat(p[0])||0,desp:parseFloat(p[1])||0,res:parseFloat(p[2]||0)||(parseFloat(p[0]||0)-parseFloat(p[1]||0))}; } return v||null; })() : null;
+    const recEl = document.getElementById('sc-kpi-rec');
+    if(recEl) recEl.innerHTML  = _fmtM(d.rec) + (dAnt ? _tendencia(d.rec, dAnt.rec) : '');
     document.getElementById('sc-kpi-rec-s').textContent = `${ultSC.mes}/26`;
-    document.getElementById('sc-kpi-desp').textContent = _fmtM(d.desp);
+    const despEl = document.getElementById('sc-kpi-desp');
+    if(despEl) despEl.innerHTML = _fmtM(d.desp) + (dAnt ? _tendencia(d.desp, dAnt.desp) : '');
     if(d.rec>0) document.getElementById('sc-kpi-desp-s').textContent = `${(d.desp/d.rec*100).toFixed(0)}% da receita`;
-    document.getElementById('sc-kpi-res').textContent  = (d.res>=0?'+':'')+_fmtM(d.res);
+    const resEl = document.getElementById('sc-kpi-res');
+    if(resEl) resEl.innerHTML  = (d.res>=0?'+':'')+_fmtM(d.res) + (dAnt ? _tendencia(d.res, dAnt.res) : '');
     document.getElementById('sc-kpi-res-s').textContent = d.res>=0 ? 'Resultado positivo' : 'Déficit operacional';
     const rCard = document.getElementById('sc-kpi-res-card');
     if(rCard) rCard.className = 'kpi-card '+(d.res<0?'red':'grn');
@@ -3710,11 +3818,16 @@ function renderHospCancer(){
   const ultCA = _ultimoMes(cd);
   if(ultCA.data) {
     const d = ultCA.data;
-    document.getElementById('ca-kpi-rec').textContent  = _fmtM(d.rec);
+    const mesAntCA = _mesAnterior(ultCA.mes);
+    const dAntCA = mesAntCA ? cd[mesAntCA] : null;
+    const caRecEl = document.getElementById('ca-kpi-rec');
+    if(caRecEl) caRecEl.innerHTML = _fmtM(d.rec) + (dAntCA ? _tendencia(d.rec, dAntCA.rec) : '');
     document.getElementById('ca-kpi-rec-s').textContent = `${ultCA.mes}/26 · KPIH`;
-    document.getElementById('ca-kpi-desp').textContent = _fmtM(d.desp);
+    const caDespEl = document.getElementById('ca-kpi-desp');
+    if(caDespEl) caDespEl.innerHTML = _fmtM(d.desp) + (dAntCA ? _tendencia(d.desp, dAntCA.desp) : '');
     document.getElementById('ca-kpi-desp-s').textContent = `Custo total KPIH`;
-    document.getElementById('ca-kpi-res').textContent  = (d.res>=0?'+':'')+_fmtK(d.res);
+    const caResEl = document.getElementById('ca-kpi-res');
+    if(caResEl) caResEl.innerHTML = (d.res>=0?'+':'')+_fmtK(d.res) + (dAntCA ? _tendencia(d.res, dAntCA.res) : '');
     document.getElementById('ca-kpi-res-s').textContent = d.res>=0 ? 'Resultado positivo' : 'Déficit';
     const rCard = document.getElementById('ca-kpi-res-card');
     if(rCard) rCard.className = 'kpi-card '+(d.res<0?'red':'grn');
@@ -3760,11 +3873,16 @@ function renderHospCoracao(){
   const ultCO = _ultimoMes(cod);
   if(ultCO.data) {
     const d = ultCO.data;
-    document.getElementById('co-kpi-rec').textContent  = _fmtM(d.rec);
+    const mesAntCO = _mesAnterior(ultCO.mes);
+    const dAntCO = mesAntCO ? cod[mesAntCO] : null;
+    const coRecEl = document.getElementById('co-kpi-rec');
+    if(coRecEl) coRecEl.innerHTML = _fmtM(d.rec) + (dAntCO ? _tendencia(d.rec, dAntCO.rec) : '');
     document.getElementById('co-kpi-rec-s').textContent = `${ultCO.mes}/26 · KPIH`;
-    document.getElementById('co-kpi-desp').textContent = _fmtM(d.desp);
+    const coDespEl = document.getElementById('co-kpi-desp');
+    if(coDespEl) coDespEl.innerHTML = _fmtM(d.desp) + (dAntCO ? _tendencia(d.desp, dAntCO.desp) : '');
     document.getElementById('co-kpi-desp-s').textContent = 'Custo total KPIH';
-    document.getElementById('co-kpi-res').textContent  = (d.res>=0?'+':'')+_fmtK(d.res);
+    const coResEl = document.getElementById('co-kpi-res');
+    if(coResEl) coResEl.innerHTML = (d.res>=0?'+':'')+_fmtK(d.res) + (dAntCO ? _tendencia(d.res, dAntCO.res) : '');
     document.getElementById('co-kpi-res-s').textContent = d.res>=0 ? 'Resultado positivo' : 'Déficit';
     const rCard = document.getElementById('co-kpi-res-card');
     if(rCard) rCard.className = 'kpi-card '+(d.res<0?'red':'grn');
@@ -3875,6 +3993,228 @@ function renderHospKPIH() {
     <td class="r" style="${totalRes<0?'color:#c0392b':'color:#2e7d32'}">${totalRec>0?(totalRes/totalRec*100).toFixed(1)+'%':'–'}</td>
     <td style="text-align:center">${totalRes>=0?'✅':'🔴'}</td>
   </tr>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// KPIH ONLINE — Busca ao vivo via servidor proxy
+// ══════════════════════════════════════════════════════════════════
+
+// Carrega cache ao abrir o painel (sem bloquear)
+async function _kpihCarregarCache() {
+  try {
+    const r = await fetch('/api/kpih-dados');
+    const data = await r.json();
+    if(data.relatorios && data.geradoEm) {
+      const dt = new Date(data.geradoEm);
+      const label = dt.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const el = document.getElementById('kpih-ultima-busca');
+      if(el) el.textContent = `Último: ${label} · ${data.competencia}`;
+      const ts = document.getElementById('kpih-timestamp');
+      if(ts) ts.textContent = `Dados KPIH atualizados: ${label}`;
+      if(data.relatorios.rankingSES) _renderKPIHRanking(data);
+    }
+  } catch(e) { /* sem cache — sem problema */ }
+}
+
+async function buscarKPIHOnline() {
+  const compEl = document.getElementById('kpih-comp-select');
+  const btnEl  = document.getElementById('btn-kpih-buscar');
+  const statusEl = document.getElementById('kpih-ultima-busca');
+  const comp = compEl ? compEl.value : '3/2026';
+  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Buscando…'; }
+  if(statusEl) statusEl.textContent = '🔄 Buscando dados no KPIH…';
+  try {
+    const r = await fetch('/api/kpih-buscar', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ competencia: comp })
+    });
+    const data = await r.json();
+    if(data.erro) {
+      if(statusEl) statusEl.textContent = '❌ ' + data.erro;
+      alert('Erro KPIH: ' + data.erro);
+      return;
+    }
+    const dt = new Date(data.geradoEm);
+    const label = dt.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    if(statusEl) statusEl.textContent = `✅ Atualizado: ${label} · ${data.competencia}`;
+    const ts = document.getElementById('kpih-timestamp');
+    if(ts) ts.textContent = `🔴 Dados AO VIVO · KPIH · ${label}`;
+    // Renderiza ranking ao vivo
+    _renderKPIHRanking(data);
+    // Reprocessa painel KPIH com dados do env se disponível
+    _hospRendered['kpih'] = false;
+    renderHospView('kpih');
+    // Mostra quantidade de relatórios baixados
+    const nRel = Object.keys(data.relatorios||{}).length;
+    const statusMap = data.status ? Object.entries(data.status).map(([k,v])=>`${k}:${v}`).join(' | ') : '';
+    console.log(`[KPIH] ${nRel} relatórios · ${statusMap}`);
+  } catch(e) {
+    if(statusEl) statusEl.textContent = '❌ Erro de rede: ' + e.message;
+    alert('Erro ao buscar KPIH: ' + e.message);
+  } finally {
+    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Buscar KPIH Online'; }
+  }
+}
+
+function _renderKPIHRanking(data) {
+  const rows = (data.relatorios && data.relatorios.rankingSES) || [];
+  const box = document.getElementById('kpih-ranking-box');
+  const tbody = document.getElementById('kpih-ranking-tbody');
+  const compLbl = document.getElementById('kpih-ranking-comp');
+  if(!box || !tbody) return;
+  if(!rows.length) { box.style.display = 'none'; return; }
+
+  // Pegar linhas de dados (pular cabeçalho e totais)
+  const header = rows[0] || [];
+  const dataRows = rows.slice(1).filter(r => r.length >= 3 && r[0] && r[0] !== '' && !r[1]?.toLowerCase().includes('total'));
+
+  // Calcular total para %
+  let totalGeral = 0;
+  dataRows.forEach(r => {
+    const v = parseFloat((r[r.length-1]||'').replace(/\./g,'').replace(',','.')) || 0;
+    totalGeral += v;
+  });
+
+  tbody.innerHTML = dataRows.map((r, i) => {
+    const cod  = r[0] || '';
+    const nome = r[1] || r[0] || '';
+    const tipo = r[2] || '';
+    const val  = parseFloat((r[r.length-1]||'').replace(/\./g,'').replace(',','.')) || 0;
+    const pct  = totalGeral > 0 ? (val/totalGeral*100).toFixed(1) : '–';
+    const fmtVal = val >= 1e6
+      ? 'R$ ' + (val/1e6).toFixed(3).replace('.',',') + ' M'
+      : 'R$ ' + val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const bg = i%2===0?'':'background:#f9f9f9';
+    return `<tr style="${bg}">
+      <td style="text-align:center;color:#888;font-size:11px">${i+1}</td>
+      <td class="l" style="font-size:11px">${nome}</td>
+      <td class="r" style="font-size:11px;font-weight:600">${fmtVal}</td>
+      <td class="r" style="font-size:11px">${pct}%</td>
+      <td style="font-size:10px;color:#888;text-align:center">${tipo}</td>
+    </tr>`;
+  }).join('');
+
+  if(compLbl) compLbl.textContent = `· ${data.competencia || ''}`;
+  box.style.display = 'block';
+}
+
+async function autoFillKPIH() {
+  const btnEl = document.getElementById('btn-kpih-fill');
+  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Preenchendo…'; }
+  try {
+    const r = await fetch('/api/kpih-auto-fill', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    const data = await r.json();
+    if(data.ok) {
+      const campos = Object.keys(data.campos||{});
+      alert(`✅ Auto-preenchimento OK!\n\n${campos.length} campos atualizados no CONFIGURACAO.env:\n${campos.join('\n')}`);
+    } else {
+      alert('⚠️ Não foi possível auto-preencher: ' + (data.erro || 'Erro desconhecido'));
+    }
+  } catch(e) {
+    alert('❌ Erro: ' + e.message);
+  } finally {
+    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '⚡ Auto-preencher Env'; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// GESTÃO SES / SIRESP — Proxy de login com CAPTCHA
+// ══════════════════════════════════════════════════════════════════
+
+let _sirespCookie = null;
+
+async function carregarCaptchaSiresp() {
+  const imgEl = document.getElementById('siresp-captcha-img');
+  const lblEl = document.getElementById('siresp-captcha-loading');
+  if(lblEl) lblEl.textContent = '🔄 Carregando CAPTCHA…';
+  try {
+    const r = await fetch('/api/gestao-captcha');
+    const data = await r.json();
+    if(!data.ok) throw new Error(data.erro || 'Erro ao buscar captcha');
+    _sirespCookie = data.cookie;
+    if(imgEl) { imgEl.src = data.imagem; imgEl.style.display = 'block'; }
+    if(lblEl) lblEl.style.display = 'none';
+    // Focar no input
+    const inp = document.getElementById('siresp-captcha-input');
+    if(inp) { inp.value = ''; inp.focus(); }
+  } catch(e) {
+    if(lblEl) lblEl.textContent = '❌ Erro: ' + e.message;
+  }
+}
+
+async function loginSiresp() {
+  const capInp  = document.getElementById('siresp-captcha-input');
+  const userSel = document.getElementById('siresp-user-select');
+  const statusEl= document.getElementById('siresp-login-status');
+  const btnEl   = document.getElementById('btn-siresp-login');
+  const captcha = capInp ? capInp.value.trim() : '';
+  const user    = userSel ? parseInt(userSel.value) : 1;
+  if(!captcha) { alert('Digite o código CAPTCHA primeiro!'); return; }
+
+  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Entrando…'; }
+  if(statusEl) { statusEl.style.display = 'block'; statusEl.innerHTML = '🔄 Autenticando…'; statusEl.style.color='#555'; }
+  try {
+    const r = await fetch('/api/gestao-login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ captcha, user, cookie: _sirespCookie })
+    });
+    const data = await r.json();
+    if(data.ok) {
+      if(statusEl) { statusEl.innerHTML = `✅ Logado como <strong>${data.usuario}</strong>`; statusEl.style.color='#2e7d32'; }
+      // Mostrar painel de dados
+      const loginBox  = document.getElementById('siresp-login-box');
+      const dadosBox  = document.getElementById('siresp-dados-box');
+      const userLabel = document.getElementById('siresp-usuario-logado');
+      if(loginBox) loginBox.style.display = 'none';
+      if(dadosBox) dadosBox.style.display = 'block';
+      if(userLabel) userLabel.textContent = `✅ Logado: ${data.usuario}`;
+    } else {
+      if(statusEl) { statusEl.innerHTML = `❌ Falha: ${data.erro}`; statusEl.style.color='#c0392b'; }
+      // Recarregar CAPTCHA automaticamente
+      setTimeout(carregarCaptchaSiresp, 800);
+    }
+  } catch(e) {
+    if(statusEl) { statusEl.innerHTML = `❌ Erro de rede: ${e.message}`; statusEl.style.color='#c0392b'; }
+  } finally {
+    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🚀 Entrar no SIRESP'; }
+  }
+}
+
+async function buscarDadosSiresp() {
+  const contentEl = document.getElementById('siresp-content');
+  if(contentEl) contentEl.innerHTML = '<span style="color:#1565c0">🔄 Buscando dados do contrato de gestão…</span>';
+  // Por ora, abre o portal externo — integração completa em desenvolvimento
+  setTimeout(() => {
+    if(contentEl) contentEl.innerHTML = `
+      <div style="background:#fff3e0;border-left:4px solid #f57c00;border-radius:8px;padding:12px;font-size:12px;color:#e65100">
+        <strong>ℹ️ Integração em desenvolvimento:</strong> O portal Gestão SES utiliza sessões complexas com CAPTCHA.
+        Para acessar os dados completos, utilize o link abaixo para abrir diretamente no navegador com a sessão autenticada.
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+        <a href="https://gestao.saude.sp.gov.br/principal.php" target="_blank" style="background:#1565c0;color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700">↗ Abrir portal Gestão SES</a>
+        <a href="https://gestao.saude.sp.gov.br/paginaIndicadoresGerenciados.php" target="_blank" style="background:#2e7d32;color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700">📊 Indicadores Gerenciados</a>
+      </div>`;
+  }, 500);
+}
+
+function logoutSiresp() {
+  const loginBox  = document.getElementById('siresp-login-box');
+  const dadosBox  = document.getElementById('siresp-dados-box');
+  const capInp    = document.getElementById('siresp-captcha-input');
+  const imgEl     = document.getElementById('siresp-captcha-img');
+  const lblEl     = document.getElementById('siresp-captcha-loading');
+  const statusEl  = document.getElementById('siresp-login-status');
+  _sirespCookie = null;
+  if(loginBox) loginBox.style.display = 'block';
+  if(dadosBox) dadosBox.style.display = 'none';
+  if(capInp) capInp.value = '';
+  if(imgEl) { imgEl.src = ''; imgEl.style.display = 'none'; }
+  if(lblEl) { lblEl.textContent = 'Clique em carregar para ver o CAPTCHA'; lblEl.style.display = 'inline'; }
+  if(statusEl) statusEl.style.display = 'none';
+}
+
+function abrirSirespExterno() {
+  window.open('https://gestao.saude.sp.gov.br/', '_blank');
 }
 
 // ── CNES: consulta DATASUS ────────────────────────────────────────
