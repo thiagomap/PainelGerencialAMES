@@ -727,6 +727,13 @@ function handleSalvarConfiguracao(req, res) {
           });
         });
       }
+      // Credenciais sistemas externos (aceita também do frontend)
+      if(cfg.gestaoLogin  !== undefined) setVal('GESTAO_LOGIN',  cfg.gestaoLogin);
+      if(cfg.gestaoSenha  !== undefined) setVal('GESTAO_SENHA',  cfg.gestaoSenha);
+      if(cfg.sirespLogin  !== undefined) setVal('SIRESP_LOGIN',  cfg.sirespLogin);
+      if(cfg.sirespSenha  !== undefined) setVal('SIRESP_SENHA',  cfg.sirespSenha);
+      if(cfg.kpihLoginCfg !== undefined) setVal('KPIH_LOGIN',    cfg.kpihLoginCfg);
+      if(cfg.kpihSenhaCfg !== undefined) setVal('KPIH_SENHA',    cfg.kpihSenhaCfg);
       fs.writeFileSync(CONFIG_FILE, lines.join('\n'), 'utf8');
       console.log(`${new Date().toLocaleTimeString('pt-BR')} Configuracao salva via web`);
       res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
@@ -1316,23 +1323,29 @@ async function handleGestaoLogin(req, res) {
       return res.end(JSON.stringify({ ok: true, usuario: login }));
     }
 
-    // Extrai mensagem de erro do HTML
-    const errMatch = html.match(/(?:class="[^"]*(?:erro|error|alert)[^"]*"[^>]*>|<[^>]*color[^>]*red[^>]*>)\s*([^<]{5,80})/i)
-                  || html.match(/captcha\s+inv[aá]lid|captcha incorret|senha inv[aá]lid|usu[aá]rio inv[aá]lid|login inv[aá]lid/i);
+    // Extrai mensagem de erro — o site usa alert('...') para mostrar erros
+    const alertMatch = html.match(/alert\s*\(\s*['"]([^'"]{5,120})['"]\s*\)/i);
     let msg;
-    if (errMatch) {
-      msg = errMatch[1] ? errMatch[1].trim() : errMatch[0].trim();
-    } else if (temFormLogin) {
-      msg = 'CAPTCHA incorreto ou expirado — carregue um novo CAPTCHA';
+    if (alertMatch) {
+      msg = alertMatch[1].trim(); // ex: "Nome de usuário ou senha inválido."
     } else {
-      msg = `Resposta inesperada HTTP ${r.status} — tente novamente`;
+      const errMatch = html.match(/(?:class="[^"]*(?:erro|error|alert)[^"]*"[^>]*>)\s*([^<]{5,80})/i);
+      if (errMatch) {
+        msg = errMatch[1].trim();
+      } else if (temFormLogin) {
+        msg = 'CAPTCHA incorreto ou expirado — carregue um novo CAPTCHA';
+      } else {
+        msg = `Resposta inesperada HTTP ${r.status}`;
+      }
     }
+    // Classifica o tipo de erro para o frontend agir corretamente
+    const ehErroSenha = /senha|usu[aá]rio|inv[aá]lid/i.test(msg);
+    const ehErroCaptcha = /captcha|c[oó]digo|seguran/i.test(msg);
 
-    console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ Gestão SES login falhou: ${msg}`);
-    // Log trecho do HTML para diagnóstico
-    console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔍 HTML snippet: ${html.substring(0, 400).replace(/\s+/g,' ')}`);
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ Gestão SES login falhou: ${msg} (erroSenha=${ehErroSenha})`);
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔍 HTML snippet: ${html.substring(0, 300).replace(/\s+/g,' ')}`);
     res.writeHead(401, {'Content-Type':'application/json;charset=utf-8',...cors});
-    res.end(JSON.stringify({ ok: false, erro: msg }));
+    res.end(JSON.stringify({ ok: false, erro: msg, tipoErro: ehErroSenha ? 'senha' : ehErroCaptcha ? 'captcha' : 'outro' }));
   });
 }
 

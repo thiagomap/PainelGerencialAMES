@@ -4200,6 +4200,7 @@ async function autoFillKPIH() {
 
 let _sirespCookie = null;
 let _sirespLogado = false;
+let _captchaCarregando = false; // flag p/ evitar carregamentos duplos
 
 // "Buscar Dados Online" — mesma UX do KPIH:
 // se já logado → busca direto; se não → mostra CAPTCHA e carrega automaticamente
@@ -4230,6 +4231,8 @@ async function buscarGestaoOnline() {
 }
 
 async function carregarCaptchaSiresp() {
+  if(_captchaCarregando) return; // evita duas sessões simultâneas
+  _captchaCarregando = true;
   const imgEl = document.getElementById('siresp-captcha-img');
   const lblEl = document.getElementById('siresp-captcha-loading');
   if(lblEl) { lblEl.textContent = '⏳ Carregando…'; lblEl.style.display = 'inline'; }
@@ -4245,6 +4248,8 @@ async function carregarCaptchaSiresp() {
     if(inp) { inp.value = ''; inp.focus(); }
   } catch(e) {
     if(lblEl) { lblEl.textContent = '❌ ' + e.message; lblEl.style.display = 'inline'; }
+  } finally {
+    _captchaCarregando = false;
   }
 }
 
@@ -4280,8 +4285,19 @@ async function loginSiresp() {
       buscarDadosSiresp();
     } else {
       _sirespLogado = false;
-      if(statusEl) { statusEl.innerHTML = `❌ ${data.erro || 'CAPTCHA incorreto — tente novamente'}. <a href="#" onclick="carregarCaptchaSiresp();return false">🔄 Novo CAPTCHA</a>`; statusEl.style.color='#c0392b'; }
-      setTimeout(carregarCaptchaSiresp, 600);
+      const ehSenha = data.tipoErro === 'senha';
+      if(statusEl) {
+        statusEl.style.color = '#c0392b';
+        if(ehSenha) {
+          statusEl.innerHTML = `❌ <strong>${data.erro}</strong><br>
+            <span style="font-size:11px">Atualize a senha em
+              <a href="#" onclick="showView('config');return false" style="color:#1565c0">⚙️ Configurações → Gestão SES</a>
+            </span>`;
+        } else {
+          statusEl.innerHTML = `❌ ${data.erro || 'CAPTCHA incorreto'} — <a href="#" onclick="carregarCaptchaSiresp();return false" style="color:#1565c0">🔄 Novo CAPTCHA</a>`;
+          setTimeout(carregarCaptchaSiresp, 600);
+        }
+      }
     }
   } catch(e) {
     if(statusEl) { statusEl.innerHTML = `❌ Erro de rede: ${e.message}`; statusEl.style.color='#c0392b'; }
@@ -4768,6 +4784,7 @@ function _renderCfgForm(wrap, cfg){
       <button class="cfg-subtab" onclick="hospSubTab(this,'coracao')" id="hst-coracao">❤️ H. Coração</button>
       <button class="cfg-subtab" onclick="hospSubTab(this,'cnes')" id="hst-cnes">🏥 CNES</button>
       <button class="cfg-subtab" onclick="hospSubTab(this,'kpih')" id="hst-kpih">📊 KPIH</button>
+      <button class="cfg-subtab" onclick="hospSubTab(this,'acessos')" id="hst-acessos">🔐 Acessos</button>
     </div>
     <div id="hsp-sc">
       <div class="cfg-section-title">Financeiro — Hospital Santa Casa de Franca (DRE total Fundação)</div>
@@ -4802,6 +4819,36 @@ function _renderCfgForm(wrap, cfg){
       <div class="cfg-nota">Fonte: Relatório Gerencial (KPIH). Insira Receita Op. Líquida e Custo Total por unidade e mês.</div>
       <table class="cfg-table" style="margin-top:8px"><thead><tr><th>Unidade</th><th>Mês</th><th>Receita (R$)</th><th>Custo Total (R$)</th><th>Resultado (R$)</th></tr></thead>
       <tbody>${kpihRows}</tbody></table>
+    </div>
+    <div id="hsp-acessos" style="display:none">
+      <div class="cfg-section-title">🔐 Acessos aos Sistemas Externos</div>
+      <div class="cfg-nota">Credenciais usadas pelo servidor para buscar dados online. Mantenha atualizadas.</div>
+      <div class="cfg-grid2" style="margin-top:12px">
+        <div class="cfg-field">
+          <label>Gestão SES — Login (gestao.saude.sp.gov.br)</label>
+          <input type="text" id="cfg_gestaoLogin" value="${esc(cfg.gestaoLogin||'vmedeiros')}" placeholder="login">
+        </div>
+        <div class="cfg-field">
+          <label>Gestão SES — Senha</label>
+          <input type="text" id="cfg_gestaoSenha" value="${esc(cfg.gestaoSenha||'')}" placeholder="senha">
+        </div>
+        <div class="cfg-field">
+          <label>SIRESP Ambulatorial — Login (AMEs)</label>
+          <input type="text" id="cfg_sirespLogin" value="${esc(cfg.gestaoLogin2||'ddgsilva')}" placeholder="login">
+        </div>
+        <div class="cfg-field">
+          <label>SIRESP Ambulatorial — Senha</label>
+          <input type="text" id="cfg_sirespSenha" value="${esc(cfg.gestaoSenha2||'')}" placeholder="senha">
+        </div>
+        <div class="cfg-field">
+          <label>KPIH — Login (kpih.com.br)</label>
+          <input type="text" id="cfg_kpihLoginCfg" value="${esc(cfg.kpihLogin||'thiago.silva')}" placeholder="login">
+        </div>
+        <div class="cfg-field">
+          <label>KPIH — Senha</label>
+          <input type="text" id="cfg_kpihSenhaCfg" value="${esc(cfg.kpihSenha||'')}" placeholder="senha">
+        </div>
+      </div>
     </div>
   </div>`;
 
@@ -4884,7 +4931,7 @@ function _renderCfgForm(wrap, cfg){
 function hospSubTab(btn, id) {
   document.querySelectorAll('.cfg-subtab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['sc','cancer','coracao','cnes','kpih'].forEach(k=>{
+  ['sc','cancer','coracao','cnes','kpih','acessos'].forEach(k=>{
     const el=document.getElementById('hsp-'+k); if(el) el.style.display = (k===id?'block':'none');
   });
 }
@@ -5183,6 +5230,20 @@ async function salvarConfiguracoes(){
       if(rec||custo) payload.kpih[u][m] = {rec, custo, res: rec-custo};
     });
   });
+
+  // Credenciais dos sistemas externos (sub-tab 🔐 Acessos)
+  const gestaoLogin   = document.getElementById('cfg_gestaoLogin')?.value;
+  const gestaoSenha   = document.getElementById('cfg_gestaoSenha')?.value;
+  const sirespLogin   = document.getElementById('cfg_sirespLogin')?.value;
+  const sirespSenha   = document.getElementById('cfg_sirespSenha')?.value;
+  const kpihLoginCfg  = document.getElementById('cfg_kpihLoginCfg')?.value;
+  const kpihSenhaCfg  = document.getElementById('cfg_kpihSenhaCfg')?.value;
+  if(gestaoLogin  !== undefined) payload.gestaoLogin  = gestaoLogin;
+  if(gestaoSenha  !== undefined) payload.gestaoSenha  = gestaoSenha;
+  if(sirespLogin  !== undefined) payload.sirespLogin  = sirespLogin;
+  if(sirespSenha  !== undefined) payload.sirespSenha  = sirespSenha;
+  if(kpihLoginCfg !== undefined) payload.kpihLoginCfg = kpihLoginCfg;
+  if(kpihSenhaCfg !== undefined) payload.kpihSenhaCfg = kpihSenhaCfg;
 
   try {
     // captura timestamp atual para detectar quando regeneração terminar
