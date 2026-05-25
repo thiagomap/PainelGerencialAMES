@@ -1253,13 +1253,20 @@ function _gestaoReq(method, urlPath, postData, extraHeaders) {
 }
 
 async function handleGestaoCaptcha(req, res) {
-  // Busca a imagem CAPTCHA do servidor remoto, guarda o session cookie, retorna base64
+  // Passo 1: GET index.php para criar a sessão PHP (igual ao browser)
+  // O browser faz isso automaticamente antes de mostrar o captcha
+  _gestaoSession.cookie = null; // reinicia sessão para garantir cookie novo
+  const r0 = await _gestaoReq('GET', '/index.php');
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🍪 Gestão SES sessão index.php: HTTP ${r0.status} | Cookie: ${(_gestaoSession.cookie||'').substring(0,40)}`);
+
+  // Passo 2: GET captcha.php COM A MESMA SESSÃO → PHP armazena captcha na sessão correta
   const r = await _gestaoReq('GET', '/captcha.php');
   if (r.status !== 200) {
     res.writeHead(502, {'Content-Type':'application/json;charset=utf-8',...cors});
     return res.end(JSON.stringify({ ok: false, erro: `captcha.php retornou HTTP ${r.status}` }));
   }
   const b64 = r.body.toString('base64');
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🖼️ Gestão SES captcha carregado | Cookie: ${(_gestaoSession.cookie||'').substring(0,40)}`);
   res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
   res.end(JSON.stringify({ ok: true, imagem: `data:image/jpeg;base64,${b64}`, cookie: _gestaoSession.cookie }));
 }
@@ -1275,11 +1282,15 @@ async function handleGestaoLogin(req, res) {
     const login = userNum === 2 ? (cfg.gestaoLogin2 || 'ddgsilva') : (cfg.gestaoLogin || 'vmedeiros');
     const senha = userNum === 2 ? (cfg.gestaoSenha2 || '260718')  : (cfg.gestaoSenha || '1118901');
     const captcha = params.captcha || ''; // mantém case original — CAPTCHA é case-sensitive
+    // Restaura o cookie da sessão que foi estabelecida no captcha (não pode ter mudado!)
     if (params.cookie) _gestaoSession.cookie = params.cookie;
+    // Remove o field entra=Entrar que o browser envia mas pode não ser necessário
+    // NÃO enviamos g-recaptcha-response — o onClick do reCAPTCHA v3 do site tem callback VAZIO
 
     console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔑 Gestão SES tentativa: ${login} | captcha="${captcha}" | cookie=${(_gestaoSession.cookie||'').substring(0,30)}…`);
 
-    const postData = `LOGIN=${encodeURIComponent(login)}&SENHA=${encodeURIComponent(senha)}&captcha=${encodeURIComponent(captcha)}&g-recaptcha-response=`;
+    // Inclui "entra=Entrar" (valor do botão submit que o browser envia)
+    const postData = `LOGIN=${encodeURIComponent(login)}&SENHA=${encodeURIComponent(senha)}&captcha=${encodeURIComponent(captcha)}&entra=Entrar`;
     const r = await _gestaoReq('POST', '/index.php', postData, {
       Referer: 'https://gestao.saude.sp.gov.br/',
       Origin:  'https://gestao.saude.sp.gov.br',
