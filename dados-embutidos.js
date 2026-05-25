@@ -1,6 +1,6 @@
-/* Gerado automaticamente por gerar-dados.js em 2026-05-22T20:08:48.798Z */
+/* Gerado automaticamente por gerar-dados.js em 2026-05-25T12:41:12.781Z */
 window.DADOS_DASH = {
- "geradoEm": "2026-05-22T20:08:48.798Z",
+ "geradoEm": "2026-05-25T12:41:12.781Z",
  "periodo": "Janeiro-Abril 2026",
  "meses": 4,
  "mesesRealizados": 4,

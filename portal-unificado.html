@@ -529,6 +529,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     <div class="sb-item" data-view="hosp-sc" data-title="Santa Casa de Franca"><span class="ico">🏛️</span><span class="lbl">Santa Casa</span></div>
     <div class="sb-item" data-view="hosp-cancer" data-title="Hospital do Câncer"><span class="ico">🧬</span><span class="lbl">H. do Câncer</span></div>
     <div class="sb-item" data-view="hosp-coracao" data-title="Hospital do Coração"><span class="ico">❤️</span><span class="lbl">H. do Coração</span></div>
+    <div class="sb-item" data-view="hosp-kpih" data-title="Resultado por Unidade KPIH"><span class="ico">📊</span><span class="lbl">KPIH por Unidade</span></div>
   </div>
   <div class="sb-sec">
     <div class="sb-lbl">AMEs – SES/SP</div>
@@ -674,12 +675,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
 
   <div id="view-hosp-sc" class="view">
     <div class="sec-title">Santa Casa de Franca – CNPJ 47.969.134/0001-89 · ONA Nível 3</div>
-    <div class="kpi-row">
-      <div class="kpi-card blu-h"><div class="kl">Receita Total Mar/26</div><div class="kv">R$ 22,4M</div><div class="ks pos">+4% vs orçamento</div></div>
-      <div class="kpi-card red"><div class="kl">Custo + Despesa</div><div class="kv">R$ 23,6M</div><div class="ks neg">105% da receita</div></div>
-      <div class="kpi-card red"><div class="kl">Resultado Mar/26</div><div class="kv neg">−R$ 1,1M</div><div class="ks">Déficit op. estrutural</div></div>
+    <div class="kpi-row" id="hosp-sc-kpis">
+      <div class="kpi-card blu-h"><div class="kl">Receita Último mês</div><div class="kv" id="sc-kpi-rec">–</div><div class="ks" id="sc-kpi-rec-s">Dados do env</div></div>
+      <div class="kpi-card red"><div class="kl">Despesa Último mês</div><div class="kv" id="sc-kpi-desp">–</div><div class="ks neg" id="sc-kpi-desp-s">% da receita</div></div>
+      <div class="kpi-card" id="sc-kpi-res-card"><div class="kl">Resultado Último mês</div><div class="kv" id="sc-kpi-res">–</div><div class="ks" id="sc-kpi-res-s">Resultado operacional</div></div>
       <div class="kpi-card"><div class="kl">Tab. SUS Paulista/mês</div><div class="kv">R$ 5,79M</div><div class="ks">Complemento SES/SP fixo</div></div>
-      <div class="kpi-card red"><div class="kl">Acumulado Jan–Mar</div><div class="kv neg">−R$ 1,23M</div><div class="ks">3m accrual</div></div>
+      <div class="kpi-card" id="sc-kpi-acum-card"><div class="kl">Resultado Acumulado</div><div class="kv" id="sc-kpi-acum">–</div><div class="ks" id="sc-kpi-acum-s">Jan–mês atual</div></div>
       <div class="kpi-card grn"><div class="kl">PL (31/03/2026)</div><div class="kv">R$ 81,8M</div><div class="ks">Estável · sólido</div></div>
     </div>
     <div class="chart-row">
@@ -707,18 +708,35 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     </table></div>
     <div class="sec-title" style="margin-top:16px">Indicadores Assistenciais</div>
     <div class="hosp-ind-row" id="hosp-sc-ind"></div>
+
+    <!-- CONFERÊNCIA COM RELATÓRIO GERENCIAL -->
+    <div class="sec-title" style="margin-top:20px">📋 Conferência com Relatório Gerencial Mar/2026</div>
+    <div style="overflow-x:auto"><table class="det-table" id="hosp-sc-conferencia">
+      <thead><tr><th class="l">Indicador</th><th>Portal (env)</th><th>Relatório Mar/2026</th><th>Δ</th><th>Status</th></tr></thead>
+      <tbody id="hosp-sc-conf-body">
+        <tr><td class="lbl" colspan="5" style="text-align:center;color:#aaa;padding:16px">Carregando conferência…</td></tr>
+      </tbody>
+    </table></div>
+
+    <!-- DADOS CNES -->
+    <div class="sec-title" style="margin-top:20px">🏥 Dados CNES – Cadastro Nacional de Estabelecimentos de Saúde</div>
+    <div style="background:#e3f2fd;border-left:4px solid #1565c0;border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:12px;color:#0d47a1">
+      📌 Preencha o código CNES em <strong>Configurações → 🏥 Hospital → CNES</strong>, depois clique em Consultar.
+      <span style="float:right"><button onclick="consultarCNES('sc')" style="background:#1565c0;color:#fff;border:none;padding:5px 14px;border-radius:16px;cursor:pointer;font-size:11px;font-weight:700">🔄 Consultar CNES DATASUS</button></span>
+    </div>
+    <div id="cnes-sc-content" style="font-size:12px;color:#888;padding:8px">Clique em "Consultar CNES DATASUS" para buscar dados do cadastro…</div>
   </div>
 
   <div id="view-hosp-cancer" class="view">
     <div class="sec-title">Hospital do Câncer – Oncologia · CNPJ a confirmar</div>
-    <div class="warn-box-h">Dados de referência — substitua pelos valores reais do relatório gerencial da unidade.</div>
+    <div id="hosp-cancer-warn" class="warn-box-h">📊 Dados KPIH Mar/2026 carregados do env. Preencha outros meses em Configurações → 🏥 Hospital → H. Câncer.</div>
     <div class="kpi-row">
-      <div class="kpi-card pur-h"><div class="kl">Receita Total 4m</div><div class="kv">R$ 24,3M</div><div class="ks">~R$ 6,1M/mês</div></div>
-      <div class="kpi-card red"><div class="kl">Custo Total 4m</div><div class="kv">R$ 24,2M</div><div class="ks">~R$ 6,05M/mês</div></div>
-      <div class="kpi-card grn"><div class="kl">Resultado 4m</div><div class="kv pos">+R$ 100K</div><div class="ks">Margem 0,4%</div></div>
+      <div class="kpi-card pur-h"><div class="kl">Receita Último mês</div><div class="kv" id="ca-kpi-rec">–</div><div class="ks" id="ca-kpi-rec-s">Fonte: env</div></div>
+      <div class="kpi-card red"><div class="kl">Custo Último mês</div><div class="kv" id="ca-kpi-desp">–</div><div class="ks" id="ca-kpi-desp-s">Custos totais</div></div>
+      <div class="kpi-card" id="ca-kpi-res-card"><div class="kl">Resultado Último mês</div><div class="kv" id="ca-kpi-res">–</div><div class="ks" id="ca-kpi-res-s">KPIH</div></div>
       <div class="kpi-card tea-h"><div class="kl">Sessões Quimio/mês</div><div class="kv">~850</div><div class="ks">Amb. + internação</div></div>
       <div class="kpi-card pur-h"><div class="kl">Sessões Radio/mês</div><div class="kv">~420</div><div class="ks">Linear + braquiterapia</div></div>
-      <div class="kpi-card"><div class="kl">Leitos · Ocupação</div><div class="kv">62 · 79%</div><div class="ks">Oncologia 40 · Clínica 22</div></div>
+      <div class="kpi-card"><div class="kl">Leitos</div><div class="kv" id="ca-kpi-leitos">62</div><div class="ks">Oncologia 40 · Clínica 22</div></div>
     </div>
     <div class="chart-row">
       <div class="chart-box"><div class="chart-box-title">Receita vs Despesa Mensal (R$ M)</div><div class="chart-wrap"><canvas id="ch-hca-fin"></canvas></div></div>
@@ -737,18 +755,23 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
       </tbody>
     </table></div>
     <div class="hosp-ind-row" id="hosp-ca-ind"></div>
+    <div style="background:#e3f2fd;border-left:4px solid #880e4f;border-radius:8px;padding:10px 16px;margin-top:14px;font-size:12px;color:#4a0030">
+      📌 Código CNES: <span id="cnes-cancer-code">–</span>
+      <span style="float:right"><button onclick="consultarCNES('cancer')" style="background:#880e4f;color:#fff;border:none;padding:5px 14px;border-radius:16px;cursor:pointer;font-size:11px;font-weight:700">🔄 Consultar CNES</button></span>
+    </div>
+    <div id="cnes-cancer-content" style="font-size:12px;color:#888;padding:8px">Clique em "Consultar CNES" para buscar dados do cadastro DATASUS…</div>
   </div>
 
   <div id="view-hosp-coracao" class="view">
     <div class="sec-title">Hospital do Coração – Cardiologia · CNPJ a confirmar</div>
-    <div class="warn-box-h">Dados de referência — substitua pelos valores reais do relatório gerencial da unidade.</div>
+    <div id="hosp-coracao-warn" class="warn-box-h">📊 Dados KPIH Mar/2026 carregados do env. Preencha outros meses em Configurações → 🏥 Hospital → H. Coração.</div>
     <div class="kpi-row">
-      <div class="kpi-card blu-h"><div class="kl">Receita Total 4m</div><div class="kv">R$ 31,6M</div><div class="ks">~R$ 7,9M/mês</div></div>
-      <div class="kpi-card red"><div class="kl">Custo Total 4m</div><div class="kv">R$ 31,1M</div><div class="ks">~R$ 7,77M/mês</div></div>
-      <div class="kpi-card grn"><div class="kl">Resultado 4m</div><div class="kv pos">+R$ 500K</div><div class="ks">Margem 1,6%</div></div>
+      <div class="kpi-card blu-h"><div class="kl">Receita Último mês</div><div class="kv" id="co-kpi-rec">–</div><div class="ks" id="co-kpi-rec-s">Fonte: env</div></div>
+      <div class="kpi-card red"><div class="kl">Custo Último mês</div><div class="kv" id="co-kpi-desp">–</div><div class="ks" id="co-kpi-desp-s">Custos totais</div></div>
+      <div class="kpi-card" id="co-kpi-res-card"><div class="kl">Resultado Último mês</div><div class="kv" id="co-kpi-res">–</div><div class="ks" id="co-kpi-res-s">KPIH</div></div>
       <div class="kpi-card blu-h"><div class="kl">Cateterismos/mês</div><div class="kv">~130</div><div class="ks">Diagn. + terapêutico</div></div>
       <div class="kpi-card red"><div class="kl">Angioplastias/mês</div><div class="kv">~45</div><div class="ks">PTCA + Stent</div></div>
-      <div class="kpi-card"><div class="kl">Leitos · Ocup. UTI</div><div class="kv">75 · 91%</div><div class="ks">UTI 25 · Enf. 50</div></div>
+      <div class="kpi-card"><div class="kl">Leitos</div><div class="kv" id="co-kpi-leitos">75</div><div class="ks">UTI 25 · Enf. 50</div></div>
     </div>
     <div class="chart-row">
       <div class="chart-box"><div class="chart-box-title">Receita vs Despesa Mensal (R$ M)</div><div class="chart-wrap"><canvas id="ch-hco-fin"></canvas></div></div>
@@ -767,6 +790,32 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
       </tbody>
     </table></div>
     <div class="hosp-ind-row" id="hosp-co-ind"></div>
+    <div style="background:#e3f2fd;border-left:4px solid #1565c0;border-radius:8px;padding:10px 16px;margin-top:14px;font-size:12px;color:#0d47a1">
+      📌 Código CNES: <span id="cnes-coracao-code">–</span>
+      <span style="float:right"><button onclick="consultarCNES('coracao')" style="background:#1565c0;color:#fff;border:none;padding:5px 14px;border-radius:16px;cursor:pointer;font-size:11px;font-weight:700">🔄 Consultar CNES</button></span>
+    </div>
+    <div id="cnes-coracao-content" style="font-size:12px;color:#888;padding:8px">Clique em "Consultar CNES" para buscar dados do cadastro DATASUS…</div>
+  </div>
+
+  <!-- ═══ RESULTADO KPIH POR UNIDADE ═══ -->
+  <div id="view-hosp-kpih" class="view">
+    <div class="sec-title">📊 Resultado por Unidade de Negócio – KPIH · Jan–Abr/2026</div>
+    <div style="background:#e8f5e9;border-left:4px solid #2e7d32;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1b5e20">
+      <strong>Sistema de Custos KPIH:</strong> Resultado por unidade de negócio com rateios dos setores administrativos e auxiliares.
+      Fonte: Relatório Gerencial Março/2026. Preencha outros meses em <strong>Configurações → 🏥 Hospital → 📊 KPIH</strong>.
+    </div>
+    <div class="kpi-row" id="kpih-kpis"></div>
+    <div class="chart-row">
+      <div class="chart-box" style="flex:2"><div class="chart-box-title">Receita × Custo por Unidade (R$ M) – Último mês disponível</div><div class="chart-wrap" style="height:240px"><canvas id="ch-kpih-main"></canvas></div></div>
+      <div class="chart-box"><div class="chart-box-title">Resultado por Unidade (R$ M)</div><div class="chart-wrap" style="height:240px"><canvas id="ch-kpih-res"></canvas></div></div>
+    </div>
+    <div class="sec-title" style="margin-top:8px">Detalhamento por Unidade</div>
+    <div style="overflow-x:auto"><table class="det-table" id="kpih-table">
+      <thead><tr><th class="l">Unidade de Negócio</th><th>Receita Op. Líq.</th><th>Custo Total</th><th>Resultado</th><th>Margem %</th><th>Status</th></tr></thead>
+      <tbody id="kpih-tbody">
+        <tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">Carregando dados KPIH…</td></tr>
+      </tbody>
+    </table></div>
   </div>
 
   <!-- ═══ PLANOS DE AÇÃO ═══ -->
@@ -1014,6 +1063,7 @@ function showView(viewId, label, targetAme){
   if(viewId==='hosp-sc')          setTimeout(()=>renderHospView('sc'), 60);
   if(viewId==='hosp-cancer')      setTimeout(()=>renderHospView('cancer'), 60);
   if(viewId==='hosp-coracao')     setTimeout(()=>renderHospView('coracao'), 60);
+  if(viewId==='hosp-kpih')        setTimeout(()=>renderHospView('kpih'), 60);
   // Clínica
   if(viewId==='clinica'){ _clinTab=_clinTab||'visao'; renderClinView(_clinTab); }
 }
@@ -3459,43 +3509,129 @@ const MESES4 = ['Janeiro','Fevereiro','Março','Abril'];
 
 function renderHospView(id){
   if(_hospRendered[id]) return;
+  // Se DADOS_CFG ainda não carregou, aguarda até 3s antes de renderizar
+  if(!window.DADOS_CFG) {
+    let tries = 0;
+    const wait = setInterval(()=>{
+      tries++;
+      if(window.DADOS_CFG || tries > 15) {
+        clearInterval(wait);
+        if(!_hospRendered[id]) { _hospRendered[id]=true; _renderHospViewInner(id); }
+      }
+    }, 200);
+    return;
+  }
   _hospRendered[id] = true;
+  _renderHospViewInner(id);
+}
+
+function _renderHospViewInner(id){
   if(id==='consolidado') renderHospConsolidado();
   if(id==='sc')          renderHospSC();
   if(id==='cancer')      renderHospCancer();
   if(id==='coracao')     renderHospCoracao();
+  if(id==='kpih')        renderHospKPIH();
 }
 
 function mkH(id,cfg){ const el=document.getElementById(id); if(!el)return; return new Chart(el,cfg); }
 
+// Helper: formata R$ M
+function _fmtM(v){ const m=v/1e6; return (m>=0?'R$ ':'−R$ ')+Math.abs(m).toFixed(1)+'M'; }
+function _fmtK(v){ const k=v/1e3; return (v>=0?'R$ ':'−R$ ')+Math.abs(k>=1000?v/1e6:k).toFixed(k>=1000?1:0)+(k>=1000?'M':'K'); }
+
+// Pega último mês com dados de um objeto {JAN:{rec,desp,res}, ...}
+function _ultimoMes(dataObj, chave='rec') {
+  const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  let ultimo = null, ultimoKey = null;
+  MESES_ORD.forEach(m => {
+    const v = dataObj[m];
+    if (typeof v === 'object' && v && v[chave]) { ultimo = v; ultimoKey = m; }
+    else if (typeof v === 'string' && v.split('|')[0]) {
+      const p = v.split('|'); ultimo = {rec:parseFloat(p[0])||0, desp:parseFloat(p[1])||0, res:parseFloat(p[2]||0)|| (parseFloat(p[0]||0)-parseFloat(p[1]||0))}; ultimoKey = m;
+    }
+  });
+  return { data: ultimo, mes: ultimoKey };
+}
+
+const _MESES_PT = {JAN:'Jan',FEV:'Fev',MAR:'Mar',ABR:'Abr',MAI:'Mai',JUN:'Jun',JUL:'Jul',AGO:'Ago',SET:'Set',OUT:'Out',NOV:'Nov',DEZ:'Dez'};
+
 function renderHospConsolidado(){
-  mkH('ch-hcons-rec',{type:'bar',data:{labels:MESES4,datasets:[
-    {label:'Santa Casa',data:[32.4,14.5,29.9,23.5],backgroundColor:'#2e7d32',borderRadius:3},
-    {label:'H. Câncer',data:[5.8,6.2,5.9,6.4],backgroundColor:'#c2185b',borderRadius:3},
-    {label:'H. Coração',data:[7.5,8.0,7.8,8.3],backgroundColor:'#1565c0',borderRadius:3},
+  const cfg = window.DADOS_CFG || {};
+  const hd  = cfg.hospital || {};
+  const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN'];
+  // Parse hospital raw strings
+  const scRec  = MESES_ORD.map(m => { const p=(hd[m]||'').split('|'); return (parseFloat(p[0])||0)/1e6; });
+  const caData = cfg.cancer || {};
+  const coData = cfg.coracao || {};
+  const caRec  = MESES_ORD.map(m => (caData[m]?.rec||0)/1e6);
+  const coRec  = MESES_ORD.map(m => (coData[m]?.rec||0)/1e6);
+  const labels = MESES_ORD.map(m => _MESES_PT[m]);
+  mkH('ch-hcons-rec',{type:'bar',data:{labels,datasets:[
+    {label:'Santa Casa',data:scRec,backgroundColor:'#2e7d32',borderRadius:3},
+    {label:'H. Câncer',data:caRec,backgroundColor:'#c2185b',borderRadius:3},
+    {label:'H. Coração',data:coRec,backgroundColor:'#1565c0',borderRadius:3},
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
-    scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>v+'M'}}}}});
+    scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>v.toFixed(0)+'M'}}}}});
+  const leitos = cfg.leitos || {sc:200,cancer:62,coracao:75};
   mkH('ch-hcons-ocup',{type:'bar',data:{labels:['Santa Casa','H. Câncer','H. Coração'],datasets:[
     {label:'Ocupação (%)',data:[84,79,86],backgroundColor:['#2e7d32','#c2185b','#1565c0'],borderRadius:6},
     {label:'Meta 75%',   data:[75,75,75], backgroundColor:['rgba(0,0,0,.1)','rgba(0,0,0,.1)','rgba(0,0,0,.1)'],borderRadius:6},
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
     scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
+  // Atualizar KPIs nav cards com dados reais
+  const scUlt = _ultimoMes(hd); const caUlt = _ultimoMes(caData); const coUlt = _ultimoMes(coData);
+  if(scUlt.data) {
+    const el=document.querySelector('.hnc-sc .hnc-kpis');
+    if(el) el.innerHTML=`<span>${_fmtM(scUlt.data.rec)}/mês</span><span>${leitos.sc} leitos</span><span>${_fmtK(scUlt.data.res)}</span><span>ONA 3</span>`;
+  }
 }
 
 function renderHospSC(){
-  mkH('ch-hsc-fin',{type:'bar',data:{labels:MESES4,datasets:[
-    {label:'Receita',data:[32.4,14.5,22.4,23.5],backgroundColor:'#2e7d32',borderRadius:3},
-    {label:'Despesa',data:[22.4,23.0,23.6,25.1],backgroundColor:'#ef5350',borderRadius:3},
+  const cfg = window.DADOS_CFG || {};
+  const hd  = cfg.hospital || {};
+  const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN'];
+  // Parse raw strings
+  const rec  = MESES_ORD.map(m => { const p=(hd[m]||'').split('|'); return (parseFloat(p[0])||0)/1e6; });
+  const desp = MESES_ORD.map(m => { const p=(hd[m]||'').split('|'); return (parseFloat(p[1])||0)/1e6; });
+  const labels = MESES_ORD.map(m => _MESES_PT[m]);
+
+  // KPIs dinâmicos — último mês com dados
+  const ultSC = _ultimoMes(hd);
+  if(ultSC.data) {
+    const d = ultSC.data;
+    document.getElementById('sc-kpi-rec').textContent  = _fmtM(d.rec);
+    document.getElementById('sc-kpi-rec-s').textContent = `${ultSC.mes}/26`;
+    document.getElementById('sc-kpi-desp').textContent = _fmtM(d.desp);
+    if(d.rec>0) document.getElementById('sc-kpi-desp-s').textContent = `${(d.desp/d.rec*100).toFixed(0)}% da receita`;
+    document.getElementById('sc-kpi-res').textContent  = (d.res>=0?'+':'')+_fmtM(d.res);
+    document.getElementById('sc-kpi-res-s').textContent = d.res>=0 ? 'Resultado positivo' : 'Déficit operacional';
+    const rCard = document.getElementById('sc-kpi-res-card');
+    if(rCard) rCard.className = 'kpi-card '+(d.res<0?'red':'grn');
+    // Acumulado
+    const acum = MESES_ORD.reduce((s,m) => { const p=(hd[m]||'').split('|'); return s+(parseFloat(p[2]||0)||(parseFloat(p[0]||0)-parseFloat(p[1]||0))); }, 0);
+    document.getElementById('sc-kpi-acum').textContent = (acum>=0?'+':'')+_fmtM(acum);
+    document.getElementById('sc-kpi-acum-s').textContent = 'Jan–'+ultSC.mes+'/26';
+    const aCard = document.getElementById('sc-kpi-acum-card');
+    if(aCard) aCard.className = 'kpi-card '+(acum<0?'red':'grn');
+    // Atualizar KPIs inline do HTML que ainda são hardcoded
+    const secTitle = document.querySelector('#view-hosp-sc .sec-title');
+    if(secTitle) secTitle.textContent = `Santa Casa de Franca – CNPJ 47.969.134/0001-89 · ONA Nível 3 · Último dado: ${ultSC.mes}/2026`;
+  }
+
+  mkH('ch-hsc-fin',{type:'bar',data:{labels,datasets:[
+    {label:'Receita',data:rec,backgroundColor:'#2e7d32',borderRadius:3},
+    {label:'Despesa',data:desp,backgroundColor:'#ef5350',borderRadius:3},
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
-    scales:{y:{ticks:{callback:v=>v+'M'}}}}});
+    scales:{y:{ticks:{callback:v=>v.toFixed(1)+'M'}}}}});
   mkH('ch-hsc-rec',{type:'doughnut',data:{
     labels:['SUS Federal','Tab. Paulista','Convênios','Subvenções','Ensino'],
     datasets:[{data:[8.99,5.79,3.22,2.48,0.34],backgroundColor:['#1565c0','#2e7d32','#f57c00','#6a1b9a','#00796b'],borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10}}}}});
-  // Indicadores assistenciais
+
+  // Indicadores assistenciais (baseados no Relatório Gerencial Mar/2026)
   const inds=[
     {l:'Taxa de Ocupação',v:'84%',w:84,cor:'#2e7d32',ref:'Meta ≥75% · OK'},
     {l:'ALOS (dias)',v:'5,2d',w:58,cor:'#f57c00',ref:'Meta ≤5d · ATENÇÃO'},
@@ -3505,15 +3641,100 @@ function renderHospSC(){
     {l:'Partos/mês',v:'~110',w:55,cor:'#6a1b9a',ref:'Normal + cesárea'},
   ];
   document.getElementById('hosp-sc-ind').innerHTML=inds.map(i=>`<div class="hind"><div class="hind-lbl">${i.l}</div><div class="hind-val">${i.v}</div><div class="hind-bar"><div class="hind-fill" style="width:${i.w}%;background:${i.cor}"></div></div><div class="hind-ref">${i.ref}</div></div>`).join('');
+
+  // Conferência com Relatório Gerencial Mar/2026
+  _renderConferenciaSC();
+
+  // Carregar dados CNES existentes (cache)
+  _carregarCachesCNES();
+}
+
+function _renderConferenciaSC() {
+  const cfg = window.DADOS_CFG || {};
+  const hd  = cfg.hospital || {};
+  // Dados do Relatório Gerencial Março/2026 (valores reais extraídos do PDF)
+  const relatorio = {
+    receitaTotal:  22447702,
+    custoTotal:    23632598,
+    resultado:     -1184896,
+    tabPaulista:   5790024,
+    receitaSUS:    8990643,
+    convenios:     3217413,
+    doacoesSubv:   3635535,
+  };
+  // Dados do portal (Março = MAR)
+  const marStr = hd['MAR'] || '';
+  const marP = marStr.split('|');
+  const portalRec  = parseFloat(marP[0])||0;
+  const portalDesp = parseFloat(marP[1])||0;
+  const portalRes  = parseFloat(marP[2]||0)||(portalRec-portalDesp);
+
+  const pct = (p,r) => { if(!r) return '–'; const d=Math.abs((p-r)/r*100); return d.toFixed(1)+'%'; };
+  const status = (p,r) => {
+    if(!p||!r) return '<span style="color:#aaa">⬜ Sem dado</span>';
+    const d=Math.abs((p-r)/r);
+    if(d<0.01) return '<span style="color:#2e7d32;font-weight:700">✅ Igual</span>';
+    if(d<0.05) return '<span style="color:#f57c00;font-weight:700">⚠️ Dif &lt;5%</span>';
+    return '<span style="color:#c0392b;font-weight:700">❌ Diverge</span>';
+  };
+  const fmt = v => v ? 'R$ '+(v/1e6).toFixed(3)+'M' : '–';
+
+  const rows = [
+    ['Receita Total Mar/2026',        fmt(portalRec),  fmt(relatorio.receitaTotal),  pct(portalRec, relatorio.receitaTotal),  status(portalRec, relatorio.receitaTotal)],
+    ['Despesa Total Mar/2026',        fmt(portalDesp), fmt(relatorio.custoTotal),    pct(portalDesp,relatorio.custoTotal),    status(portalDesp,relatorio.custoTotal)],
+    ['Resultado Operacional Mar/2026',fmt(portalRes),  fmt(relatorio.resultado),     pct(portalRes, relatorio.resultado),     status(portalRes, relatorio.resultado)],
+    ['Tab. Paulista (referência)',     'R$ 5,790M',     fmt(relatorio.tabPaulista),   '0,0%',                                  '✅ Igual'],
+  ];
+  const tbody = document.getElementById('hosp-sc-conf-body');
+  if(tbody) tbody.innerHTML = rows.map(([ind,portal,rel,delta,st])=>`
+    <tr>
+      <td class="lbl">${ind}</td>
+      <td class="r">${portal}</td>
+      <td class="r">${rel}</td>
+      <td class="r">${delta}</td>
+      <td style="text-align:center">${st}</td>
+    </tr>`).join('')+`
+    <tr style="background:#f5f5f5;font-size:11px"><td colspan="5" style="padding:6px 10px;color:#888">
+      📌 Relatório Gerencial Março/2026 · Fonte: Controladoria · Atualizado 17/04/2026
+      · Portal lê HOSPITAL_MAR do CONFIGURACAO.env
+    </td></tr>`;
 }
 
 function renderHospCancer(){
-  mkH('ch-hca-fin',{type:'bar',data:{labels:MESES4,datasets:[
-    {label:'Receita',data:[5.8,6.2,5.9,6.4],backgroundColor:'#c2185b',borderRadius:3},
-    {label:'Despesa',data:[6.1,5.9,6.0,6.2],backgroundColor:'#f48fb1',borderRadius:3},
+  const cfg = window.DADOS_CFG || {};
+  const cd  = cfg.cancer || {};
+  const leitos = cfg.leitos || {sc:200,cancer:62,coracao:75};
+  const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN'];
+
+  // KPIs dinâmicos
+  const ultCA = _ultimoMes(cd);
+  if(ultCA.data) {
+    const d = ultCA.data;
+    document.getElementById('ca-kpi-rec').textContent  = _fmtM(d.rec);
+    document.getElementById('ca-kpi-rec-s').textContent = `${ultCA.mes}/26 · KPIH`;
+    document.getElementById('ca-kpi-desp').textContent = _fmtM(d.desp);
+    document.getElementById('ca-kpi-desp-s').textContent = `Custo total KPIH`;
+    document.getElementById('ca-kpi-res').textContent  = (d.res>=0?'+':'')+_fmtK(d.res);
+    document.getElementById('ca-kpi-res-s').textContent = d.res>=0 ? 'Resultado positivo' : 'Déficit';
+    const rCard = document.getElementById('ca-kpi-res-card');
+    if(rCard) rCard.className = 'kpi-card '+(d.res<0?'red':'grn');
+    document.getElementById('ca-kpi-leitos').textContent = leitos.cancer;
+    // Atualizar warn box
+    const warn = document.getElementById('hosp-cancer-warn');
+    if(warn) warn.innerHTML = `📊 Dados KPIH ${ultCA.mes}/2026 · Receita: ${_fmtM(d.rec)} · Resultado: ${(d.res>=0?'+':'')+_fmtK(d.res)} · Preencha outros meses em <strong>Configurações → 🏥 Hospital → H. Câncer</strong>`;
+  }
+  document.getElementById('cnes-cancer-code').textContent = (cfg.cnes||{}).cancer || 'Não configurado';
+
+  const rec  = MESES_ORD.map(m => (cd[m]?.rec||0)/1e6);
+  const desp = MESES_ORD.map(m => (cd[m]?.desp||0)/1e6);
+  const labels = MESES_ORD.map(m => _MESES_PT[m]);
+
+  mkH('ch-hca-fin',{type:'bar',data:{labels,datasets:[
+    {label:'Receita',data:rec,backgroundColor:'#c2185b',borderRadius:3},
+    {label:'Custo',data:desp,backgroundColor:'#f48fb1',borderRadius:3},
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
-    scales:{y:{ticks:{callback:v=>v+'M'}}}}});
+    scales:{y:{ticks:{callback:v=>v.toFixed(1)+'M'}}}}});
   mkH('ch-hca-proc',{type:'doughnut',data:{
     labels:['Quimio Amb.','Radioterapia','Quimio Int.','Cirurgia Onco','Diagnóstico'],
     datasets:[{data:[3360,1662,165,113,286],backgroundColor:['#880e4f','#c2185b','#e91e63','#ad1457','#f48fb1'],borderWidth:2,borderColor:'#fff'}]},
@@ -3530,12 +3751,39 @@ function renderHospCancer(){
 }
 
 function renderHospCoracao(){
-  mkH('ch-hco-fin',{type:'bar',data:{labels:MESES4,datasets:[
-    {label:'Receita',data:[7.5,8.0,7.8,8.3],backgroundColor:'#1565c0',borderRadius:3},
-    {label:'Despesa',data:[7.8,7.6,7.9,7.8],backgroundColor:'#90caf9',borderRadius:3},
+  const cfg = window.DADOS_CFG || {};
+  const cod = cfg.coracao || {};
+  const leitos = cfg.leitos || {sc:200,cancer:62,coracao:75};
+  const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN'];
+
+  // KPIs dinâmicos
+  const ultCO = _ultimoMes(cod);
+  if(ultCO.data) {
+    const d = ultCO.data;
+    document.getElementById('co-kpi-rec').textContent  = _fmtM(d.rec);
+    document.getElementById('co-kpi-rec-s').textContent = `${ultCO.mes}/26 · KPIH`;
+    document.getElementById('co-kpi-desp').textContent = _fmtM(d.desp);
+    document.getElementById('co-kpi-desp-s').textContent = 'Custo total KPIH';
+    document.getElementById('co-kpi-res').textContent  = (d.res>=0?'+':'')+_fmtK(d.res);
+    document.getElementById('co-kpi-res-s').textContent = d.res>=0 ? 'Resultado positivo' : 'Déficit';
+    const rCard = document.getElementById('co-kpi-res-card');
+    if(rCard) rCard.className = 'kpi-card '+(d.res<0?'red':'grn');
+    document.getElementById('co-kpi-leitos').textContent = leitos.coracao;
+    const warn = document.getElementById('hosp-coracao-warn');
+    if(warn) warn.innerHTML = `📊 Dados KPIH ${ultCO.mes}/2026 · Receita: ${_fmtM(d.rec)} · Resultado: ${(d.res>=0?'+':'')+_fmtK(d.res)} · Preencha outros meses em <strong>Configurações → 🏥 Hospital → H. Coração</strong>`;
+  }
+  document.getElementById('cnes-coracao-code').textContent = (cfg.cnes||{}).coracao || 'Não configurado';
+
+  const rec  = MESES_ORD.map(m => (cod[m]?.rec||0)/1e6);
+  const desp = MESES_ORD.map(m => (cod[m]?.desp||0)/1e6);
+  const labels = MESES_ORD.map(m => _MESES_PT[m]);
+
+  mkH('ch-hco-fin',{type:'bar',data:{labels,datasets:[
+    {label:'Receita',data:rec,backgroundColor:'#1565c0',borderRadius:3},
+    {label:'Custo',data:desp,backgroundColor:'#90caf9',borderRadius:3},
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
-    scales:{y:{ticks:{callback:v=>v+'M'}}}}});
+    scales:{y:{ticks:{callback:v=>v.toFixed(1)+'M'}}}}});
   mkH('ch-hco-proc',{type:'doughnut',data:{
     labels:['Cateterismo','Angioplastia','CRM','Marcapasso','Ecocardiograma'],
     datasets:[{data:[345,180,89,70,1243],backgroundColor:['#0d47a1','#1565c0','#1976d2','#2196f3','#90caf9'],borderWidth:2,borderColor:'#fff'}]},
@@ -3549,6 +3797,167 @@ function renderHospCoracao(){
     {l:'Readmissão 30d',v:'5,4%',w:54,cor:'#2e7d32',ref:'Meta ≤8% · OK'},
   ];
   document.getElementById('hosp-co-ind').innerHTML=inds.map(i=>`<div class="hind"><div class="hind-lbl">${i.l}</div><div class="hind-val">${i.v}</div><div class="hind-bar"><div class="hind-fill" style="width:${i.w}%;background:${i.cor}"></div></div><div class="hind-ref">${i.ref}</div></div>`).join('');
+}
+
+// ── KPIH: Resultado por Unidade de Negócio ──────────────────────
+function renderHospKPIH() {
+  const cfg  = window.DADOS_CFG || {};
+  const kpih = cfg.kpih || {};
+  const MESES_ORD = ['JAN','FEV','MAR','ABR','MAI','JUN'];
+  const UNITS = [
+    {k:'SC',  n:'Santa Casa',    cor:'#2e7d32'},
+    {k:'CO',  n:'H. Coração',   cor:'#1565c0'},
+    {k:'CA',  n:'H. Câncer',    cor:'#c2185b'},
+    {k:'SADT',n:'SADT',          cor:'#f57c00'},
+    {k:'HEMO',n:'Hemodiálise',   cor:'#00796b'},
+    {k:'REAB',n:'Reab. Física',  cor:'#6a1b9a'},
+  ];
+
+  // Encontrar mês mais recente com dados
+  let melhorMes = null;
+  MESES_ORD.forEach(m => { if(UNITS.some(u => kpih[u.k]?.[m])) melhorMes = m; });
+  if(!melhorMes) melhorMes = 'MAR'; // fallback
+
+  const recs  = UNITS.map(u => (kpih[u.k]?.[melhorMes]?.rec  || 0)/1e6);
+  const custos= UNITS.map(u => (kpih[u.k]?.[melhorMes]?.custo|| kpih[u.k]?.[melhorMes]?.desp|| 0)/1e6);
+  const resArr= UNITS.map(u => (kpih[u.k]?.[melhorMes]?.res  || 0)/1e6);
+  const labels= UNITS.map(u => u.n);
+
+  // KPIs de resumo
+  const totalRec = recs.reduce((s,v)=>s+v,0);
+  const totalCusto= custos.reduce((s,v)=>s+v,0);
+  const totalRes  = resArr.reduce((s,v)=>s+v,0);
+  const kpiEl = document.getElementById('kpih-kpis');
+  if(kpiEl) kpiEl.innerHTML = `
+    <div class="kpi-card grn"><div class="kl">Receita Total (${_MESES_PT[melhorMes]}/26)</div><div class="kv">${_fmtM(totalRec*1e6)}</div><div class="ks">6 unidades consolidadas</div></div>
+    <div class="kpi-card red"><div class="kl">Custo Total (${_MESES_PT[melhorMes]}/26)</div><div class="kv">${_fmtM(totalCusto*1e6)}</div><div class="ks">Com rateios adm/aux</div></div>
+    <div class="kpi-card ${totalRes<0?'red':'grn'}"><div class="kl">Resultado ${_MESES_PT[melhorMes]}/26</div><div class="kv ${totalRes<0?'neg':'pos'}">${(totalRes>=0?'+':'')+_fmtM(totalRes*1e6)}</div><div class="ks">KPIH consolidado</div></div>
+    <div class="kpi-card blu-h"><div class="kl">Margem KPIH</div><div class="kv">${totalRec>0?(totalRes/totalRec*100).toFixed(1)+'%':'–'}</div><div class="ks">Resultado/Receita</div></div>`;
+
+  // Gráfico principal: barras agrupadas
+  mkH('ch-kpih-main',{type:'bar',data:{labels,datasets:[
+    {label:'Receita',data:recs,backgroundColor:UNITS.map(u=>u.cor+'cc'),borderRadius:3},
+    {label:'Custo',data:custos,backgroundColor:UNITS.map(u=>u.cor+'44'),borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
+    scales:{y:{ticks:{callback:v=>v.toFixed(1)+'M'}}}}});
+
+  // Gráfico resultado
+  const resCors = resArr.map(v => v>=0?'#2e7d32':'#c0392b');
+  mkH('ch-kpih-res',{type:'bar',data:{labels,datasets:[
+    {label:'Resultado',data:resArr,backgroundColor:resCors,borderRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
+    scales:{y:{ticks:{callback:v=>v.toFixed(1)+'M'}}}}});
+
+  // Tabela detalhada
+  const tbody = document.getElementById('kpih-tbody');
+  if(tbody) tbody.innerHTML = UNITS.map(u => {
+    const d = kpih[u.k]?.[melhorMes];
+    if(!d) return `<tr><td class="lbl">${u.n}</td><td colspan="4" style="text-align:center;color:#aaa">Sem dados para ${_MESES_PT[melhorMes]}/26</td></tr>`;
+    const rec = d.rec||0, custo = d.custo||d.desp||0, res = d.res||(rec-custo);
+    const margem = rec>0?(res/rec*100).toFixed(1)+'%':'–';
+    const resCor = res<0?'color:#c0392b':'color:#2e7d32';
+    const stIcon = res>=0?'✅':'🔴';
+    return `<tr>
+      <td class="lbl" style="border-left:4px solid ${u.cor}">${u.n}</td>
+      <td class="r">R$ ${(rec/1e6).toFixed(3)}M</td>
+      <td class="r">R$ ${(custo/1e6).toFixed(3)}M</td>
+      <td class="r" style="${resCor};font-weight:700">${(res>=0?'+':'')}R$ ${(res/1e6).toFixed(3)}M</td>
+      <td class="r" style="${resCor}">${margem}</td>
+      <td style="text-align:center">${stIcon}</td>
+    </tr>`;
+  }).join('')+`<tr class="tot">
+    <td class="lbl">TOTAL CONSOLIDADO</td>
+    <td class="r">R$ ${(totalRec).toFixed(3)}M</td>
+    <td class="r">R$ ${(totalCusto).toFixed(3)}M</td>
+    <td class="r" style="${totalRes<0?'color:#c0392b':'color:#2e7d32'};font-weight:800">${(totalRes>=0?'+':'')}R$ ${(totalRes).toFixed(3)}M</td>
+    <td class="r" style="${totalRes<0?'color:#c0392b':'color:#2e7d32'}">${totalRec>0?(totalRes/totalRec*100).toFixed(1)+'%':'–'}</td>
+    <td style="text-align:center">${totalRes>=0?'✅':'🔴'}</td>
+  </tr>`;
+}
+
+// ── CNES: consulta DATASUS ────────────────────────────────────────
+async function consultarCNES(hospitalId) {
+  const contentIds = {sc:'cnes-sc-content', cancer:'cnes-cancer-content', coracao:'cnes-coracao-content'};
+  const targetIds = hospitalId === 'all' ? ['sc','cancer','coracao'] : [hospitalId];
+  targetIds.forEach(id => {
+    const el = document.getElementById(contentIds[id]);
+    if(el) el.innerHTML = '<span style="color:#1565c0">🔄 Consultando DATASUS…</span>';
+  });
+  try {
+    const r = await fetch('/api/cnes-buscar', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({hospitais:targetIds})});
+    const data = await r.json();
+    if(data.hospitais) {
+      Object.entries(data.hospitais).forEach(([key, info]) => {
+        const el = document.getElementById(contentIds[key]);
+        if(!el) return;
+        if(!info || info.erro) {
+          el.innerHTML = `<div style="color:#f57c00;padding:8px">⚠️ ${info?.erro || 'Sem dados'}</div>`;
+          return;
+        }
+        _renderCNESBox(el, info);
+      });
+    }
+  } catch(e) {
+    targetIds.forEach(id => {
+      const el = document.getElementById(contentIds[id]);
+      if(el) el.innerHTML = `<div style="color:#c0392b;padding:8px">❌ Erro: ${e.message}</div>`;
+    });
+  }
+}
+
+function _renderCNESBox(el, info) {
+  if(!info || typeof info !== 'object') { el.innerHTML = '<span style="color:#aaa">Sem dados disponíveis</span>'; return; }
+  if(info.erro) { el.innerHTML = `<div style="color:#f57c00;padding:8px">⚠️ ${info.erro}</div>`; return; }
+  // Tenta extrair campos comuns da API CNES
+  const nome   = info.noFantasia || info.noRazaoSocial || info.nome || '';
+  const cnes   = info.cnes || info.coCnes || '';
+  const leitos = info.qtLeitosExistente || info.leitos || '';
+  const tipo   = info.tpUnidade?.descricao || info.tipoUnidade || '';
+  const mun    = info.municipio?.noMunicipio || info.municipio || '';
+  const html   = `<div style="background:#fff;border-radius:8px;padding:12px;border:1px solid #e0e0e0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;font-size:11px">
+    ${nome?`<div><strong>Nome:</strong><br>${nome}</div>`:''}
+    ${cnes?`<div><strong>CNES:</strong><br>${cnes}</div>`:''}
+    ${leitos?`<div><strong>Leitos:</strong><br>${leitos}</div>`:''}
+    ${tipo?`<div><strong>Tipo:</strong><br>${tipo}</div>`:''}
+    ${mun?`<div><strong>Município:</strong><br>${mun}</div>`:''}
+    <div style="grid-column:1/-1;font-size:10px;color:#aaa">Fonte: DATASUS/CNES · ${new Date().toLocaleString('pt-BR')}</div>
+    <details style="grid-column:1/-1"><summary style="cursor:pointer;font-size:10px;color:#888">Ver JSON completo</summary><pre style="font-size:9px;overflow:auto;max-height:150px">${JSON.stringify(info,null,2)}</pre></details>
+  </div>`;
+  el.innerHTML = html;
+}
+
+async function _carregarCachesCNES() {
+  try {
+    const r = await fetch('/api/cnes-dados');
+    const data = await r.json();
+    if(data.hospitais) {
+      const mp = {santaCasa:'sc', cancer:'cancer', coracao:'coracao'};
+      const contentIds = {sc:'cnes-sc-content', cancer:'cnes-cancer-content', coracao:'cnes-coracao-content'};
+      Object.entries(data.hospitais).forEach(([key, info]) => {
+        const id = mp[key];
+        if(!id) return;
+        const el = document.getElementById(contentIds[id]);
+        if(!el) return;
+        if(info && !info.erro) { _renderCNESBox(el, info); }
+        else if(info?.erro) { el.innerHTML = `<div style="color:#f57c00;font-size:11px;padding:8px">⚠️ ${info.erro}</div>`; }
+      });
+      if(data.ts) {
+        const scEl = document.getElementById('cnes-sc-content');
+        // only show cache notice if content was loaded
+        ['cnes-sc-content','cnes-cancer-content','cnes-coracao-content'].forEach(id=>{
+          const el=document.getElementById(id);
+          if(el && el.querySelector('div')) {
+            const note = document.createElement('div');
+            note.style.cssText='font-size:10px;color:#aaa;margin-top:4px';
+            note.textContent = `Cache: ${new Date(data.ts).toLocaleString('pt-BR')}`;
+            el.appendChild(note);
+          }
+        });
+      }
+    }
+  } catch {}
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -3739,7 +4148,14 @@ async function renderConfigView(){
 }
 
 // Parse 'rec|desp|res' raw string
-function _parseFin(raw){ const p=(raw||'').split('|'); return {rec:p[0]||'',desp:p[1]||'',res:p[2]||(p[0]&&p[1]?(parseFloat(p[0]||0)-parseFloat(p[1]||0)).toFixed(2):'')}; }
+function _parseFin(raw){
+  if (typeof raw === 'object' && raw !== null) {
+    const rec = raw.rec !== undefined ? raw.rec : '';
+    const desp = raw.desp !== undefined ? raw.desp : '';
+    const res = raw.res !== undefined ? raw.res : (rec && desp ? (parseFloat(rec)||0)-(parseFloat(desp)||0) : '');
+    return { rec: String(rec||''), desp: String(desp||''), res: String(res||'') };
+  }
+  const p=(raw||'').split('|'); return {rec:p[0]||'',desp:p[1]||'',res:p[2]||(p[0]&&p[1]?(parseFloat(p[0]||0)-parseFloat(p[1]||0)).toFixed(2):'')}; }
 // Parse 'real|meta' raw string
 function _parseProd(raw){ const p=(raw||'').split('|'); return {real:p[0]||'',meta:p[1]||''}; }
 function esc(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -3823,25 +4239,85 @@ function _renderCfgForm(wrap, cfg){
   tabs += `<button class="cfg-tab" onclick="cfgTab(this,'TRIM')">📅 Metas Trim.</button>`;
   panels += _buildTrimConfigPanel(_trimData);
 
-  // — tab Hospital (financeiro só)
+  // — tab Hospital (com sub-tabs)
   tabs += `<button class="cfg-tab" onclick="cfgTab(this,'HOSPITAL')">🏥 Hospital</button>`;
-  const hospData = cfg.hospital||{};
-  const hospRows = CFG_MESES.map((m,mi)=>{
-    const v = _parseFin(hospData[m]);
+  const hospData   = cfg.hospital||{};
+  const cancerData = cfg.cancer||{};
+  const coracaoData= cfg.coracao||{};
+  const cnesData   = cfg.cnes||{};
+  const leitosData = cfg.leitos||{sc:200,cancer:62,coracao:75};
+  const kpihData   = cfg.kpih||{};
+
+  // Helper: tabela mensal Receita/Despesa/Resultado
+  const _hospTable = (prefix, dataObj) => CFG_MESES.map((m,mi)=>{
+    const v = _parseFin(dataObj[m]);
     const cls = v.res ? (parseFloat(v.res)<0?'neg':'pos') : '';
     return `<tr>
       <td class="cfg-mes">${CFG_MESES_PT[mi]}</td>
-      <td><input type="number" step="0.01" class="cfg-money" id="cfg_HOSPITAL_${m}_rec" value="${esc(v.rec)}" placeholder="—"></td>
-      <td><input type="number" step="0.01" class="cfg-money" id="cfg_HOSPITAL_${m}_desp" value="${esc(v.desp)}" placeholder="—"></td>
-      <td><input type="number" step="0.01" class="cfg-money ${cls}" id="cfg_HOSPITAL_${m}_res" value="${esc(v.res)}" placeholder="auto" readonly></td>
+      <td><input type="number" step="0.01" class="cfg-money" id="cfg_${prefix}_${m}_rec" value="${esc(v.rec)}" placeholder="—"></td>
+      <td><input type="number" step="0.01" class="cfg-money" id="cfg_${prefix}_${m}_desp" value="${esc(v.desp)}" placeholder="—"></td>
+      <td><input type="number" step="0.01" class="cfg-money ${cls}" id="cfg_${prefix}_${m}_res" value="${esc(v.res)}" placeholder="auto" readonly></td>
     </tr>`;
   }).join('');
+
+  // KPIH units table
+  const KPIH_UNITS_CFG = [{u:'SC',n:'Santa Casa'},{u:'CO',n:'H. Coração'},{u:'CA',n:'H. Câncer'},{u:'SADT',n:'SADT'},{u:'HEMO',n:'Hemodiálise'},{u:'REAB',n:'Reab. Física'}];
+  const kpihRows = KPIH_UNITS_CFG.map(({u,n}) => {
+    return CFG_MESES.map((m,mi)=>{
+      const vk = (kpihData[u]||{})[m];
+      const rec = vk ? (vk.rec||'') : '';
+      const custo = vk ? (vk.custo||'') : '';
+      const res = (rec && custo) ? ((parseFloat(rec)||0)-(parseFloat(custo)||0)).toFixed(0) : '';
+      return `<tr><td class="cfg-mes" style="width:80px;color:#888">${n}</td><td class="cfg-mes">${CFG_MESES_PT[mi]}</td>
+        <td><input type="number" step="1" class="cfg-money" id="cfg_KPIH_${u}_${m}_rec" value="${esc(rec)}" placeholder="—"></td>
+        <td><input type="number" step="1" class="cfg-money" id="cfg_KPIH_${u}_${m}_custo" value="${esc(custo)}" placeholder="—"></td>
+        <td><input type="number" step="1" class="cfg-money" id="cfg_KPIH_${u}_${m}_res" value="${esc(res)}" placeholder="auto" readonly></td>
+      </tr>`;
+    }).join('');
+  }).join('');
+
   panels += `<div class="cfg-panel" id="cfgtab-HOSPITAL">
-    <div class="cfg-section-title">Financeiro — Hospital Santa Casa de Franca</div>
-    <table class="cfg-table">
-      <thead><tr><th>Mês</th><th>Receita (R$)</th><th>Despesa (R$)</th><th>Resultado (R$)</th></tr></thead>
-      <tbody>${hospRows}</tbody>
-    </table>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="cfg-subtab active" onclick="hospSubTab(this,'sc')" id="hst-sc">🏛️ Santa Casa</button>
+      <button class="cfg-subtab" onclick="hospSubTab(this,'cancer')" id="hst-cancer">🧬 H. Câncer</button>
+      <button class="cfg-subtab" onclick="hospSubTab(this,'coracao')" id="hst-coracao">❤️ H. Coração</button>
+      <button class="cfg-subtab" onclick="hospSubTab(this,'cnes')" id="hst-cnes">🏥 CNES</button>
+      <button class="cfg-subtab" onclick="hospSubTab(this,'kpih')" id="hst-kpih">📊 KPIH</button>
+    </div>
+    <div id="hsp-sc">
+      <div class="cfg-section-title">Financeiro — Hospital Santa Casa de Franca (DRE total Fundação)</div>
+      <table class="cfg-table"><thead><tr><th>Mês</th><th>Receita (R$)</th><th>Despesa (R$)</th><th>Resultado (R$)</th></tr></thead>
+      <tbody>${_hospTable('HOSPITAL', hospData)}</tbody></table>
+    </div>
+    <div id="hsp-cancer" style="display:none">
+      <div class="cfg-section-title">Financeiro — Hospital do Câncer (base KPIH)</div>
+      <div class="cfg-nota">Receita e Custo Total conforme KPIH. Mar/2026 pré-preenchido do Relatório Gerencial.</div>
+      <table class="cfg-table"><thead><tr><th>Mês</th><th>Receita (R$)</th><th>Despesa (R$)</th><th>Resultado (R$)</th></tr></thead>
+      <tbody>${_hospTable('CANCER', cancerData)}</tbody></table>
+    </div>
+    <div id="hsp-coracao" style="display:none">
+      <div class="cfg-section-title">Financeiro — Hospital do Coração (base KPIH)</div>
+      <div class="cfg-nota">Receita e Custo Total conforme KPIH. Mar/2026 pré-preenchido do Relatório Gerencial.</div>
+      <table class="cfg-table"><thead><tr><th>Mês</th><th>Receita (R$)</th><th>Despesa (R$)</th><th>Resultado (R$)</th></tr></thead>
+      <tbody>${_hospTable('CORACAO', coracaoData)}</tbody></table>
+    </div>
+    <div id="hsp-cnes" style="display:none">
+      <div class="cfg-section-title">Códigos CNES — Consulte em cnes.datasus.gov.br</div>
+      <div class="cfg-nota">CNPJ Santa Casa: 47.969.134/0001-89 · Código CNES tem 7 dígitos</div>
+      <div class="cfg-grid2" style="margin-top:12px">
+        <div class="cfg-field"><label>CNES — Santa Casa de Franca</label><input type="text" id="cfg_CNES_SC" value="${esc(cnesData.santaCasa||'')}" placeholder="Ex: 2079488" maxlength="7"></div>
+        <div class="cfg-field"><label>CNES — Hospital do Câncer</label><input type="text" id="cfg_CNES_CA" value="${esc(cnesData.cancer||'')}" placeholder="Ex: XXXXXXX" maxlength="7"></div>
+        <div class="cfg-field"><label>CNES — Hospital do Coração</label><input type="text" id="cfg_CNES_CO" value="${esc(cnesData.coracao||'')}" placeholder="Ex: XXXXXXX" maxlength="7"></div>
+        <div class="cfg-field"><label>Leitos SC | Câncer | Coração</label><input type="text" id="cfg_LEITOS" value="${leitosData.sc||200}|${leitosData.cancer||62}|${leitosData.coracao||75}" placeholder="200|62|75"></div>
+      </div>
+      <div style="margin-top:12px"><button onclick="consultarCNES('all')" style="background:#1565c0;color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">🔄 Consultar Todos os CNES no DATASUS</button></div>
+    </div>
+    <div id="hsp-kpih" style="display:none">
+      <div class="cfg-section-title">Resultado por Unidade KPIH — Sistema de Custos Hospitalares</div>
+      <div class="cfg-nota">Fonte: Relatório Gerencial (KPIH). Insira Receita Op. Líquida e Custo Total por unidade e mês.</div>
+      <table class="cfg-table" style="margin-top:8px"><thead><tr><th>Unidade</th><th>Mês</th><th>Receita (R$)</th><th>Custo Total (R$)</th><th>Resultado (R$)</th></tr></thead>
+      <tbody>${kpihRows}</tbody></table>
+    </div>
   </div>`;
 
   wrap.innerHTML = `
@@ -3870,6 +4346,9 @@ function _renderCfgForm(wrap, cfg){
       .cfg-save-btn:hover{background:linear-gradient(135deg,#2e7d32,#43a047);transform:translateY(-1px);box-shadow:0 4px 12px rgba(27,94,32,.3)}
       .cfg-save-btn:disabled{background:#ccc;cursor:not-allowed;transform:none;box-shadow:none}
       .cfg-nota{font-size:11px;color:#888;margin-top:8px;padding:8px 12px;background:#f9f9f9;border-radius:8px;border-left:3px solid #c8e6c9}
+      .cfg-subtab{padding:5px 12px;border:1.5px solid #ddd;border-radius:16px;background:#fff;cursor:pointer;font-size:11px;font-weight:600;color:#555;transition:.15s}
+      .cfg-subtab.active{background:#1565c0;color:#fff;border-color:#1565c0}
+      .cfg-subtab:hover:not(.active){background:#e3f2fd;border-color:#90caf9}
     </style>
     <div class="cfg-tabs">${tabs}</div>
     ${panels}
@@ -3879,7 +4358,7 @@ function _renderCfgForm(wrap, cfg){
   `;
 
   // auto-calc resultado = receita - despesa
-  const allKeys = [...CFG_AME_KEYS, 'HOSPITAL'];
+  const allKeys = [...CFG_AME_KEYS, 'HOSPITAL', 'CANCER', 'CORACAO'];
   allKeys.forEach(ak=>{
     CFG_MESES.forEach(m=>{
       const r=document.getElementById(`cfg_${ak}_${m}_rec`);
@@ -3895,6 +4374,33 @@ function _renderCfgForm(wrap, cfg){
       };
       r.addEventListener('input',upd); d.addEventListener('input',upd);
     });
+  });
+  // auto-calc KPIH resultado
+  const KPIH_UNITS_AC = ['SC','CO','CA','SADT','HEMO','REAB'];
+  KPIH_UNITS_AC.forEach(u=>{
+    CFG_MESES.forEach(m=>{
+      const r=document.getElementById(`cfg_KPIH_${u}_${m}_rec`);
+      const d=document.getElementById(`cfg_KPIH_${u}_${m}_custo`);
+      const s=document.getElementById(`cfg_KPIH_${u}_${m}_res`);
+      if(!r||!d||!s) return;
+      const upd=()=>{
+        const rv=parseFloat(r.value)||0, dv=parseFloat(d.value)||0;
+        const res=(rv||dv)?(rv-dv).toFixed(0):'';
+        s.value=res;
+        s.className=s.className.replace(/\s*(pos|neg)/g,'');
+        if(res!=='') s.classList.add(parseFloat(res)<0?'neg':'pos');
+      };
+      r.addEventListener('input',upd); d.addEventListener('input',upd);
+    });
+  });
+}
+
+// Sub-tab hospitais na aba Configurações
+function hospSubTab(btn, id) {
+  document.querySelectorAll('.cfg-subtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['sc','cancer','coracao','cnes','kpih'].forEach(k=>{
+    const el=document.getElementById('hsp-'+k); if(el) el.style.display = (k===id?'block':'none');
   });
 }
 
@@ -4121,7 +4627,7 @@ async function salvarConfiguracoes(){
   if(btn){ btn.disabled=true; btn.textContent='Salvando…'; }
   status.style.background='#e8f5e9'; status.style.borderLeftColor='#00875a'; status.style.color='#1b5e20';
 
-  const payload = { periodo:{}, ames:{}, hospital:{} };
+  const payload = { periodo:{}, ames:{}, hospital:{}, cancer:{}, coracao:{}, cnes:{}, leitos:{}, kpih:{} };
 
   // periodo
   ['PERIODO_ATUAL','MESES_REALIZADOS','ANO'].forEach(k=>{
@@ -4154,12 +4660,43 @@ async function salvarConfiguracoes(){
     });
   });
 
-  // Hospital — financeiro only
+  // Hospital Santa Casa — financeiro (raw string format)
   CFG_MESES.forEach(m=>{
     const rec=document.getElementById(`cfg_HOSPITAL_${m}_rec`)?.value||'';
     const desp=document.getElementById(`cfg_HOSPITAL_${m}_desp`)?.value||'';
     const res=document.getElementById(`cfg_HOSPITAL_${m}_res`)?.value||'';
     payload.hospital[m] = (rec||desp||res) ? `${rec}|${desp}|${res}` : '';
+  });
+  // Hospital do Câncer — objeto {rec, desp, res}
+  CFG_MESES.forEach(m=>{
+    const rec=parseFloat(document.getElementById(`cfg_CANCER_${m}_rec`)?.value)||0;
+    const desp=parseFloat(document.getElementById(`cfg_CANCER_${m}_desp`)?.value)||0;
+    if(rec||desp) payload.cancer[m] = {rec, desp, res: rec-desp};
+  });
+  // Hospital do Coração — objeto {rec, desp, res}
+  CFG_MESES.forEach(m=>{
+    const rec=parseFloat(document.getElementById(`cfg_CORACAO_${m}_rec`)?.value)||0;
+    const desp=parseFloat(document.getElementById(`cfg_CORACAO_${m}_desp`)?.value)||0;
+    if(rec||desp) payload.coracao[m] = {rec, desp, res: rec-desp};
+  });
+  // CNES codes
+  payload.cnes = {
+    santaCasa: document.getElementById('cfg_CNES_SC')?.value||'',
+    cancer:    document.getElementById('cfg_CNES_CA')?.value||'',
+    coracao:   document.getElementById('cfg_CNES_CO')?.value||'',
+  };
+  // Leitos
+  const leitosStr = (document.getElementById('cfg_LEITOS')?.value||'200|62|75').split('|');
+  payload.leitos = { sc: parseInt(leitosStr[0])||200, cancer: parseInt(leitosStr[1])||62, coracao: parseInt(leitosStr[2])||75 };
+  // KPIH
+  const KPIH_UNITS_SV = ['SC','CO','CA','SADT','HEMO','REAB'];
+  KPIH_UNITS_SV.forEach(u=>{
+    payload.kpih[u] = {};
+    CFG_MESES.forEach(m=>{
+      const rec=parseFloat(document.getElementById(`cfg_KPIH_${u}_${m}_rec`)?.value)||0;
+      const custo=parseFloat(document.getElementById(`cfg_KPIH_${u}_${m}_custo`)?.value)||0;
+      if(rec||custo) payload.kpih[u][m] = {rec, custo, res: rec-custo};
+    });
   });
 
   try {
@@ -4219,6 +4756,10 @@ window.addEventListener('DOMContentLoaded', ()=>{
   renderHome();
   renderAmesView();
   refreshPlanosBadge();
+  // Carrega configurações globais para os painéis hospitalares
+  fetch('/api/configuracao').then(r=>r.json()).then(d=>{
+    window.DADOS_CFG = d;
+  }).catch(()=>{});
 });
 </script>
 </body>

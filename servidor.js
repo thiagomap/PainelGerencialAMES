@@ -164,6 +164,20 @@ const server = http.createServer((req, res) => {
       ultimaAtualizacao: _ultimaAtualizacao ? _ultimaAtualizacao.toLocaleString('pt-BR') : null,
     }));
   }
+  if (req.method === 'GET' && req.url.startsWith('/api/cnes-dados')) {
+    const cnesFile = path.join(ROOT, 'cnes-dados.json');
+    try {
+      const data = JSON.parse(fs.readFileSync(cnesFile, 'utf8'));
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(JSON.stringify(data));
+    } catch {
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(JSON.stringify({ ok: false, msg: 'Nenhum dado CNES disponível — clique em Consultar CNES' }));
+    }
+  }
+  if (req.method === 'POST' && req.url === '/api/cnes-buscar') {
+    return handleBuscarCNES(req, res);
+  }
 
   // â”€â”€ GET estÃ¡tico â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let url = req.url.split('?')[0];
@@ -536,8 +550,18 @@ const CONFIG_FILE = path.join(ROOT, 'CONFIGURACAO.env');
 const MESES_CFG = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const AMES_CONFIG = ['CAMPINAS','CASA_BRANCA','FRANCA','JURUMIRIM','RIBEIRAO','SAO_CARLOS'];
 
+function _parseFin(val) {
+  // "receita|despesa" ou "receita|despesa|resultado"
+  if (!val) return { rec: 0, desp: 0, res: 0 };
+  const p = val.split('|');
+  const rec  = parseFloat(p[0]) || 0;
+  const desp = parseFloat(p[1]) || 0;
+  const res  = p[2] !== undefined ? (parseFloat(p[2]) || 0) : (rec - desp);
+  return { rec, desp, res };
+}
+
 function lerConfiguracaoEnv() {
-  const result = { periodo: {}, ames: {}, hospital: {} };
+  const result = { periodo: {}, ames: {}, hospital: {}, cancer: {}, coracao: {}, cnes: {}, leitos: {}, kpih: {} };
   let lines = [];
   try { lines = fs.readFileSync(CONFIG_FILE, 'utf8').split('\n'); } catch(e) { return result; }
   const get = key => { const l = lines.find(l => l.startsWith(key+'=')); return l ? l.slice(key.length+1).trim() : ''; };
@@ -555,7 +579,38 @@ function lerConfiguracaoEnv() {
       MESES_CFG.forEach(m => { result.ames[ame].producao[met][m] = get(`${ame}_${met}_${m}`); });
     });
   });
-  MESES_CFG.forEach(m => { result.hospital[m] = get(`HOSPITAL_${m}`); });
+  // Hospital Santa Casa: mantém formato raw string (compatibilidade com form de config)
+  // Cancer / Coração: retorna objeto {rec, desp, res} como números
+  MESES_CFG.forEach(m => {
+    result.hospital[m] = get(`HOSPITAL_${m}`); // raw string "rec|desp|res"
+    result.cancer[m]   = _parseFin(get(`CANCER_${m}`));
+    result.coracao[m]  = _parseFin(get(`CORACAO_${m}`));
+  });
+  // CNES
+  result.cnes = {
+    santaCasa: get('CNES_SANTA_CASA'),
+    cancer:    get('CNES_CANCER'),
+    coracao:   get('CNES_CORACAO'),
+  };
+  // Leitos
+  const leitos = (get('HOSPITAL_LEITOS') || '200|62|75').split('|');
+  result.leitos = { sc: parseInt(leitos[0])||200, cancer: parseInt(leitos[1])||62, coracao: parseInt(leitos[2])||75 };
+  // KPIH (Resultado por Unidade)
+  const KPIH_UNITS = ['SC','CO','CA','SADT','HEMO','REAB'];
+  KPIH_UNITS.forEach(u => {
+    result.kpih[u] = {};
+    MESES_CFG.forEach(m => {
+      const v = get(`KPIH_${u}_${m}`);
+      if (v && v.includes('|')) {
+        const p = v.split('|');
+        const rec  = parseFloat(p[0]) || 0;
+        const custo = parseFloat(p[1]) || 0;
+        result.kpih[u][m] = { rec, custo, res: rec - custo };
+      } else {
+        result.kpih[u][m] = null;
+      }
+    });
+  });
   return result;
 }
 
@@ -593,6 +648,31 @@ function handleSalvarConfiguracao(req, res) {
         }
       });
       if(cfg.hospital) MESES_CFG.forEach(m => setVal(`HOSPITAL_${m}`, cfg.hospital[m]||''));
+      if(cfg.cancer)  MESES_CFG.forEach(m => {
+        const v = cfg.cancer[m];
+        if (typeof v === 'object' && v) setVal(`CANCER_${m}`, `${v.rec||''}|${v.desp||''}`);
+        else if (typeof v === 'string') setVal(`CANCER_${m}`, v||'|');
+      });
+      if(cfg.coracao) MESES_CFG.forEach(m => {
+        const v = cfg.coracao[m];
+        if (typeof v === 'object' && v) setVal(`CORACAO_${m}`, `${v.rec||''}|${v.desp||''}`);
+        else if (typeof v === 'string') setVal(`CORACAO_${m}`, v||'|');
+      });
+      if(cfg.cnes) {
+        if(cfg.cnes.santaCasa !== undefined) setVal('CNES_SANTA_CASA', cfg.cnes.santaCasa||'');
+        if(cfg.cnes.cancer    !== undefined) setVal('CNES_CANCER',     cfg.cnes.cancer||'');
+        if(cfg.cnes.coracao   !== undefined) setVal('CNES_CORACAO',    cfg.cnes.coracao||'');
+      }
+      if(cfg.leitos) setVal('HOSPITAL_LEITOS', `${cfg.leitos.sc||200}|${cfg.leitos.cancer||62}|${cfg.leitos.coracao||75}`);
+      if(cfg.kpih) {
+        const KPIH_UNITS = ['SC','CO','CA','SADT','HEMO','REAB'];
+        KPIH_UNITS.forEach(u => {
+          if(cfg.kpih[u]) MESES_CFG.forEach(m => {
+            const v = cfg.kpih[u][m];
+            setVal(`KPIH_${u}_${m}`, v ? `${v.rec||''}|${v.custo||''}` : '|');
+          });
+        });
+      }
       fs.writeFileSync(CONFIG_FILE, lines.join('\n'), 'utf8');
       console.log(`${new Date().toLocaleTimeString('pt-BR')} Configuracao salva via web`);
       res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
@@ -790,6 +870,53 @@ Seja DETALHISTA. Escreva anÃ¡lises completas em cada [META]. NÃ£o use JSON, 
       });
     }
   });
+}
+
+// ── CNES: consulta DATASUS e retorna dados do estabelecimento ──
+async function buscarCNES(code) {
+  if (!code || code.length < 5) return null;
+  return new Promise(resolve => {
+    const options = {
+      hostname: 'cnes.datasus.gov.br',
+      path: `/services/estabelecimentos/${code}`,
+      method: 'GET',
+      headers: { 'Accept': 'application/json', 'User-Agent': 'PortalGerencialSantaCasa/1.0' },
+      timeout: 8000,
+    };
+    const req = https.request(options, resHttp => {
+      let data = '';
+      resHttp.on('data', d => data += d);
+      resHttp.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { resolve({ _raw: data.substring(0, 200), erro: 'Resposta não é JSON válido' }); }
+      });
+    });
+    req.on('error', e => resolve({ erro: e.message }));
+    req.on('timeout', () => { req.destroy(); resolve({ erro: 'Timeout ao consultar DATASUS' }); });
+    req.end();
+  });
+}
+
+async function handleBuscarCNES(req, res) {
+  const cfg = lerConfiguracaoEnv();
+  const codes = {
+    santaCasa: cfg.cnes.santaCasa,
+    cancer:    cfg.cnes.cancer,
+    coracao:   cfg.cnes.coracao,
+  };
+  const resultado = { ts: new Date().toISOString(), hospitais: {} };
+  for (const [key, code] of Object.entries(codes)) {
+    if (code && code.length >= 5) {
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 Consultando CNES ${code} (${key})…`);
+      resultado.hospitais[key] = await buscarCNES(code);
+    } else {
+      resultado.hospitais[key] = { erro: 'Código CNES não configurado — preencha em Configurações → CNES' };
+    }
+  }
+  const cnesFile = path.join(ROOT, 'cnes-dados.json');
+  fs.writeFileSync(cnesFile, JSON.stringify(resultado, null, 2), 'utf8');
+  res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+  res.end(JSON.stringify(resultado));
 }
 
 server.listen(PORT, '0.0.0.0', () => {
