@@ -1,23 +1,23 @@
 {
-  "competencia": "3/2026",
-  "geradoEm": "2026-05-25T17:36:54.334Z",
+  "competencia": "4/2026",
+  "geradoEm": "2026-05-25T18:08:59.218Z",
   "relatorios": {
     "rankingSES": [
       [
-        "Relat�rio de ranking de custos por centro",
+        "Relatório de ranking de custos por centro",
         "",
         "",
         ""
       ],
       [
-        "Funda��o Santa Casa de Miseric�rdia de Franca  3/2026 - 3/2026 - Sem valores rateados - Sem Recursos Externos",
+        "Fundação Santa Casa de Misericórdia de Franca  4/2026 - 4/2026 - Sem valores rateados - Sem Recursos Externos",
         "",
         "",
         ""
       ],
       [
-        "Descri��o",
-        "3/2026",
+        "Descrição",
+        "4/2026",
         "",
         ""
       ],
@@ -28,83 +28,89 @@
         "Valor"
       ],
       [
-        "Centro Cir�rgico Santa Casa",
-        "1.995.676,53",
-        "8,19",
-        "1�"
+        "Centro Cirúrgico Santa Casa",
+        "1.949.218,63",
+        "8,01",
+        "1º"
       ],
       [
         "Quimioterapia",
-        "1.108.638,04",
-        "4,55",
-        "2�"
+        "1.100.380,35",
+        "4,52",
+        "2º"
       ],
       [
-        "Centro Cir�rgico Hospital do Cora��o",
-        "958.233,80",
-        "3,93",
-        "3�"
+        "Centro Cirúrgico Hospital do Coração",
+        "1.062.511,34",
+        "4,37",
+        "3º"
       ],
       [
-        "Utin / Pedi�trica",
-        "834.618,00",
-        "3,42",
-        "4�"
+        "Hemodiálise",
+        "960.966,33",
+        "3,95",
+        "4º"
       ],
       [
-        "Laborat�rio An�lises Cl�nicas  Santa Cas",
-        "777.186,45",
-        "3,19",
-        "5�"
+        "Utin / Pediátrica",
+        "817.680,25",
+        "3,36",
+        "5º"
+      ],
+      [
+        "Laboratório Análises Clínicas  Santa Cas",
+        "809.055,07",
+        "3,33",
+        "6º"
       ],
       [
         "U.T.I. Adulto",
-        "760.179,39",
+        "759.478,00",
         "3,12",
-        "6�"
-      ],
-      [
-        "Hemodi�lise",
-        "746.794,93",
-        "3,06",
-        "7�"
-      ],
-      [
-        "Centro Obst�trico",
-        "624.396,12",
-        "2,56",
-        "8�"
+        "7º"
       ],
       [
         "Pronto Atendimento Hospital Geral",
-        "623.380,50",
-        "2,56",
-        "9�"
+        "647.427,14",
+        "2,66",
+        "8º"
       ],
       [
-        "Hemodin�mica",
-        "569.123,40",
-        "2,33",
-        "10�"
+        "Centro Obstétrico",
+        "619.796,39",
+        "2,55",
+        "9º"
+      ],
+      [
+        "Hemodinâmica",
+        "540.717,22",
+        "2,22",
+        "10º"
       ],
       [
         "Sub-Total",
-        "8.998.227,15",
-        "36,92",
+        "9.267.230,73",
+        "38,09",
         ""
       ],
       [
         "Outros Centros de Custo",
-        "15.375.681,43",
-        "63,08",
+        "15.062.411,49",
+        "61,91",
         ""
       ],
       [
         "Total",
-        "24.373.908,58",
+        "24.329.642,22",
         "100,00",
         ""
       ]
     ]
+  },
+  "status": {
+    "rankingSES": 200,
+    "eficienciaProdutiva": 405,
+    "custoPorEspecialidade": 405,
+    "dre": 405
   }
 }

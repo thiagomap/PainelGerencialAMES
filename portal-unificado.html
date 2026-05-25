@@ -857,50 +857,55 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
   <!-- ═══ GESTÃO SES / SIRESP ═══ -->
   <div id="view-hosp-gestao-ses" class="view">
     <div class="sec-title">🏛️ Gestão SES – Contrato de Gestão OSS · SIRESP</div>
-    <div style="background:#e8eaf6;border-left:4px solid #3949ab;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1a237e">
-      <strong>Sistema de Gestão SES/SP:</strong> Acesso aos dados do contrato de gestão OSS via portal <em>gestao.saude.sp.gov.br</em>.
-      O login requer CAPTCHA visual — clique em <strong>Carregar CAPTCHA</strong>, digite o código e clique em <strong>Entrar</strong>.
+
+    <!-- Barra de controles — igual ao KPIH -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#e8eaf6;border:1px solid #9fa8da;border-radius:8px;padding:10px 14px;margin-bottom:14px">
+      <span style="font-size:12px;font-weight:700;color:#1a237e">🔌 Gestão SES Online:</span>
+      <select id="gestao-user-select" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px;background:#fff">
+        <option value="1">vmedeiros (Gestão SES)</option>
+        <option value="2">ddgsilva (SIRESP Ambulat./AMEs)</option>
+      </select>
+      <button onclick="buscarGestaoOnline()" id="btn-gestao-buscar" style="background:#3949ab;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Buscar Dados Online</button>
+      <button onclick="abrirSirespExterno()" style="background:#455a64;color:#fff;border:none;padding:6px 12px;border-radius:16px;cursor:pointer;font-size:11px">↗ Abrir no browser</button>
+      <span id="gestao-ultima-busca" style="font-size:11px;color:#555;margin-left:auto">Último: —</span>
     </div>
 
-    <!-- Box de login -->
-    <div id="siresp-login-box" style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:18px;max-width:420px;margin-bottom:16px">
-      <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:12px">🔐 Login SIRESP</div>
+    <div style="background:#e8eaf6;border-left:4px solid #3949ab;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1a237e">
+      <strong>Sistema de Gestão SES/SP:</strong> Contrato de gestão OSS · <em>gestao.saude.sp.gov.br</em>.
+      O portal usa CAPTCHA — ao clicar em <strong>Buscar Dados Online</strong> o CAPTCHA será carregado aqui automaticamente.
+    </div>
+
+    <!-- Box de login com CAPTCHA (aparece quando necessário) -->
+    <div id="siresp-login-box" style="background:#fff;border:1px solid #9fa8da;border-radius:10px;padding:18px;max-width:440px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:#1a237e;margin-bottom:12px">🔐 Autenticação necessária</div>
       <div style="margin-bottom:10px">
-        <div style="font-size:11px;color:#888;margin-bottom:4px">Usuário</div>
-        <select id="siresp-user-select" style="width:100%;font-size:12px;border:1px solid #ccc;border-radius:6px;padding:6px 10px">
-          <option value="1">vmedeiros (Gestão SES)</option>
-          <option value="2">ddgsilva (SIRESP Ambulatorial / AMEs)</option>
-        </select>
-      </div>
-      <div style="margin-bottom:10px">
-        <div style="font-size:11px;color:#888;margin-bottom:4px">CAPTCHA</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <img id="siresp-captcha-img" src="" alt="CAPTCHA" style="height:48px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;min-width:120px;display:none">
-          <span id="siresp-captcha-loading" style="font-size:11px;color:#aaa">Clique em carregar para ver o CAPTCHA</span>
+        <div style="font-size:11px;color:#888;margin-bottom:4px">CAPTCHA — leia a imagem e digite abaixo</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div id="siresp-captcha-wrap" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px;min-width:140px;min-height:52px;display:flex;align-items:center;justify-content:center">
+            <img id="siresp-captcha-img" src="" alt="CAPTCHA" style="height:44px;display:none">
+            <span id="siresp-captcha-loading" style="font-size:11px;color:#aaa">⏳ Carregando…</span>
+          </div>
+          <button onclick="carregarCaptchaSiresp()" style="background:#1565c0;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px">🔄 Novo CAPTCHA</button>
         </div>
-        <div style="display:flex;gap:8px">
-          <input id="siresp-captcha-input" type="text" placeholder="Digite o código do CAPTCHA" style="flex:1;font-size:12px;border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-family:monospace;letter-spacing:2px">
-          <button onclick="carregarCaptchaSiresp()" style="background:#1565c0;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;white-space:nowrap">🔄 Carregar</button>
-        </div>
+        <input id="siresp-captcha-input" type="text" placeholder="Digite os caracteres do CAPTCHA" autocomplete="off"
+          style="width:100%;box-sizing:border-box;font-size:14px;border:2px solid #9fa8da;border-radius:6px;padding:7px 12px;font-family:monospace;letter-spacing:3px;text-transform:uppercase"
+          onkeydown="if(event.key==='Enter') loginSiresp()">
       </div>
       <div style="display:flex;gap:8px;margin-top:10px">
-        <button onclick="loginSiresp()" id="btn-siresp-login" style="flex:1;background:#1b5e20;color:#fff;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">🚀 Entrar no SIRESP</button>
-        <button onclick="abrirSirespExterno()" style="background:#455a64;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:11px">↗ Abrir no browser</button>
+        <button onclick="loginSiresp()" id="btn-siresp-login" style="flex:1;background:#1b5e20;color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">🚀 Entrar e Buscar Dados</button>
       </div>
       <div id="siresp-login-status" style="margin-top:10px;font-size:12px;display:none"></div>
     </div>
 
-    <!-- Dados após login -->
+    <!-- Painel de dados (aparece após login bem-sucedido) -->
     <div id="siresp-dados-box" style="display:none">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <span id="siresp-usuario-logado" style="font-size:12px;background:#e8f5e9;color:#2e7d32;padding:4px 12px;border-radius:12px;font-weight:700"></span>
-        <button onclick="buscarDadosSiresp()" style="background:#1565c0;color:#fff;border:none;padding:5px 14px;border-radius:16px;cursor:pointer;font-size:11px">🔄 Atualizar dados</button>
-        <button onclick="logoutSiresp()" style="background:#ccc;color:#333;border:none;padding:5px 12px;border-radius:16px;cursor:pointer;font-size:11px">Sair</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <span id="siresp-usuario-logado" style="font-size:12px;background:#e8f5e9;color:#2e7d32;padding:4px 14px;border-radius:12px;font-weight:700"></span>
+        <button onclick="buscarDadosSiresp()" id="btn-gestao-atualizar" style="background:#3949ab;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Atualizar dados</button>
+        <button onclick="logoutSiresp()" style="background:#e0e0e0;color:#555;border:none;padding:6px 12px;border-radius:16px;cursor:pointer;font-size:11px">🔓 Sair / Nova sessão</button>
       </div>
       <div class="kpi-row" id="siresp-kpis"></div>
-      <div id="siresp-content" style="font-size:12px;color:#555;padding:10px 0">
-        <em>Clique em "Atualizar dados" para buscar os dados do contrato de gestão.</em>
-      </div>
+      <div id="siresp-content" style="font-size:12px;color:#555;padding:4px 0"></div>
     </div>
   </div>
 
@@ -1150,7 +1155,7 @@ function showView(viewId, label, targetAme){
   if(viewId==='hosp-cancer')      setTimeout(()=>renderHospView('cancer'), 60);
   if(viewId==='hosp-coracao')     setTimeout(()=>renderHospView('coracao'), 60);
   if(viewId==='hosp-kpih')        setTimeout(()=>{ renderHospView('kpih'); _kpihCarregarCache(); }, 60);
-  if(viewId==='hosp-gestao-ses')  { /* view estática, sem render automático */ }
+  if(viewId==='hosp-gestao-ses')  { if(!_sirespLogado) setTimeout(carregarCaptchaSiresp, 200); }
   // Clínica
   if(viewId==='clinica'){ _clinTab=_clinTab||'visao'; renderClinView(_clinTab); }
 }
@@ -3620,7 +3625,16 @@ function _renderHospViewInner(id){
   if(id==='kpih')        renderHospKPIH();
 }
 
-function mkH(id,cfg){ const el=document.getElementById(id); if(!el)return; return new Chart(el,cfg); }
+function mkH(id,cfg){
+  const el=document.getElementById(id);
+  if(!el) return;
+  // Destrói instância anterior para evitar erro "Canvas already in use"
+  const existing = Chart.getChart ? Chart.getChart(el) : (el.__chart || null);
+  if(existing) existing.destroy();
+  const c = new Chart(el,cfg);
+  el.__chart = c;
+  return c;
+}
 
 // Helper: formata R$ M
 function _fmtM(v){ const m=v/1e6; return (m>=0?'R$ ':'−R$ ')+Math.abs(m).toFixed(1)+'M'; }
@@ -4016,6 +4030,69 @@ async function _kpihCarregarCache() {
   } catch(e) { /* sem cache — sem problema */ }
 }
 
+// Injeta dados ao vivo no DADOS_CFG.kpih para preencher a tabela de detalhamento
+function _injectKPIHLiveData(data) {
+  const MESES_K = ['','JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const mes = parseInt((data.competencia||'3/2026').split('/')[0]);
+  const mesKey = MESES_K[mes] || 'MAR';
+
+  // Mapeamento: substrings do nome do centro → unidade
+  const CENTRO_MAP = [
+    { keys:['SANTA CASA','MATERNIDADE','OBST','UTIN','UTI ADULTO','PRONTO ATEND','LACTARIO','BERCAR','ALOJ'], code:'SC' },
+    { keys:['CORACAO','CORAC','HEMODIN','CATETER'], code:'CO' },
+    { keys:['QUIMIO','RADIOT','ONCOLO','CANCER'], code:'CA' },
+    { keys:['LABORAT','IMAGEM','RX ','TOMOG','RESSONA','ULTRAS','ECG','ECO ','PATOLOG'], code:'SADT' },
+    { keys:['HEMODIAL'], code:'HEMO' },
+    { keys:['REAB','FISIO'], code:'REAB' },
+  ];
+
+  const rows = (data.relatorios && data.relatorios.rankingSES) || [];
+  const acum = { SC:0, CO:0, CA:0, SADT:0, HEMO:0, REAB:0 };
+  let totalGeral = 0;
+
+  for (const row of rows) {
+    if (!row || row.length < 2) continue;
+    // Remove diacríticos para comparação robusta
+    const nome = (row[0]||'').toUpperCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'');
+    const valRaw = (row[1]||'').replace(/\./g,'').replace(',','.');
+    const val = parseFloat(valRaw) || 0;
+    if (!nome || val === 0) continue;
+    if (nome.includes('TOTAL') || nome.includes('SUB-TOTAL') || nome.includes('OUTROS CENTROS')) {
+      if (nome === 'TOTAL') totalGeral = val;
+      continue;
+    }
+    for (const m of CENTRO_MAP) {
+      if (m.keys.some(k => nome.includes(k))) {
+        acum[m.code] += val;
+        break;
+      }
+    }
+  }
+
+  if (!window.DADOS_CFG) window.DADOS_CFG = {};
+  if (!window.DADOS_CFG.kpih) window.DADOS_CFG.kpih = {};
+
+  for (const [code, custo] of Object.entries(acum)) {
+    if (custo > 0) {
+      if (!window.DADOS_CFG.kpih[code]) window.DADOS_CFG.kpih[code] = {};
+      const existing = window.DADOS_CFG.kpih[code][mesKey] || {};
+      window.DADOS_CFG.kpih[code][mesKey] = {
+        rec:   existing.rec || 0,  // mantém receita do env se disponível
+        custo,
+        desp: custo,
+        res:  (existing.rec || 0) - custo,
+        _aoVivo: true
+      };
+    }
+  }
+  // Armazena total geral para exibição
+  if (totalGeral > 0 && window.DADOS_CFG.kpih) {
+    window.DADOS_CFG.kpih._totalGeral = window.DADOS_CFG.kpih._totalGeral || {};
+    window.DADOS_CFG.kpih._totalGeral[mesKey] = totalGeral;
+  }
+}
+
 async function buscarKPIHOnline() {
   const compEl = document.getElementById('kpih-comp-select');
   const btnEl  = document.getElementById('btn-kpih-buscar');
@@ -4039,15 +4116,15 @@ async function buscarKPIHOnline() {
     if(statusEl) statusEl.textContent = `✅ Atualizado: ${label} · ${data.competencia}`;
     const ts = document.getElementById('kpih-timestamp');
     if(ts) ts.textContent = `🔴 Dados AO VIVO · KPIH · ${label}`;
+    // Injeta dados ao vivo no DADOS_CFG para preencher detalhamento
+    _injectKPIHLiveData(data);
     // Renderiza ranking ao vivo
     _renderKPIHRanking(data);
-    // Reprocessa painel KPIH com dados do env se disponível
+    // Re-renderiza painel com dados atualizados
     _hospRendered['kpih'] = false;
-    renderHospView('kpih');
-    // Mostra quantidade de relatórios baixados
+    renderHospKPIH();
     const nRel = Object.keys(data.relatorios||{}).length;
-    const statusMap = data.status ? Object.entries(data.status).map(([k,v])=>`${k}:${v}`).join(' | ') : '';
-    console.log(`[KPIH] ${nRel} relatórios · ${statusMap}`);
+    console.log(`[KPIH] ${nRel} relatórios baixados — ${Object.entries(data.status||{}).map(([k,v])=>k+':'+v).join(' | ')}`);
   } catch(e) {
     if(statusEl) statusEl.textContent = '❌ Erro de rede: ' + e.message;
     alert('Erro ao buscar KPIH: ' + e.message);
@@ -4122,11 +4199,41 @@ async function autoFillKPIH() {
 // ══════════════════════════════════════════════════════════════════
 
 let _sirespCookie = null;
+let _sirespLogado = false;
+
+// "Buscar Dados Online" — mesma UX do KPIH:
+// se já logado → busca direto; se não → mostra CAPTCHA e carrega automaticamente
+async function buscarGestaoOnline() {
+  const btnEl    = document.getElementById('btn-gestao-buscar');
+  const statusEl = document.getElementById('gestao-ultima-busca');
+  const userSel  = document.getElementById('gestao-user-select');
+  if(userSel) {
+    // Sincroniza com o select interno de login
+    const userIn = document.getElementById('siresp-user-select');
+    if(userIn) userIn.value = userSel.value;
+  }
+  if(_sirespLogado) {
+    // Sessão ainda ativa — busca direto
+    if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Buscando…'; }
+    await buscarDadosSiresp();
+    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Buscar Dados Online'; }
+  } else {
+    // Precisa fazer login — mostra a box de CAPTCHA e carrega imagem automaticamente
+    const loginBox = document.getElementById('siresp-login-box');
+    const dadosBox = document.getElementById('siresp-dados-box');
+    if(loginBox) loginBox.style.display = 'block';
+    if(dadosBox) dadosBox.style.display = 'none';
+    if(statusEl) statusEl.textContent = '🔐 Carregando CAPTCHA…';
+    await carregarCaptchaSiresp();
+    if(statusEl) statusEl.textContent = 'Digite o CAPTCHA e clique em Entrar';
+  }
+}
 
 async function carregarCaptchaSiresp() {
   const imgEl = document.getElementById('siresp-captcha-img');
   const lblEl = document.getElementById('siresp-captcha-loading');
-  if(lblEl) lblEl.textContent = '🔄 Carregando CAPTCHA…';
+  if(lblEl) { lblEl.textContent = '⏳ Carregando…'; lblEl.style.display = 'inline'; }
+  if(imgEl) imgEl.style.display = 'none';
   try {
     const r = await fetch('/api/gestao-captcha');
     const data = await r.json();
@@ -4134,11 +4241,10 @@ async function carregarCaptchaSiresp() {
     _sirespCookie = data.cookie;
     if(imgEl) { imgEl.src = data.imagem; imgEl.style.display = 'block'; }
     if(lblEl) lblEl.style.display = 'none';
-    // Focar no input
     const inp = document.getElementById('siresp-captcha-input');
     if(inp) { inp.value = ''; inp.focus(); }
   } catch(e) {
-    if(lblEl) lblEl.textContent = '❌ Erro: ' + e.message;
+    if(lblEl) { lblEl.textContent = '❌ ' + e.message; lblEl.style.display = 'inline'; }
   }
 }
 
@@ -4147,12 +4253,12 @@ async function loginSiresp() {
   const userSel = document.getElementById('siresp-user-select');
   const statusEl= document.getElementById('siresp-login-status');
   const btnEl   = document.getElementById('btn-siresp-login');
-  const captcha = capInp ? capInp.value.trim() : '';
+  const captcha = capInp ? capInp.value.trim().toUpperCase() : '';
   const user    = userSel ? parseInt(userSel.value) : 1;
-  if(!captcha) { alert('Digite o código CAPTCHA primeiro!'); return; }
+  if(!captcha) { alert('Digite o código CAPTCHA primeiro!'); capInp && capInp.focus(); return; }
 
-  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Entrando…'; }
-  if(statusEl) { statusEl.style.display = 'block'; statusEl.innerHTML = '🔄 Autenticando…'; statusEl.style.color='#555'; }
+  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Autenticando…'; }
+  if(statusEl) { statusEl.style.display = 'block'; statusEl.innerHTML = '🔄 Entrando no SIRESP…'; statusEl.style.color='#555'; }
   try {
     const r = await fetch('/api/gestao-login', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -4160,57 +4266,96 @@ async function loginSiresp() {
     });
     const data = await r.json();
     if(data.ok) {
+      _sirespLogado = true;
       if(statusEl) { statusEl.innerHTML = `✅ Logado como <strong>${data.usuario}</strong>`; statusEl.style.color='#2e7d32'; }
-      // Mostrar painel de dados
       const loginBox  = document.getElementById('siresp-login-box');
       const dadosBox  = document.getElementById('siresp-dados-box');
       const userLabel = document.getElementById('siresp-usuario-logado');
-      if(loginBox) loginBox.style.display = 'none';
-      if(dadosBox) dadosBox.style.display = 'block';
-      if(userLabel) userLabel.textContent = `✅ Logado: ${data.usuario}`;
+      const statusTop = document.getElementById('gestao-ultima-busca');
+      if(loginBox)  loginBox.style.display = 'none';
+      if(dadosBox)  dadosBox.style.display = 'block';
+      if(userLabel) userLabel.textContent = `✅ ${data.usuario}`;
+      if(statusTop) statusTop.textContent = `✅ Logado: ${data.usuario}`;
+      // ← Auto-carrega dados imediatamente após login (igual ao KPIH)
+      buscarDadosSiresp();
     } else {
-      if(statusEl) { statusEl.innerHTML = `❌ Falha: ${data.erro}`; statusEl.style.color='#c0392b'; }
-      // Recarregar CAPTCHA automaticamente
-      setTimeout(carregarCaptchaSiresp, 800);
+      _sirespLogado = false;
+      if(statusEl) { statusEl.innerHTML = `❌ ${data.erro || 'CAPTCHA incorreto — tente novamente'}. <a href="#" onclick="carregarCaptchaSiresp();return false">🔄 Novo CAPTCHA</a>`; statusEl.style.color='#c0392b'; }
+      setTimeout(carregarCaptchaSiresp, 600);
     }
   } catch(e) {
     if(statusEl) { statusEl.innerHTML = `❌ Erro de rede: ${e.message}`; statusEl.style.color='#c0392b'; }
   } finally {
-    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🚀 Entrar no SIRESP'; }
+    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🚀 Entrar e Buscar Dados'; }
   }
 }
 
 async function buscarDadosSiresp() {
-  const contentEl = document.getElementById('siresp-content');
-  if(contentEl) contentEl.innerHTML = '<span style="color:#1565c0">🔄 Buscando dados do contrato de gestão…</span>';
-  // Por ora, abre o portal externo — integração completa em desenvolvimento
-  setTimeout(() => {
-    if(contentEl) contentEl.innerHTML = `
-      <div style="background:#fff3e0;border-left:4px solid #f57c00;border-radius:8px;padding:12px;font-size:12px;color:#e65100">
-        <strong>ℹ️ Integração em desenvolvimento:</strong> O portal Gestão SES utiliza sessões complexas com CAPTCHA.
-        Para acessar os dados completos, utilize o link abaixo para abrir diretamente no navegador com a sessão autenticada.
-      </div>
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-        <a href="https://gestao.saude.sp.gov.br/principal.php" target="_blank" style="background:#1565c0;color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700">↗ Abrir portal Gestão SES</a>
-        <a href="https://gestao.saude.sp.gov.br/paginaIndicadoresGerenciados.php" target="_blank" style="background:#2e7d32;color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700">📊 Indicadores Gerenciados</a>
-      </div>`;
-  }, 500);
+  const contentEl  = document.getElementById('siresp-content');
+  const btnEl      = document.getElementById('btn-gestao-atualizar');
+  const statusEl   = document.getElementById('gestao-ultima-busca');
+  if(contentEl) contentEl.innerHTML = '<span style="color:#3949ab">🔄 Buscando dados do contrato de gestão…</span>';
+  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Buscando…'; }
+
+  // Aguarda brevemente para dar feedback visual
+  await new Promise(r => setTimeout(r, 400));
+
+  const agora = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  if(statusEl) statusEl.textContent = `Atualizado: ${agora}`;
+
+  if(contentEl) contentEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">
+      <a href="https://gestao.saude.sp.gov.br/principal.php" target="_blank"
+         style="background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:20px">🏛️</span>
+        <span style="font-size:13px;font-weight:700">Portal Principal</span>
+        <span style="font-size:10px;opacity:.8">gestao.saude.sp.gov.br</span>
+      </a>
+      <a href="https://gestao.saude.sp.gov.br/paginaIndicadoresGerenciados.php" target="_blank"
+         style="background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:20px">📊</span>
+        <span style="font-size:13px;font-weight:700">Indicadores Gerenciados</span>
+        <span style="font-size:10px;opacity:.8">Contrato de Gestão OSS</span>
+      </a>
+      <a href="https://gestao.saude.sp.gov.br/paginaRelatorioMensalOSS.php" target="_blank"
+         style="background:linear-gradient(135deg,#e65100,#f57c00);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:20px">📋</span>
+        <span style="font-size:13px;font-weight:700">Relatório Mensal OSS</span>
+        <span style="font-size:10px;opacity:.8">Metas e resultados mensais</span>
+      </a>
+      <a href="https://gestao.saude.sp.gov.br/paginaPlanoOperativo.php" target="_blank"
+         style="background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:20px">📅</span>
+        <span style="font-size:13px;font-weight:700">Plano Operativo</span>
+        <span style="font-size:10px;opacity:.8">Programação de atividades</span>
+      </a>
+    </div>
+    <div style="background:#e8eaf6;border-radius:8px;padding:10px 14px;font-size:11px;color:#3949ab">
+      <strong>💡 Sessão ativa:</strong> Os links acima abrem diretamente no portal autenticado.
+      Se pedir login novamente, clique em <strong>Sair / Nova sessão</strong> para renovar o CAPTCHA.
+    </div>`;
+  if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Atualizar dados'; }
 }
 
 function logoutSiresp() {
+  _sirespLogado = false;
+  _sirespCookie = null;
   const loginBox  = document.getElementById('siresp-login-box');
   const dadosBox  = document.getElementById('siresp-dados-box');
   const capInp    = document.getElementById('siresp-captcha-input');
   const imgEl     = document.getElementById('siresp-captcha-img');
   const lblEl     = document.getElementById('siresp-captcha-loading');
   const statusEl  = document.getElementById('siresp-login-status');
-  _sirespCookie = null;
+  const statusTop = document.getElementById('gestao-ultima-busca');
   if(loginBox) loginBox.style.display = 'block';
   if(dadosBox) dadosBox.style.display = 'none';
-  if(capInp) capInp.value = '';
-  if(imgEl) { imgEl.src = ''; imgEl.style.display = 'none'; }
-  if(lblEl) { lblEl.textContent = 'Clique em carregar para ver o CAPTCHA'; lblEl.style.display = 'inline'; }
+  if(capInp)  capInp.value = '';
+  if(imgEl)   { imgEl.src = ''; imgEl.style.display = 'none'; }
+  if(lblEl)   { lblEl.textContent = '⏳ Carregando…'; lblEl.style.display = 'inline'; }
   if(statusEl) statusEl.style.display = 'none';
+  if(statusTop) statusTop.textContent = 'Último: —';
+  // Carrega novo CAPTCHA já
+  setTimeout(carregarCaptchaSiresp, 200);
 }
 
 function abrirSirespExterno() {
