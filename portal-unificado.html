@@ -862,7 +862,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#e8eaf6;border:1px solid #9fa8da;border-radius:8px;padding:10px 14px;margin-bottom:14px">
       <span style="font-size:12px;font-weight:700;color:#1a237e">🔌 Gestão SES Online:</span>
       <select id="gestao-user-select" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px;background:#fff">
-        <option value="1">vmedeiros (Gestão SES)</option>
+        <option value="1">vilmar (Gestão SES)</option>
         <option value="2">ddgsilva (SIRESP Ambulat./AMEs)</option>
       </select>
       <button onclick="buscarGestaoOnline()" id="btn-gestao-buscar" style="background:#3949ab;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Buscar Dados Online</button>
@@ -899,13 +899,16 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
 
     <!-- Painel de dados (aparece após login bem-sucedido) -->
     <div id="siresp-dados-box" style="display:none">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
         <span id="siresp-usuario-logado" style="font-size:12px;background:#e8f5e9;color:#2e7d32;padding:4px 14px;border-radius:12px;font-weight:700"></span>
         <button onclick="buscarDadosSiresp()" id="btn-gestao-atualizar" style="background:#3949ab;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Atualizar dados</button>
         <button onclick="logoutSiresp()" style="background:#e0e0e0;color:#555;border:none;padding:6px 12px;border-radius:16px;cursor:pointer;font-size:11px">🔓 Sair / Nova sessão</button>
+        <span id="gestao-ts" style="font-size:10px;color:#999;margin-left:auto"></span>
       </div>
-      <div class="kpi-row" id="siresp-kpis"></div>
-      <div id="siresp-content" style="font-size:12px;color:#555;padding:4px 0"></div>
+      <!-- Abas das páginas scrapeadas -->
+      <div id="gestao-tabs" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;display:none"></div>
+      <!-- Conteúdo da aba ativa -->
+      <div id="siresp-content" style="font-size:12px;color:#555"></div>
     </div>
   </div>
 
@@ -4306,51 +4309,202 @@ async function loginSiresp() {
   }
 }
 
+// Dados do Gestão SES em memória (para troca entre abas sem refetch)
+let _gestaoData = null;
+let _gestaoAbaAtiva = 'principal';
+
 async function buscarDadosSiresp() {
-  const contentEl  = document.getElementById('siresp-content');
-  const btnEl      = document.getElementById('btn-gestao-atualizar');
-  const statusEl   = document.getElementById('gestao-ultima-busca');
-  if(contentEl) contentEl.innerHTML = '<span style="color:#3949ab">🔄 Buscando dados do contrato de gestão…</span>';
-  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Buscando…'; }
-
-  // Aguarda brevemente para dar feedback visual
-  await new Promise(r => setTimeout(r, 400));
-
-  const agora = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  if(statusEl) statusEl.textContent = `Atualizado: ${agora}`;
+  const contentEl = document.getElementById('siresp-content');
+  const btnEl     = document.getElementById('btn-gestao-atualizar');
+  const statusEl  = document.getElementById('gestao-ultima-busca');
+  const tsEl      = document.getElementById('gestao-ts');
+  const tabsEl    = document.getElementById('gestao-tabs');
 
   if(contentEl) contentEl.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">
-      <a href="https://gestao.saude.sp.gov.br/principal.php" target="_blank"
-         style="background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
-        <span style="font-size:20px">🏛️</span>
-        <span style="font-size:13px;font-weight:700">Portal Principal</span>
-        <span style="font-size:10px;opacity:.8">gestao.saude.sp.gov.br</span>
-      </a>
-      <a href="https://gestao.saude.sp.gov.br/paginaIndicadoresGerenciados.php" target="_blank"
-         style="background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
-        <span style="font-size:20px">📊</span>
-        <span style="font-size:13px;font-weight:700">Indicadores Gerenciados</span>
-        <span style="font-size:10px;opacity:.8">Contrato de Gestão OSS</span>
-      </a>
-      <a href="https://gestao.saude.sp.gov.br/paginaRelatorioMensalOSS.php" target="_blank"
-         style="background:linear-gradient(135deg,#e65100,#f57c00);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
-        <span style="font-size:20px">📋</span>
-        <span style="font-size:13px;font-weight:700">Relatório Mensal OSS</span>
-        <span style="font-size:10px;opacity:.8">Metas e resultados mensais</span>
-      </a>
-      <a href="https://gestao.saude.sp.gov.br/paginaPlanoOperativo.php" target="_blank"
-         style="background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;text-decoration:none;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
-        <span style="font-size:20px">📅</span>
-        <span style="font-size:13px;font-weight:700">Plano Operativo</span>
-        <span style="font-size:10px;opacity:.8">Programação de atividades</span>
-      </a>
-    </div>
-    <div style="background:#e8eaf6;border-radius:8px;padding:10px 14px;font-size:11px;color:#3949ab">
-      <strong>💡 Sessão ativa:</strong> Os links acima abrem diretamente no portal autenticado.
-      Se pedir login novamente, clique em <strong>Sair / Nova sessão</strong> para renovar o CAPTCHA.
+    <div style="display:flex;align-items:center;gap:10px;padding:20px 0;color:#3949ab;font-size:13px">
+      <span style="font-size:22px;animation:spin 1s linear infinite;display:inline-block">🔄</span>
+      <span>Navegando pelo portal Gestão SES…<br><span style="font-size:11px;color:#888">Buscando: Início → Indicadores → Relatório Mensal → Plano Operativo</span></span>
     </div>`;
-  if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Atualizar dados'; }
+  if(tabsEl) tabsEl.style.display = 'none';
+  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Navegando…'; }
+  if(statusEl) statusEl.textContent = '🔄 Buscando…';
+
+  try {
+    const r = await fetch('/api/gestao-scrape', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    const data = await r.json();
+
+    if(data.sessaoExpirada || !data.ok) {
+      // Sessão expirou — volta para login
+      _sirespLogado = false;
+      const loginBox = document.getElementById('siresp-login-box');
+      const dadosBox = document.getElementById('siresp-dados-box');
+      if(loginBox) loginBox.style.display = 'block';
+      if(dadosBox) dadosBox.style.display = 'none';
+      if(statusEl) statusEl.textContent = '🔐 Sessão expirada';
+      setTimeout(carregarCaptchaSiresp, 300);
+      return;
+    }
+
+    _gestaoData = data;
+    const agora = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    if(statusEl) statusEl.textContent = `✅ Atualizado: ${agora}`;
+    if(tsEl)     tsEl.textContent     = `🕐 ${agora}`;
+
+    // Renderiza abas
+    _renderGestaoAbas(data);
+
+  } catch(e) {
+    if(contentEl) contentEl.innerHTML = `<div style="color:#c62828;padding:12px">❌ Erro de rede: ${e.message}</div>`;
+  } finally {
+    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Atualizar dados'; }
+  }
+}
+
+function _renderGestaoAbas(data) {
+  const tabsEl   = document.getElementById('gestao-tabs');
+  const contentEl= document.getElementById('siresp-content');
+  if(!tabsEl || !contentEl) return;
+
+  const chaves = Object.keys(data.paginas || {});
+  if(!chaves.length) {
+    contentEl.innerHTML = '<div style="color:#888;padding:12px">Nenhuma página disponível.</div>';
+    return;
+  }
+
+  // Estilos das abas
+  tabsEl.innerHTML = chaves.map(k => {
+    const pg = data.paginas[k];
+    const nTabelas = (pg.tabelas||[]).length;
+    const badge = nTabelas > 0 ? `<span style="background:#1b5e20;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px">${nTabelas}</span>` : '';
+    const ativo = k === _gestaoAbaAtiva;
+    return `<button onclick="_gestaoMudarAba('${k}')" id="gtab-${k}"
+      style="padding:6px 12px;border:1.5px solid ${ativo?'#3949ab':'#c5cae9'};border-radius:18px;background:${ativo?'#3949ab':'#fff'};color:${ativo?'#fff':'#555'};cursor:pointer;font-size:12px;font-weight:600;transition:.15s">
+      ${pg.titulo||k}${badge}
+    </button>`;
+  }).join('');
+
+  tabsEl.style.display = 'flex';
+
+  // Seleciona a aba ativa (preferir a que tem mais dados)
+  if(!data.paginas[_gestaoAbaAtiva]) {
+    _gestaoAbaAtiva = chaves.find(k => (data.paginas[k].tabelas||[]).length > 0) || chaves[0];
+  }
+  _gestaoMostrarAba(_gestaoAbaAtiva);
+}
+
+function _gestaoMudarAba(key) {
+  _gestaoAbaAtiva = key;
+  // Atualiza visual das abas
+  document.querySelectorAll('[id^="gtab-"]').forEach(b => {
+    const k = b.id.replace('gtab-','');
+    const ativo = k === key;
+    b.style.background     = ativo ? '#3949ab' : '#fff';
+    b.style.color          = ativo ? '#fff'    : '#555';
+    b.style.borderColor    = ativo ? '#3949ab' : '#c5cae9';
+  });
+  _gestaoMostrarAba(key);
+}
+
+function _gestaoMostrarAba(key) {
+  const contentEl = document.getElementById('siresp-content');
+  if(!contentEl || !_gestaoData) return;
+  const pg = _gestaoData.paginas[key];
+  if(!pg) { contentEl.innerHTML = '<div style="color:#888;padding:8px">Página não encontrada.</div>'; return; }
+
+  if(pg.erro) {
+    contentEl.innerHTML = `<div style="color:#c62828;padding:12px;background:#fff8f8;border-radius:8px;border:1px solid #ffcdd2">
+      ❌ Erro ao carregar ${pg.titulo}: <strong>${pg.erro}</strong>
+    </div>`;
+    return;
+  }
+
+  const tabelas = pg.tabelas || [];
+  const titulos = pg.titulos || [];
+
+  if(!tabelas.length) {
+    // Sem tabelas — mostra link para abrir no browser
+    contentEl.innerHTML = `
+      <div style="background:#e8eaf6;border-radius:8px;padding:16px;text-align:center;color:#3949ab">
+        <div style="font-size:22px;margin-bottom:8px">📭</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">${pg.titulo}</div>
+        <div style="font-size:11px;margin-bottom:12px;color:#666">
+          ${titulos.length ? titulos.slice(0,3).join(' · ') : 'Página carregada (sem tabelas de dados)'}
+        </div>
+        <a href="https://gestao.saude.sp.gov.br/${key === 'principal' ? 'principal.php' : _gestaoPathMap(key)}"
+           target="_blank" style="background:#3949ab;color:#fff;text-decoration:none;padding:7px 16px;border-radius:16px;font-size:12px;font-weight:700">
+          ↗ Abrir no browser
+        </a>
+      </div>`;
+    return;
+  }
+
+  // Render titulos
+  let html = '';
+  if(titulos.length) {
+    html += `<div style="font-size:11px;color:#666;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px">
+      ${titulos.slice(0,5).join(' · ')}
+    </div>`;
+  }
+
+  // Render cada tabela
+  tabelas.forEach((rows, ti) => {
+    if(!rows.length) return;
+    const headerRow = rows[0];
+    const dataRows  = rows.slice(1);
+
+    html += `<div style="margin-bottom:16px;overflow-x:auto">`;
+    if(tabelas.length > 1) html += `<div style="font-size:10px;color:#999;margin-bottom:4px">Tabela ${ti+1}</div>`;
+    html += `<table style="width:100%;border-collapse:collapse;font-size:11px;min-width:300px">`;
+
+    // Cabeçalho
+    html += `<thead><tr>`;
+    headerRow.forEach(h => {
+      html += `<th style="background:#e8eaf6;color:#1a237e;padding:5px 8px;text-align:left;font-weight:700;border-bottom:2px solid #9fa8da;white-space:nowrap;font-size:11px">${h}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
+    // Linhas de dados
+    dataRows.forEach((row, ri) => {
+      const bg = ri % 2 === 0 ? '#fff' : '#f8f9ff';
+      html += `<tr style="background:${bg}">`;
+      row.forEach((cell, ci) => {
+        // Detecta valores numéricos/percentuais para colorir
+        const isNum   = /^[\d.,]+\s*%?$/.test(cell) && ci > 0;
+        const isPct   = /^\d+[,.]?\d*\s*%$/.test(cell);
+        const valPct  = isPct ? parseFloat(cell.replace(',','.')) : null;
+        let style = `padding:4px 8px;border-bottom:1px solid #eee;font-size:11px`;
+        if(isPct && valPct !== null) {
+          if(valPct >= 100) style += ';color:#1b5e20;font-weight:700';
+          else if(valPct >= 90) style += ';color:#2e7d32;font-weight:600';
+          else if(valPct < 70)  style += ';color:#c62828;font-weight:600';
+        } else if(isNum) {
+          style += ';text-align:right;font-family:monospace';
+        }
+        html += `<td style="${style}">${cell}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+  });
+
+  // Link para abrir no browser
+  html += `<div style="margin-top:10px;text-align:right">
+    <a href="https://gestao.saude.sp.gov.br/${_gestaoPathMap(key)}" target="_blank"
+       style="font-size:11px;color:#3949ab;text-decoration:none">↗ Abrir ${pg.titulo} no browser</a>
+  </div>`;
+
+  contentEl.innerHTML = html;
+}
+
+function _gestaoPathMap(key) {
+  const map = {
+    principal:   'principal.php',
+    indicadores: 'paginaIndicadoresGerenciados.php',
+    relatorio:   'paginaRelatorioMensalOSS.php',
+    plano:       'paginaPlanoOperativo.php',
+    avaliacao:   'paginaAvaliacao.php',
+  };
+  return map[key] || key + '.php';
 }
 
 function irParaAcessos() {

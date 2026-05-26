@@ -174,6 +174,9 @@ const server = http.createServer((req, res) => {
     if (req.url === '/api/gestao-login') {
       return handleGestaoLogin(req, res);
     }
+    if (req.url === '/api/gestao-scrape') {
+      return handleGestaoScrape(req, res);
+    }
     res.writeHead(404, {'Content-Type': 'application/json; charset=utf-8', ...cors});
     res.end(JSON.stringify({ok: false, erro: 'Endpoint não encontrado'}));
     return;
@@ -213,6 +216,16 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === 'GET' && req.url.startsWith('/api/gestao-captcha')) {
     return handleGestaoCaptcha(req, res);
+  }
+  if (req.method === 'GET' && req.url.startsWith('/api/gestao-dados')) {
+    const f = path.join(ROOT, 'gestao-dados.json');
+    try {
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(fs.readFileSync(f, 'utf8'));
+    } catch {
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(JSON.stringify({ ok: false, msg: 'Sem dados salvos — faça login e busque os dados' }));
+    }
   }
   if (req.method === 'GET' && req.url.startsWith('/api/kpih-dados')) {
     const kpihFile = path.join(ROOT, 'kpih-dados.json');
@@ -1347,6 +1360,131 @@ async function handleGestaoLogin(req, res) {
     res.writeHead(401, {'Content-Type':'application/json;charset=utf-8',...cors});
     res.end(JSON.stringify({ ok: false, erro: msg, tipoErro: ehErroSenha ? 'senha' : ehErroCaptcha ? 'captcha' : 'outro' }));
   });
+}
+
+// ── Parser HTML: extrai tabelas como arrays de linhas/células ────────────────
+function _extrairTabelas(html) {
+  const tabelas = [];
+  // Remove scripts, styles e comentários
+  const limpo = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '');
+
+  const tableRe = /<table[^>]*>([\s\S]*?)<\/table>/gi;
+  let tm;
+  while ((tm = tableRe.exec(limpo)) !== null) {
+    const rows = [];
+    const rowRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+    let rm;
+    while ((rm = rowRe.exec(tm[1])) !== null) {
+      const cells = [];
+      const cellRe = /<t[dh][^>]*(?:colspan="(\d+)")?[^>]*>([\s\S]*?)<\/t[dh]>/gi;
+      let cm;
+      while ((cm = cellRe.exec(rm[1])) !== null) {
+        const span  = parseInt(cm[1] || '1') || 1;
+        const txt   = cm[2]
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/&nbsp;/g,  ' ')
+          .replace(/&amp;/g,   '&')
+          .replace(/&lt;/g,    '<')
+          .replace(/&gt;/g,    '>')
+          .replace(/&quot;/g,  '"')
+          .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
+          .replace(/\s+/g, ' ')
+          .trim();
+        cells.push(txt);
+        // Repete célula para colspan (mantém alinhamento)
+        for (let i = 1; i < span; i++) cells.push('');
+      }
+      if (cells.some(c => c.length > 0)) rows.push(cells);
+    }
+    // Filtra tabelas triviais (menos de 2 linhas ou menos de 2 colunas em média)
+    if (rows.length >= 2) {
+      const avgCols = rows.reduce((s, r) => s + r.length, 0) / rows.length;
+      if (avgCols >= 2) tabelas.push(rows);
+    }
+  }
+  return tabelas;
+}
+
+function _extrairTitulos(html) {
+  const titulos = [];
+  const limpo = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+  const hRe = /<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/gi;
+  let m;
+  while ((m = hRe.exec(limpo)) !== null) {
+    const txt = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (txt.length > 3 && txt.length < 200) titulos.push(txt);
+  }
+  return [...new Set(titulos)];
+}
+
+function _limparHtml(html) {
+  // Converte latin1/UTF-8 → caracteres PT-BR corretos
+  return html
+    .replace(/Ã§/g, 'ç').replace(/Ã£/g, 'ã').replace(/Ã©/g, 'é')
+    .replace(/Ã³/g, 'ó').replace(/Ãº/g, 'ú').replace(/Ã­/g, 'í')
+    .replace(/Ã¡/g, 'á').replace(/Ã¢/g, 'â').replace(/Ã /, 'à')
+    .replace(/Ã‡/g, 'Ç').replace(/Ã•/g, 'Õ').replace(/Ãµ/g, 'õ')
+    .replace(/Ã‰/g, 'É').replace(/Ãˆ/g, 'È').replace(/Ã"/g, 'Ó');
+}
+
+// ── Navega pelo portal Gestão SES e extrai dados ──────────────────────────────
+async function handleGestaoScrape(req, res) {
+  if (!_gestaoSession.cookie) {
+    res.writeHead(401, {'Content-Type':'application/json;charset=utf-8',...cors});
+    return res.end(JSON.stringify({ ok: false, erro: 'Sessão expirada — faça login novamente', sessaoExpirada: true }));
+  }
+
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔍 Gestão SES: iniciando navegação...`);
+  const resultado = { ok: true, paginas: {}, timestamp: new Date().toISOString() };
+
+  // Páginas para visitar em sequência
+  const paginas = [
+    { key: 'principal',   path: '/principal.php',                   titulo: '🏠 Início' },
+    { key: 'indicadores', path: '/paginaIndicadoresGerenciados.php', titulo: '📊 Indicadores' },
+    { key: 'relatorio',   path: '/paginaRelatorioMensalOSS.php',     titulo: '📋 Relatório Mensal' },
+    { key: 'plano',       path: '/paginaPlanoOperativo.php',         titulo: '📅 Plano Operativo' },
+    { key: 'avaliacao',   path: '/paginaAvaliacao.php',              titulo: '⭐ Avaliação' },
+  ];
+
+  for (const p of paginas) {
+    try {
+      const r = await _gestaoReq('GET', p.path);
+      const rawHtml = r.body.toString('latin1');
+      const html    = _limparHtml(rawHtml);
+
+      // Verifica se sessão expirou durante navegação
+      const loc = (r.headers.location || '').toLowerCase();
+      if ((r.status === 302 && loc.includes('index.php')) ||
+          (r.status === 200 && html.includes('name="captcha"'))) {
+        _gestaoSession.cookie = null;
+        resultado.ok    = false;
+        resultado.erro  = 'Sessão expirada durante navegação — faça login novamente';
+        resultado.sessaoExpirada = true;
+        break;
+      }
+
+      const tabelas  = _extrairTabelas(html);
+      const titulos  = _extrairTitulos(html);
+
+      resultado.paginas[p.key] = { titulo: p.titulo, status: r.status, tabelas, titulos };
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ ${p.titulo}: HTTP ${r.status} | ${tabelas.length} tabelas | ${titulos.length} títulos`);
+    } catch(e) {
+      resultado.paginas[p.key] = { titulo: p.titulo, erro: e.message, tabelas: [], titulos: [] };
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ ${p.titulo}: ${e.message}`);
+    }
+  }
+
+  // Salva em disco para consulta posterior
+  try {
+    fs.writeFileSync(path.join(ROOT, 'gestao-dados.json'), JSON.stringify(resultado, null, 2), 'utf8');
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 💾 gestao-dados.json salvo`);
+  } catch(e) { console.error('Erro ao salvar gestao-dados.json:', e.message); }
+
+  res.writeHead(resultado.ok ? 200 : 401, {'Content-Type':'application/json;charset=utf-8',...cors});
+  res.end(JSON.stringify(resultado));
 }
 
 server.listen(PORT, '0.0.0.0', () => {
