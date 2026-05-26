@@ -530,8 +530,6 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     <div class="sb-item" data-view="hosp-cancer" data-title="Hospital do Câncer"><span class="ico">🧬</span><span class="lbl">H. do Câncer</span></div>
     <div class="sb-item" data-view="hosp-coracao" data-title="Hospital do Coração"><span class="ico">❤️</span><span class="lbl">H. do Coração</span></div>
     <div class="sb-item" data-view="hosp-kpih" data-title="Resultado por Unidade KPIH"><span class="ico">📊</span><span class="lbl">KPIH por Unidade</span></div>
-    <div class="sb-item" data-view="hosp-cnes" data-title="CNES – Cadastro Nacional"><span class="ico">🆔</span><span class="lbl">CNES</span></div>
-    <div class="sb-item" data-view="hosp-gestao-ses" data-title="Gestão SES / SIRESP"><span class="ico">🏛️</span><span class="lbl">Gestão SES</span></div>
   </div>
   <div class="sb-sec">
     <div class="sb-lbl">AMEs – SES/SP</div>
@@ -855,64 +853,6 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     <div id="kpih-timestamp" style="font-size:10px;color:#aaa;text-align:right;margin-top:6px"></div>
   </div>
 
-  <!-- ═══ GESTÃO SES / SIRESP ═══ -->
-  <div id="view-hosp-gestao-ses" class="view">
-    <div class="sec-title">🏛️ Gestão SES – Contrato de Gestão OSS · SIRESP</div>
-
-    <!-- Barra de controles — igual ao KPIH -->
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#e8eaf6;border:1px solid #9fa8da;border-radius:8px;padding:10px 14px;margin-bottom:14px">
-      <span style="font-size:12px;font-weight:700;color:#1a237e">🔌 Gestão SES Online:</span>
-      <select id="gestao-user-select" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px;background:#fff">
-        <option value="1">vilmar (Gestão SES)</option>
-        <option value="2">ddgsilva (SIRESP Ambulat./AMEs)</option>
-      </select>
-      <button onclick="buscarGestaoOnline()" id="btn-gestao-buscar" style="background:#3949ab;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Buscar Dados Online</button>
-      <button onclick="abrirSirespExterno()" style="background:#455a64;color:#fff;border:none;padding:6px 12px;border-radius:16px;cursor:pointer;font-size:11px">↗ Abrir no browser</button>
-      <span id="gestao-ultima-busca" style="font-size:11px;color:#555;margin-left:auto">Último: —</span>
-    </div>
-
-    <div style="background:#e8eaf6;border-left:4px solid #3949ab;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1a237e">
-      <strong>Sistema de Gestão SES/SP:</strong> Contrato de gestão OSS · <em>gestao.saude.sp.gov.br</em>.
-      O portal usa CAPTCHA — ao clicar em <strong>Buscar Dados Online</strong> o CAPTCHA será carregado aqui automaticamente.
-    </div>
-
-    <!-- Box de login com CAPTCHA (aparece quando necessário) -->
-    <div id="siresp-login-box" style="background:#fff;border:1px solid #9fa8da;border-radius:10px;padding:18px;max-width:440px;margin-bottom:16px">
-      <div style="font-size:13px;font-weight:700;color:#1a237e;margin-bottom:12px">🔐 Autenticação necessária</div>
-      <div style="margin-bottom:10px">
-        <div style="font-size:11px;color:#888;margin-bottom:4px">CAPTCHA — leia a imagem e digite abaixo</div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-          <div id="siresp-captcha-wrap" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px;min-width:140px;min-height:52px;display:flex;align-items:center;justify-content:center">
-            <img id="siresp-captcha-img" src="" alt="CAPTCHA" style="height:44px;display:none">
-            <span id="siresp-captcha-loading" style="font-size:11px;color:#aaa">⏳ Carregando…</span>
-          </div>
-          <button onclick="carregarCaptchaSiresp()" style="background:#1565c0;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px">🔄 Novo CAPTCHA</button>
-        </div>
-        <input id="siresp-captcha-input" type="text" placeholder="Digite os caracteres do CAPTCHA" autocomplete="off"
-          style="width:100%;box-sizing:border-box;font-size:14px;border:2px solid #9fa8da;border-radius:6px;padding:7px 12px;font-family:monospace;letter-spacing:3px"
-          onkeydown="if(event.key==='Enter') loginSiresp()">
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button onclick="loginSiresp()" id="btn-siresp-login" style="flex:1;background:#1b5e20;color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">🚀 Entrar e Buscar Dados</button>
-      </div>
-      <div id="siresp-login-status" style="margin-top:10px;font-size:12px;display:none"></div>
-    </div>
-
-    <!-- Painel de dados (aparece após login bem-sucedido) -->
-    <div id="siresp-dados-box" style="display:none">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <span id="siresp-usuario-logado" style="font-size:12px;background:#e8f5e9;color:#2e7d32;padding:4px 14px;border-radius:12px;font-weight:700"></span>
-        <button onclick="buscarDadosSiresp()" id="btn-gestao-atualizar" style="background:#3949ab;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Atualizar dados</button>
-        <button onclick="logoutSiresp()" style="background:#e0e0e0;color:#555;border:none;padding:6px 12px;border-radius:16px;cursor:pointer;font-size:11px">🔓 Sair / Nova sessão</button>
-        <span id="gestao-ts" style="font-size:10px;color:#999;margin-left:auto"></span>
-      </div>
-      <!-- Abas das páginas scrapeadas -->
-      <div id="gestao-tabs" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;display:none"></div>
-      <!-- Conteúdo da aba ativa -->
-      <div id="siresp-content" style="font-size:12px;color:#555"></div>
-    </div>
-  </div>
-
   <!-- ═══ SIRESP AMBULATORIAL ═══ -->
   <div id="view-siresp-ame" class="view">
     <div class="sec-title">🔌 SIRESP Ambulatorial – Produção AMEs</div>
@@ -920,6 +860,9 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     <!-- Barra de controles -->
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px 14px;margin-bottom:14px">
       <span style="font-size:12px;font-weight:700;color:#1b5e20">🔌 SIRESP Online:</span>
+      <select id="siresp-amb-unidade" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px;min-width:160px;background:#fff" title="Selecione a unidade AME">
+        <option value="9042|AME FRANCA">AME Franca</option>
+      </select>
       <select id="siresp-amb-mes" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px">
         <option value="01">Janeiro</option><option value="02">Fevereiro</option>
         <option value="03">Março</option><option value="04">Abril</option>
@@ -1198,17 +1141,26 @@ function showView(viewId, label, targetAme){
   if(viewId==='hosp-cancer')      setTimeout(()=>renderHospView('cancer'), 60);
   if(viewId==='hosp-coracao')     setTimeout(()=>renderHospView('coracao'), 60);
   if(viewId==='hosp-kpih')        setTimeout(()=>{ renderHospView('kpih'); _kpihCarregarCache(); }, 60);
-  if(viewId==='hosp-gestao-ses')  { if(!_sirespLogado) setTimeout(carregarCaptchaSiresp, 200); }
   if(viewId==='siresp-ame') {
+    // Carrega unidades disponíveis (async, não bloqueia)
+    _sirespCarregarUnidades();
     // Carrega cache salvo ao abrir o painel
     fetch('/api/siresp-amb-dados').then(r=>r.json()).then(d=>{
       if(d.ok && d.performance) {
         _sirespAmbData = d;
         document.getElementById('stab-perf-badge').textContent   = d.performance?.rows?.length||0;
-        document.getElementById('stab-consul-badge').textContent = d.consultas?.count||0;
+        document.getElementById('stab-consul-badge').textContent = d.consultas?.count || d.consultas?.rows?.length || 0;
         document.getElementById('siresp-amb-tabs').style.display = 'flex';
         document.getElementById('siresp-amb-status').textContent = `✅ Cache: ${d.label||''} ${d.mes||''}/${d.ano||''}`;
         _renderSirespAmbPerf(d);
+        // Pré-selecionar unidade no dropdown se já temos cache
+        const sel = document.getElementById('siresp-amb-unidade');
+        if(sel && d.code && d.label) {
+          const targetVal = `${d.code}|${d.label}`;
+          for(let opt of sel.options) {
+            if(opt.value === targetVal) { sel.value = targetVal; break; }
+          }
+        }
       }
     }).catch(()=>{});
   }
@@ -4069,7 +4021,7 @@ function renderHospKPIH() {
 // KPIH ONLINE — Busca ao vivo via servidor proxy
 // ══════════════════════════════════════════════════════════════════
 
-// Carrega cache ao abrir o painel (sem bloquear)
+// Carrega cache ao abrir o painel e injeta dados ao vivo no painel
 async function _kpihCarregarCache() {
   try {
     const r = await fetch('/api/kpih-dados');
@@ -4080,8 +4032,12 @@ async function _kpihCarregarCache() {
       const el = document.getElementById('kpih-ultima-busca');
       if(el) el.textContent = `Último: ${label} · ${data.competencia}`;
       const ts = document.getElementById('kpih-timestamp');
-      if(ts) ts.textContent = `Dados KPIH atualizados: ${label}`;
+      if(ts) ts.textContent = `🔴 Dados AO VIVO · KPIH · ${label}`;
       if(data.relatorios.rankingSES) _renderKPIHRanking(data);
+      // Injeta dados ao vivo e re-renderiza painel com custos reais
+      _injectKPIHLiveData(data);
+      _hospRendered['kpih'] = false;
+      renderHospKPIH();
     }
   } catch(e) { /* sem cache — sem problema */ }
 }
@@ -4574,20 +4530,25 @@ async function buscarSirespAmb() {
   const mes       = document.getElementById('siresp-amb-mes')?.value || '05';
   const ano       = document.getElementById('siresp-amb-ano')?.value || '2026';
 
+  // Lê unidade selecionada — formato "CODE|LABEL"
+  const unidSel = document.getElementById('siresp-amb-unidade')?.value || '9042|AME FRANCA';
+  const [code, ...labelParts] = unidSel.split('|');
+  const label = labelParts.join('|') || 'AME FRANCA';
+
   if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Buscando…'; }
-  if(statusEl) statusEl.textContent = '🔄 Conectando ao SIRESP…';
+  if(statusEl) statusEl.textContent = `🔄 Conectando — ${label}…`;
   if(tabsEl) tabsEl.style.display = 'none';
   if(contentEl) contentEl.innerHTML = `
     <div style="padding:24px 0;text-align:center;color:#1b5e20;font-size:13px">
       <span style="font-size:26px;display:inline-block;animation:spin 1s linear infinite">🔄</span><br><br>
-      Autenticando no SIRESP (5 passos)…<br>
+      Autenticando no SIRESP (5 passos) — <strong>${label}</strong>…<br>
       <span style="font-size:11px;color:#888">www.siresp.saude.sp.gov.br + ambulatorial.siresp.saude.sp.gov.br</span>
     </div>`;
 
   try {
     const r = await fetch('/api/siresp-amb-buscar', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ mes, ano })
+      body: JSON.stringify({ mes, ano, code, label })
     });
     const data = await r.json();
     if(!data.ok) throw new Error(data.erro || 'Falha na busca SIRESP');
@@ -4596,9 +4557,9 @@ async function buscarSirespAmb() {
     _sirespAmbTabAtiva = 'perf';
 
     const perfCount   = data.performance?.rows?.length  || 0;
-    const consulCount = data.consultas?.count            || 0;
+    const consulCount = data.consultas?.count            || data.consultas?.rows?.length || 0;
     const agora = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    if(statusEl) statusEl.textContent = `✅ ${data.label} | ${agora}`;
+    if(statusEl) statusEl.textContent = `✅ Cache: ${data.label} ${data.mes}/${data.ano}`;
 
     // Atualiza badges das abas
     document.getElementById('stab-perf-badge').textContent   = perfCount;
@@ -4611,6 +4572,27 @@ async function buscarSirespAmb() {
     if(statusEl) statusEl.textContent = '❌ Erro';
   } finally {
     if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Buscar Online'; }
+  }
+}
+
+// Carrega as unidades disponíveis na conta SIRESP e popula o dropdown
+async function _sirespCarregarUnidades() {
+  const sel = document.getElementById('siresp-amb-unidade');
+  if(!sel) return;
+  sel.disabled = true;
+  sel.innerHTML = '<option value="">⏳ Carregando unidades…</option>';
+  try {
+    const r = await fetch('/api/siresp-amb-unidades');
+    const data = await r.json();
+    if(!data.ok || !data.unidades?.length) throw new Error(data.erro || 'Sem unidades');
+    sel.innerHTML = data.unidades
+      .map(u => `<option value="${u.code}|${u.label}">${u.display || u.label}</option>`)
+      .join('');
+  } catch(e) {
+    // Fallback com AME Franca se não conseguir carregar
+    sel.innerHTML = '<option value="9042|AME FRANCA">AME Franca (padrão)</option>';
+  } finally {
+    sel.disabled = false;
   }
 }
 

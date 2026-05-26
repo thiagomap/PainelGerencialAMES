@@ -220,6 +220,9 @@ const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url.startsWith('/api/gestao-captcha')) {
     return handleGestaoCaptcha(req, res);
   }
+  if (req.method === 'GET' && req.url.startsWith('/api/siresp-amb-unidades')) {
+    return handleSirespAmbUnidades(req, res);
+  }
   if (req.method === 'GET' && req.url.startsWith('/api/siresp-amb-dados')) {
     const f = path.join(ROOT, 'siresp-amb-dados.json');
     try {
@@ -1516,6 +1519,7 @@ let _sirespAmb = {
   authenticated: false,
   lastLogin: 0,
   SESSION_DURATION: 45 * 60 * 1000,
+  currentUnit: null, // código da unidade selecionada na última autenticação
 };
 
 // Mescla Set-Cookie no cookie jar existente (por chave=valor)
@@ -1578,15 +1582,19 @@ function _sirespAmbReq(method, urlPath, postData, extraHeaders) {
 }
 
 // ── Autenticação SIRESP em 5 passos (porta de auth.ts) ────────────────────────
-async function sirespAmbEnsureAuth() {
-  if (_sirespAmb.authenticated && Date.now() - _sirespAmb.lastLogin < _sirespAmb.SESSION_DURATION) {
+// code/label opcionais: se diferentes da sessão atual, força re-autenticação
+async function sirespAmbEnsureAuth(code, label) {
+  const cfg = lerConfiguracaoEnv();
+  if (!code)  code  = cfg.sirespAmbCode  || '9042';
+  if (!label) label = cfg.sirespAmbLabel || 'AME FRANCA';
+
+  // Reutiliza sessão apenas se a unidade for a mesma
+  if (_sirespAmb.authenticated && _sirespAmb.currentUnit === code &&
+      Date.now() - _sirespAmb.lastLogin < _sirespAmb.SESSION_DURATION) {
     return true;
   }
-  const cfg = lerConfiguracaoEnv();
-  const user  = cfg.sirespAmbUser  || 'antalves';
-  const pass  = cfg.sirespAmbSenha || '';
-  const code  = cfg.sirespAmbCode  || '9042';
-  const label = cfg.sirespAmbLabel || 'AME FRANCA';
+  const user = cfg.sirespAmbUser  || 'antalves';
+  const pass = cfg.sirespAmbSenha || '';
 
   _sirespAmb.mainCookies = '';
   _sirespAmb.ambCookies  = '';
@@ -1639,8 +1647,81 @@ async function sirespAmbEnsureAuth() {
 
   _sirespAmb.authenticated = true;
   _sirespAmb.lastLogin = Date.now();
-  console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ SIRESP AMB: login concluído!`);
+  _sirespAmb.currentUnit = code;
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ SIRESP AMB: login concluído! Unidade: ${code}_${label}`);
   return true;
+}
+
+// ── Busca unidades disponíveis na conta SIRESP ────────────────────────────────
+async function _sirespBuscarUnidades() {
+  const cfg  = lerConfiguracaoEnv();
+  const user = cfg.sirespAmbUser  || 'antalves';
+  const pass = cfg.sirespAmbSenha || '';
+
+  // Reset sessão para forçar autenticação limpa (sem unidade escolhida)
+  _sirespAmb.mainCookies = '';
+  _sirespAmb.ambCookies  = '';
+  _sirespAmb.authenticated = false;
+  _sirespAmb.currentUnit = null;
+
+  // Passos 1-3 (sem escolher unidade)
+  const r1 = await _sirespMainReq('GET', '/');
+  const h1 = r1.body.toString('latin1');
+  const cg1 = (h1.match(/id=["']cg_1["'][^>]*value=["']([^"']+)["']/i) ||
+               h1.match(/value=["']([^"']+)["'][^>]*id=["']cg_1["']/i) || [])[1] || '';
+
+  const p2 = `usuario=${encodeURIComponent(user)}&senha=${encodeURIComponent(pass)}&sistema=1&cg_1=${encodeURIComponent(cg1)}&captcha=${encodeURIComponent(cg1)}&form_esqueci=0`;
+  const r2 = await _sirespMainReq('POST', '/index.php', p2, { Referer: 'https://www.siresp.saude.sp.gov.br/' });
+  const h2 = r2.body.toString('latin1');
+  if (/senha incorreta|usu.rio inv.lido/i.test(h2)) throw new Error('Credenciais inválidas');
+
+  const p3 = `LOGIN=${encodeURIComponent(user)}&SENHA=${encodeURIComponent(pass)}&entra=1&security=2111f426c828a070f29eaee5cc885a6e`;
+  await _sirespAmbReq('POST', '/index.php?&sistema=4', p3, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/' });
+
+  // GET escolher_unidade.php → parseia opções do <select name="unidade">
+  const rU = await _sirespAmbReq('GET', '/escolher_unidade.php');
+  const hU = rU.body.toString('latin1');
+
+  const unidades = [];
+  const optRx = /<option[^>]*value=["']([^"']+)["'][^>]*>([^<]*)<\/option>/gi;
+  let m;
+  while ((m = optRx.exec(hU)) !== null) {
+    const val = m[1].trim();
+    const txt = m[2].replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').trim();
+    if (val && val !== '' && val !== '0') {
+      // valor geralmente: "9042_AME FRANCA"
+      const parts = val.split('_');
+      const code  = parts[0];
+      const label = parts.slice(1).join('_') || txt;
+      unidades.push({ value: val, code, label, display: txt || label });
+    }
+  }
+
+  // Fallback: regex alternativo para tags option sem fechamento limpo
+  if (unidades.length === 0) {
+    const rx2 = /value=["'](\d+_[^"']+)["']/gi;
+    while ((m = rx2.exec(hU)) !== null) {
+      const val = m[1].trim();
+      const parts = val.split('_');
+      unidades.push({ value: val, code: parts[0], label: parts.slice(1).join('_'), display: parts.slice(1).join(' ') });
+    }
+  }
+
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 SIRESP: ${unidades.length} unidades disponíveis`);
+  return unidades;
+}
+
+// ── Handler: GET /api/siresp-amb-unidades ────────────────────────────────────
+async function handleSirespAmbUnidades(req, res) {
+  try {
+    const unidades = await _sirespBuscarUnidades();
+    res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+    res.end(JSON.stringify({ ok: true, unidades }));
+  } catch(e) {
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ SIRESP unidades: ${e.message}`);
+    res.writeHead(500, {'Content-Type':'application/json;charset=utf-8',...cors});
+    res.end(JSON.stringify({ ok: false, erro: e.message }));
+  }
 }
 
 // ── Coleta relatório de Performance (JSON) — porta de performance-report.collector.ts ──
@@ -1650,7 +1731,7 @@ async function _sirespColetarPerformance(code, mesStr, anoStr) {
 
   const payload = [
     `REF_MES_INI=${mesStr}`, `REF_ANO_INI=${anoStr}`,
-    `FLT_TIPO=E`, `FLT_CBO_RRAS=9921`, `FLT_CBO_DRS=200`, `FLT_CBO_SMS=851`,
+    `FLT_TIPO=E`, `FLT_CBO_RRAS=`, `FLT_CBO_DRS=`, `FLT_CBO_SMS=`,
     `FLT_COD_UNIDADE_EXECUTANTE=${code}`, `FLT_MES=${mesStr}`, `FLT_ANO=${anoStr}`,
     `CBO_TIPO_CONS=E`, `btn_exportar=`, `hdd_exportar=`,
     `unidade_codes=${code}`, `action=buscar`, `debug=12345`,
@@ -1793,10 +1874,11 @@ async function handleSirespAmbBuscar(req, res) {
     const mes    = String(params.mes  || (agora.getMonth() + 1)).padStart(2, '0');
     const ano    = String(params.ano  || agora.getFullYear());
     const cfg    = lerConfiguracaoEnv();
-    const code   = params.code || cfg.sirespAmbCode || '9042';
+    const code   = params.code  || cfg.sirespAmbCode  || '9042';
+    const label  = params.label || cfg.sirespAmbLabel || 'AME FRANCA';
 
     try {
-      const ok = await sirespAmbEnsureAuth();
+      const ok = await sirespAmbEnsureAuth(code, label);
       if (!ok) throw new Error('Falha no login SIRESP Ambulatorial');
 
       const [performance, consultas] = await Promise.all([
@@ -1805,8 +1887,7 @@ async function handleSirespAmbBuscar(req, res) {
       ]);
 
       const resultado = {
-        ok: true, mes, ano, code,
-        label: cfg.sirespAmbLabel || 'AME FRANCA',
+        ok: true, mes, ano, code, label,
         performance, consultas,
         timestamp: new Date().toISOString(),
       };
