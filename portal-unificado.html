@@ -4586,7 +4586,12 @@ async function _sirespCarregarUnidades() {
     const data = await r.json();
     if(!data.ok || !data.unidades?.length) throw new Error(data.erro || 'Sem unidades');
     sel.innerHTML = data.unidades
-      .map(u => `<option value="${u.code}|${u.label}">${u.display || u.label}</option>`)
+      .map(u => {
+        // Código "0000" ou "0001" = placeholder sem código real ainda
+        const semCodigo = parseInt(u.code) < 100;
+        const label = semCodigo ? `⚠️ ${u.display} (código pendente)` : u.display;
+        return `<option value="${u.code}|${u.label}" ${semCodigo?'disabled':''} title="${semCodigo?'Configure o código SIRESP em CONFIGURACAO.env > SIRESP_AMB_EXTRA_UNITS':''}">${label}</option>`;
+      })
       .join('');
   } catch(e) {
     // Fallback com AME Franca se não conseguir carregar

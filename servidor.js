@@ -676,10 +676,11 @@ function lerConfiguracaoEnv() {
   result.gestaoLogin2 = get('SIRESP_LOGIN')  || 'ddgsilva';
   result.gestaoSenha2 = get('SIRESP_SENHA')  || '260718';
   // Credenciais SIRESP Ambulatorial (projeto siresp-login)
-  result.sirespAmbUser  = get('SIRESP_AMB_USER')  || 'antalves';
-  result.sirespAmbSenha = get('SIRESP_AMB_SENHA')  || '';
-  result.sirespAmbCode  = get('SIRESP_AMB_CODE')   || '9042';
-  result.sirespAmbLabel = get('SIRESP_AMB_LABEL')  || 'AME FRANCA';
+  result.sirespAmbUser       = get('SIRESP_AMB_USER')        || 'antalves';
+  result.sirespAmbSenha      = get('SIRESP_AMB_SENHA')       || '';
+  result.sirespAmbCode       = get('SIRESP_AMB_CODE')        || '9042';
+  result.sirespAmbLabel      = get('SIRESP_AMB_LABEL')       || 'AME FRANCA';
+  result.sirespAmbExtraUnits = get('SIRESP_AMB_EXTRA_UNITS') || '';
   // Leitos
   const leitos = (get('HOSPITAL_LEITOS') || '200|62|75').split('|');
   result.leitos = { sc: parseInt(leitos[0])||200, cancer: parseInt(leitos[1])||62, coracao: parseInt(leitos[2])||75 };
@@ -1707,8 +1708,37 @@ async function _sirespBuscarUnidades() {
     }
   }
 
-  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 SIRESP: ${unidades.length} unidades disponíveis`);
-  return unidades;
+  // Log todas as unidades brutas para debug
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 SIRESP unidades brutas: ${unidades.map(u=>u.value).join(' | ')}`);
+
+  // Filtra apenas AMEs (exclui Santa Casa e outras unidades hospitalares)
+  let filtradas = unidades.filter(u => u.display.toUpperCase().includes('AME'));
+
+  // Adiciona unidades extras definidas no CONFIGURACAO.env
+  const cfgExtra = lerConfiguracaoEnv().sirespAmbExtraUnits || '';
+  if (cfgExtra.trim()) {
+    cfgExtra.split(',').forEach(entry => {
+      const pipe = entry.trim().indexOf('|');
+      if (pipe < 0) return;
+      const code  = entry.trim().slice(0, pipe).trim();
+      const label = entry.trim().slice(pipe + 1).trim();
+      if (!code || !label) return;
+      // Não duplica se já existe
+      if (filtradas.some(u => u.code === code)) return;
+      filtradas.push({ value: `${code}_${label}`, code, label, display: label });
+    });
+  }
+
+  // Ordena: primeiro as que têm código real (> 4 dígitos indica código SIRESP real)
+  filtradas.sort((a, b) => {
+    const aReal = parseInt(a.code) > 1000;
+    const bReal = parseInt(b.code) > 1000;
+    if (aReal === bReal) return a.display.localeCompare(b.display, 'pt-BR');
+    return bReal ? 1 : -1;
+  });
+
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 SIRESP: ${filtradas.length} unidades (${filtradas.map(u=>u.display).join(', ')})`);
+  return filtradas;
 }
 
 // ── Handler: GET /api/siresp-amb-unidades ────────────────────────────────────
