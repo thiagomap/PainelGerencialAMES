@@ -177,6 +177,9 @@ const server = http.createServer((req, res) => {
     if (req.url === '/api/gestao-scrape') {
       return handleGestaoScrape(req, res);
     }
+    if (req.url === '/api/siresp-amb-buscar') {
+      return handleSirespAmbBuscar(req, res);
+    }
     res.writeHead(404, {'Content-Type': 'application/json; charset=utf-8', ...cors});
     res.end(JSON.stringify({ok: false, erro: 'Endpoint não encontrado'}));
     return;
@@ -216,6 +219,16 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === 'GET' && req.url.startsWith('/api/gestao-captcha')) {
     return handleGestaoCaptcha(req, res);
+  }
+  if (req.method === 'GET' && req.url.startsWith('/api/siresp-amb-dados')) {
+    const f = path.join(ROOT, 'siresp-amb-dados.json');
+    try {
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(fs.readFileSync(f, 'utf8'));
+    } catch {
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      return res.end(JSON.stringify({ ok: false, msg: 'Sem dados SIRESP AME — clique em Buscar' }));
+    }
   }
   if (req.method === 'GET' && req.url.startsWith('/api/gestao-dados')) {
     const f = path.join(ROOT, 'gestao-dados.json');
@@ -655,10 +668,15 @@ function lerConfiguracaoEnv() {
   result.kpihLogin = get('KPIH_LOGIN');
   result.kpihSenha = get('KPIH_SENHA');
   // Credenciais Gestão SES / SIRESP (interno)
-  result.gestaoLogin  = get('GESTAO_LOGIN')  || 'vmedeiros';
-  result.gestaoSenha  = get('GESTAO_SENHA')  || '1118901';
+  result.gestaoLogin  = get('GESTAO_LOGIN')  || 'vilmar';
+  result.gestaoSenha  = get('GESTAO_SENHA')  || '';
   result.gestaoLogin2 = get('SIRESP_LOGIN')  || 'ddgsilva';
   result.gestaoSenha2 = get('SIRESP_SENHA')  || '260718';
+  // Credenciais SIRESP Ambulatorial (projeto siresp-login)
+  result.sirespAmbUser  = get('SIRESP_AMB_USER')  || 'antalves';
+  result.sirespAmbSenha = get('SIRESP_AMB_SENHA')  || '';
+  result.sirespAmbCode  = get('SIRESP_AMB_CODE')   || '9042';
+  result.sirespAmbLabel = get('SIRESP_AMB_LABEL')  || 'AME FRANCA';
   // Leitos
   const leitos = (get('HOSPITAL_LEITOS') || '200|62|75').split('|');
   result.leitos = { sc: parseInt(leitos[0])||200, cancer: parseInt(leitos[1])||62, coracao: parseInt(leitos[2])||75 };
@@ -1485,6 +1503,326 @@ async function handleGestaoScrape(req, res) {
 
   res.writeHead(resultado.ok ? 200 : 401, {'Content-Type':'application/json;charset=utf-8',...cors});
   res.end(JSON.stringify(resultado));
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SIRESP AMBULATORIAL — porta do projeto siresp-login (NestJS → Node.js puro)
+// Baseado em: siresp-login/src/siresp/services/
+// ══════════════════════════════════════════════════════════════════════════════
+
+let _sirespAmb = {
+  mainCookies: '',   // www.siresp.saude.sp.gov.br
+  ambCookies:  '',   // ambulatorial.siresp.saude.sp.gov.br
+  authenticated: false,
+  lastLogin: 0,
+  SESSION_DURATION: 45 * 60 * 1000,
+};
+
+// Mescla Set-Cookie no cookie jar existente (por chave=valor)
+function _mergeCookies(existing, setCookieHeader) {
+  if (!setCookieHeader) return existing;
+  const all = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+  const map = {};
+  if (existing) existing.split('; ').forEach(c => {
+    const eq = c.indexOf('='); if (eq > 0) map[c.slice(0, eq).trim()] = c.slice(eq + 1);
+  });
+  all.forEach(c => {
+    const part = c.split(';')[0]; const eq = part.indexOf('=');
+    if (eq > 0) map[part.slice(0, eq).trim()] = part.slice(eq + 1);
+  });
+  return Object.entries(map).map(([k,v]) => `${k}=${v}`).join('; ');
+}
+
+function _sirespMainReq(method, urlPath, postData, extraHeaders) {
+  return new Promise(resolve => {
+    const hdrs = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+      'Accept': 'text/html,application/xhtml+xml,*/*;q=0.9',
+      'Accept-Encoding': 'identity', 'Accept-Language': 'pt-BR,pt;q=0.9',
+      ...(extraHeaders || {}),
+    };
+    if (_sirespAmb.mainCookies) hdrs['Cookie'] = _sirespAmb.mainCookies;
+    if (postData) { hdrs['Content-Type'] = 'application/x-www-form-urlencoded'; hdrs['Content-Length'] = Buffer.byteLength(postData); }
+    const opts = { hostname: 'www.siresp.saude.sp.gov.br', port: 443, method, path: urlPath, headers: hdrs, timeout: 30000 };
+    const req = https.request(opts, res => {
+      _sirespAmb.mainCookies = _mergeCookies(_sirespAmb.mainCookies, res.headers['set-cookie']);
+      const chunks = []; res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
+    });
+    req.on('error', () => resolve({ status: 0, headers: {}, body: Buffer.from('') }));
+    req.on('timeout', () => { req.destroy(); resolve({ status: 0, headers: {}, body: Buffer.from('timeout') }); });
+    if (postData) req.write(postData); req.end();
+  });
+}
+
+function _sirespAmbReq(method, urlPath, postData, extraHeaders) {
+  return new Promise(resolve => {
+    const hdrs = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+      'Accept': 'text/html,application/xhtml+xml,application/json,*/*;q=0.9',
+      'Accept-Encoding': 'identity', 'Accept-Language': 'pt-BR,pt;q=0.9',
+      ...(extraHeaders || {}),
+    };
+    if (_sirespAmb.ambCookies) hdrs['Cookie'] = _sirespAmb.ambCookies;
+    if (postData) { hdrs['Content-Type'] = 'application/x-www-form-urlencoded'; hdrs['Content-Length'] = Buffer.byteLength(postData); }
+    const opts = { hostname: 'ambulatorial.siresp.saude.sp.gov.br', port: 443, method, path: urlPath, headers: hdrs, timeout: 30000 };
+    const req = https.request(opts, res => {
+      _sirespAmb.ambCookies = _mergeCookies(_sirespAmb.ambCookies, res.headers['set-cookie']);
+      const chunks = []; res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
+    });
+    req.on('error', () => resolve({ status: 0, headers: {}, body: Buffer.from('') }));
+    req.on('timeout', () => { req.destroy(); resolve({ status: 0, headers: {}, body: Buffer.from('timeout') }); });
+    if (postData) req.write(postData); req.end();
+  });
+}
+
+// ── Autenticação SIRESP em 5 passos (porta de auth.ts) ────────────────────────
+async function sirespAmbEnsureAuth() {
+  if (_sirespAmb.authenticated && Date.now() - _sirespAmb.lastLogin < _sirespAmb.SESSION_DURATION) {
+    return true;
+  }
+  const cfg = lerConfiguracaoEnv();
+  const user  = cfg.sirespAmbUser  || 'antalves';
+  const pass  = cfg.sirespAmbSenha || '';
+  const code  = cfg.sirespAmbCode  || '9042';
+  const label = cfg.sirespAmbLabel || 'AME FRANCA';
+
+  _sirespAmb.mainCookies = '';
+  _sirespAmb.ambCookies  = '';
+  _sirespAmb.authenticated = false;
+
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔑 SIRESP AMB: iniciando login (${user})...`);
+
+  // Passo 1: GET / → extrai token CSRF #cg_1
+  const r1 = await _sirespMainReq('GET', '/');
+  const h1 = r1.body.toString('latin1');
+  const cg1 = (h1.match(/id=["']cg_1["'][^>]*value=["']([^"']+)["']/i) ||
+               h1.match(/value=["']([^"']+)["'][^>]*id=["']cg_1["']/i) || [])[1] || '';
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: GET / → HTTP ${r1.status} | cg_1="${cg1.slice(0,30)}"`);
+
+  // Passo 2: POST login principal
+  const p2 = `usuario=${encodeURIComponent(user)}&senha=${encodeURIComponent(pass)}&sistema=1&cg_1=${encodeURIComponent(cg1)}&captcha=${encodeURIComponent(cg1)}&form_esqueci=0`;
+  const r2 = await _sirespMainReq('POST', '/index.php', p2, { Referer: 'https://www.siresp.saude.sp.gov.br/' });
+  const h2 = r2.body.toString('latin1');
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: POST /index.php → HTTP ${r2.status}`);
+  if (/senha incorreta|usu.rio inv.lido/i.test(h2)) throw new Error('Credenciais inválidas no SIRESP principal');
+
+  // Passo 3: POST login ambulatorial
+  const p3 = `LOGIN=${encodeURIComponent(user)}&SENHA=${encodeURIComponent(pass)}&entra=1&security=2111f426c828a070f29eaee5cc885a6e`;
+  const r3 = await _sirespAmbReq('POST', '/index.php?&sistema=4', p3, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/' });
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: POST amb/index.php → HTTP ${r3.status}`);
+
+  // Passo 4: Selecionar unidade
+  const unidade = `${code}_${label.toUpperCase()}`;
+  const p4 = `unidade=${encodeURIComponent(unidade)}&escolher=Ok`;
+  const r4 = await _sirespAmbReq('POST', '/escolher_unidade.php', p4, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/index.php' });
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: POST escolher_unidade → HTTP ${r4.status} | "${unidade}"`);
+
+  // Passo 5: GET principal.php → detectar tipo_doc → POST
+  const r5 = await _sirespAmbReq('GET', '/principal.php');
+  const h5 = r5.body.toString('latin1');
+  const tipoDoc = ((h5.match(/id=["']tipo_doc["'][^>]*value=["']([^"']+)["']/i) ||
+                    h5.match(/name=["']tipo_doc["'][^>]*value=["']([^"']+)["']/i) ||
+                    h5.match(/value=["']([^"']+)["'][^>]*(?:id|name)=["']tipo_doc["']/i)) || [])[1] || '';
+  const codeMap = { CF: '602', RF: '575', RI: '646', CI: '097' };
+  const digitoDoc = codeMap[tipoDoc.toUpperCase()] || null;
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: GET principal.php → HTTP ${r5.status} | tipo_doc="${tipoDoc}" → digito="${digitoDoc}"`);
+
+  if (digitoDoc) {
+    const p5 = `digito_doc=${digitoDoc}&type_doc=${encodeURIComponent(tipoDoc.toUpperCase())}`;
+    const r5b = await _sirespAmbReq('POST',
+      '/principal.php?msg_login=&security=2111f426c828a070f29eaee5cc885a6e&frmRetorno=4&entra=1',
+      p5, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/principal.php' });
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: POST principal.php → HTTP ${r5b.status}`);
+  }
+
+  _sirespAmb.authenticated = true;
+  _sirespAmb.lastLogin = Date.now();
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ SIRESP AMB: login concluído!`);
+  return true;
+}
+
+// ── Coleta relatório de Performance (JSON) — porta de performance-report.collector.ts ──
+async function _sirespColetarPerformance(code, mesStr, anoStr) {
+  const reportUrl = '/report_rel_performance.php?P=report_rel_performance';
+  await _sirespAmbReq('GET', reportUrl, null, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/principal.php' });
+
+  const payload = [
+    `REF_MES_INI=${mesStr}`, `REF_ANO_INI=${anoStr}`,
+    `FLT_TIPO=E`, `FLT_CBO_RRAS=9921`, `FLT_CBO_DRS=200`, `FLT_CBO_SMS=851`,
+    `FLT_COD_UNIDADE_EXECUTANTE=${code}`, `FLT_MES=${mesStr}`, `FLT_ANO=${anoStr}`,
+    `CBO_TIPO_CONS=E`, `btn_exportar=`, `hdd_exportar=`,
+    `unidade_codes=${code}`, `action=buscar`, `debug=12345`,
+  ].join('&');
+
+  const r = await _sirespAmbReq('POST', '/ajax_report_rel_performance.php', payload, {
+    Referer: `https://ambulatorial.siresp.saude.sp.gov.br${reportUrl}`,
+  });
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: performance HTTP ${r.status} | ${r.body.length} bytes`);
+
+  const toN = v => {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'number') return isFinite(v) ? v : null;
+    const s = String(v).replace(/\./g, '').replace(',', '.'); const n = Number(s);
+    return isFinite(n) ? n : null;
+  };
+
+  try {
+    const parsed = JSON.parse(r.body.toString('utf8'));
+    const resources = parsed?.response?.resource ?? [];
+    const total     = parsed?.response?.total     ?? null;
+    return {
+      rows: resources.map(item => ({
+        especialidade:    item.ESPEC_GC || '',
+        oferta:           toN(item.OFERTA),
+        perdaPrimariaPct: toN(item.PERDA_PRIMARIA),
+        agendCota:        toN(item.AGENDADO_COTA),
+        agendCotaPct:     toN(item.AGE_PC),
+        agendExtra:       toN(item.AGENDADO_EXTRA),
+        agendExtraPct:    toN(item.AGE_EX_PC),
+        agendTotal:       toN(item.AGENDADO_TOTAL),
+        realizadoCota:    toN(item.REALIZADO_COTA),
+        realizadoExtra:   toN(item.REALIZADO_EXTRA),
+        realizadoTotal:   toN(item.REALIZADO_TOTAL),
+        faltaCotaPct:     toN(item.FALTA_PACIENTE_COTA),
+        faltaExtraPct:    toN(item.FALTA_PACIENTE_EXTRA),
+        faltaTotalPct:    toN(item.FALTA_PACIENTE_TOTAL),
+        desistCota:       toN(item.DESISTENCIA_DISPENSADO_COTA),
+        desistExtra:      toN(item.DESISTENCIA_DISPENSADO_EXTRA),
+        desistTotal:      toN(item.DESISTENCIA_DISPENSADO_TOTAL),
+      })),
+      total: total ? {
+        oferta:        toN(total.OFERTA),
+        agendTotal:    toN(total.AGENDADO_TOTAL),
+        realizadoTotal:toN(total.REALIZADO_TOTAL),
+        faltaTotalPct: toN(total.FALTA_PACIENTE_TOTAL),
+      } : null,
+    };
+  } catch(e) {
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ SIRESP parse performance: ${e.message} | body="${r.body.toString('utf8').slice(0,200)}"`);
+    return null;
+  }
+}
+
+// ── Coleta relatório de Consultas (HTML) — porta de consultation-report.collector.ts ──
+async function _sirespColetarConsultas(mesStr, anoStr) {
+  const consultUrl = '/report_rel_consulta.php?P=report_rel_consulta';
+  await _sirespAmbReq('GET', consultUrl, null, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/principal.php' });
+
+  const payload = [
+    `hdd_acao=S`, `FLT_CBO_TIPO=C`,
+    `CBO_ID_ARVORE_T%5B1%5D=22214`, `CBO_ID_ARVORE_T%5B2%5D=`,
+    `CBO_ID_ARVORE_T%5B3%5D=`, `CBO_ID_ARVORE_T%5B4%5D=`,
+    `FLT_TIPO_MARCA=T`, `FLT_TIPO_CONSULTA=CM`, `FLT_TIPO_ATENDIMENTO=T`,
+    `FLT_ID_ESPECIALIDADE=`, `FLT_MES=${mesStr}`, `FLT_ANO=${anoStr}`,
+    `FLG_MARCA_REC=S`, `FLG_UNID_ATIVA=S`, `FLT_TIPO_REL=A`, `FLT_AGRUPAR=E`,
+    `FLG_VLR_EXAME=S`, `FLG_FILHOS=S`, `btn_acao=Buscar`,
+    `FLT_MES_INI=${mesStr}`, `FLT_ANO_INI=${anoStr}`,
+    `FLT_MES_FIM=${mesStr}`, `FLT_ANO_FIM=${anoStr}`,
+  ].join('&');
+
+  const r = await _sirespAmbReq('POST', consultUrl, payload, {
+    Referer: `https://ambulatorial.siresp.saude.sp.gov.br${consultUrl}`,
+  });
+  const html = r.body.toString('latin1');
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: consultas HTTP ${r.status} | ${html.length} chars`);
+
+  // Extrai linhas tr.dados.relatorio — igual ao selector cheerio $('tr.dados.relatorio')
+  const rows = [];
+  const trRe = /<tr[^>]*class="([^"]*)"[^>]*>([\s\S]*?)<\/tr>/gi;
+  let trM;
+  while ((trM = trRe.exec(html)) !== null) {
+    const cls = trM[1];
+    if (!cls.includes('dados') || !cls.includes('relatorio')) continue;
+    const rowHtml = trM[2];
+    const cells = [];
+    const tdRe = /<td([^>]*)>([\s\S]*?)<\/td>/gi;
+    let tdM;
+    while ((tdM = tdRe.exec(rowHtml)) !== null) {
+      const attrs = tdM[1];
+      const titleM = attrs.match(/title=["']([^"']+)["']/i);
+      const txt = tdM[2].replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+      cells.push({ text: txt, title: titleM ? titleM[1] : '' });
+    }
+    if (cells.length < 13) continue;
+    const toN = s => { const n = Number(s.replace(/\./g,'').replace(',','.')); return isFinite(n) ? n : null; };
+    const toP = s => { const n = Number(s.replace('%','').replace(',','.').trim()); return isFinite(n) ? n : null; };
+    // Layout detalhado (31 cols) ou resumido (21+ cols) — cf. consultation-report.collector.ts
+    const det = cells.length >= 31;
+    rows.push({
+      codigo:        cells[0].title || '',
+      especialidade: cells[0].text,
+      oferta:        toN(cells[1]?.text || ''),
+      agendTotal:    toN(cells[2]?.text || ''),
+      agendTotalPct: toP(cells[3]?.text || ''),
+      agendCota:     toN(cells[4]?.text || ''),
+      agendCotaPct:  toP(cells[5]?.text || ''),
+      agendExtra:    toN(cells[10]?.text || ''),
+      agendExtraPct: toP(cells[11]?.text || ''),
+      despachadoPct: toP((det ? cells[12] : cells[6])?.text || ''),
+      atendTotal:    toN((det ? cells[13] : cells[3])?.text || ''),
+      atendTotalPct: toP((det ? cells[14] : cells[4])?.text || ''),
+      ausentePct:    toP((det ? cells[20] : cells[10])?.text || ''),
+    });
+  }
+
+  // Linha TOTAL
+  let total = null;
+  const totRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+  let totM;
+  while ((totM = totRe.exec(html)) !== null) {
+    const cells2 = [];
+    const tdR2 = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi; let m2;
+    while ((m2 = tdR2.exec(totM[1])) !== null)
+      cells2.push(m2[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim());
+    if (/^tot/i.test(cells2[0] || '') && cells2.length >= 5) { total = cells2; break; }
+  }
+
+  return { rows, total, count: rows.length };
+}
+
+// ── Handler: POST /api/siresp-amb-buscar ──────────────────────────────────────
+async function handleSirespAmbBuscar(req, res) {
+  let body = '';
+  req.on('data', d => body += d);
+  req.on('end', async () => {
+    let params = {};
+    try { params = JSON.parse(body); } catch {}
+    const agora  = new Date();
+    const mes    = String(params.mes  || (agora.getMonth() + 1)).padStart(2, '0');
+    const ano    = String(params.ano  || agora.getFullYear());
+    const cfg    = lerConfiguracaoEnv();
+    const code   = params.code || cfg.sirespAmbCode || '9042';
+
+    try {
+      const ok = await sirespAmbEnsureAuth();
+      if (!ok) throw new Error('Falha no login SIRESP Ambulatorial');
+
+      const [performance, consultas] = await Promise.all([
+        _sirespColetarPerformance(code, mes, ano),
+        _sirespColetarConsultas(mes, ano),
+      ]);
+
+      const resultado = {
+        ok: true, mes, ano, code,
+        label: cfg.sirespAmbLabel || 'AME FRANCA',
+        performance, consultas,
+        timestamp: new Date().toISOString(),
+      };
+
+      try { fs.writeFileSync(path.join(ROOT, 'siresp-amb-dados.json'), JSON.stringify(resultado, null, 2), 'utf8'); } catch {}
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} 💾 SIRESP AMB: dados salvos (perf=${performance?.rows?.length||0} rows, consul=${consultas?.count||0} rows)`);
+
+      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+      res.end(JSON.stringify(resultado));
+    } catch(e) {
+      _sirespAmb.authenticated = false;
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ SIRESP AMB: ${e.message}`);
+      res.writeHead(500, {'Content-Type':'application/json;charset=utf-8',...cors});
+      res.end(JSON.stringify({ ok: false, erro: e.message }));
+    }
+  });
 }
 
 server.listen(PORT, '0.0.0.0', () => {

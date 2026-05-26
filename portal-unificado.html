@@ -536,6 +536,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
   <div class="sb-sec">
     <div class="sb-lbl">AMEs – SES/SP</div>
     <div class="sb-item" data-view="ames"><span class="ico">🔬</span><span class="lbl">Painel AMEs</span></div>
+    <div class="sb-item" data-view="siresp-ame" data-title="SIRESP – Ambulatorial AMEs"><span class="ico">🔌</span><span class="lbl">SIRESP Ambulat.</span></div>
     <div class="sb-item" data-view="financeiro"><span class="ico">💰</span><span class="lbl">Financeiro AMEs</span></div>
     <div class="sb-item" data-view="cronoata"><span class="ico">📋</span><span class="lbl">Cronoata</span><span class="sb-badge" id="sb-atras">–</span></div>
     <div class="sb-item" data-view="trimestrais"><span class="ico">📅</span><span class="lbl">Metas Trimestrais</span></div>
@@ -912,6 +913,45 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#2
     </div>
   </div>
 
+  <!-- ═══ SIRESP AMBULATORIAL ═══ -->
+  <div id="view-siresp-ame" class="view">
+    <div class="sec-title">🔌 SIRESP Ambulatorial – Produção AMEs</div>
+
+    <!-- Barra de controles -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px 14px;margin-bottom:14px">
+      <span style="font-size:12px;font-weight:700;color:#1b5e20">🔌 SIRESP Online:</span>
+      <select id="siresp-amb-mes" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px">
+        <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+        <option value="03">Março</option><option value="04">Abril</option>
+        <option value="05" selected>Maio</option><option value="06">Junho</option>
+        <option value="07">Julho</option><option value="08">Agosto</option>
+        <option value="09">Setembro</option><option value="10">Outubro</option>
+        <option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select>
+      <select id="siresp-amb-ano" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px">
+        <option value="2026" selected>2026</option>
+        <option value="2025">2025</option>
+      </select>
+      <button onclick="buscarSirespAmb()" id="btn-siresp-amb" style="background:#1b5e20;color:#fff;border:none;padding:6px 16px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:700">🔄 Buscar Online</button>
+      <span id="siresp-amb-status" style="font-size:11px;color:#555;margin-left:auto">Clique em Buscar para carregar</span>
+    </div>
+
+    <!-- Abas Performance / Consultas -->
+    <div id="siresp-amb-tabs" style="display:flex;gap:6px;margin-bottom:12px;display:none">
+      <button onclick="sirespAmbTab('perf')" id="stab-perf"
+        style="padding:6px 14px;border:1.5px solid #1b5e20;border-radius:18px;background:#1b5e20;color:#fff;cursor:pointer;font-size:12px;font-weight:600">
+        📊 Performance <span id="stab-perf-badge" style="background:#fff;color:#1b5e20;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px"></span>
+      </button>
+      <button onclick="sirespAmbTab('consul')" id="stab-consul"
+        style="padding:6px 14px;border:1.5px solid #c5cae9;border-radius:18px;background:#fff;color:#555;cursor:pointer;font-size:12px;font-weight:600">
+        🩺 Consultas <span id="stab-consul-badge" style="background:#3949ab;color:#fff;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px"></span>
+      </button>
+    </div>
+
+    <!-- Conteúdo -->
+    <div id="siresp-amb-content" style="font-size:12px"></div>
+  </div>
+
   <!-- ═══ PLANOS DE AÇÃO ═══ -->
   <div id="view-planos" class="view">
     <div class="sec-title">Planos de Ação – 6 AMEs · Jan–Jun/2026</div>
@@ -1159,6 +1199,19 @@ function showView(viewId, label, targetAme){
   if(viewId==='hosp-coracao')     setTimeout(()=>renderHospView('coracao'), 60);
   if(viewId==='hosp-kpih')        setTimeout(()=>{ renderHospView('kpih'); _kpihCarregarCache(); }, 60);
   if(viewId==='hosp-gestao-ses')  { if(!_sirespLogado) setTimeout(carregarCaptchaSiresp, 200); }
+  if(viewId==='siresp-ame') {
+    // Carrega cache salvo ao abrir o painel
+    fetch('/api/siresp-amb-dados').then(r=>r.json()).then(d=>{
+      if(d.ok && d.performance) {
+        _sirespAmbData = d;
+        document.getElementById('stab-perf-badge').textContent   = d.performance?.rows?.length||0;
+        document.getElementById('stab-consul-badge').textContent = d.consultas?.count||0;
+        document.getElementById('siresp-amb-tabs').style.display = 'flex';
+        document.getElementById('siresp-amb-status').textContent = `✅ Cache: ${d.label||''} ${d.mes||''}/${d.ano||''}`;
+        _renderSirespAmbPerf(d);
+      }
+    }).catch(()=>{});
+  }
   // Clínica
   if(viewId==='clinica'){ _clinTab=_clinTab||'visao'; renderClinView(_clinTab); }
 }
@@ -4505,6 +4558,198 @@ function _gestaoPathMap(key) {
     avaliacao:   'paginaAvaliacao.php',
   };
   return map[key] || key + '.php';
+}
+
+// ══════════════════════════════════════════════════════════
+// SIRESP AMBULATORIAL — funções do painel
+// ══════════════════════════════════════════════════════════
+let _sirespAmbData = null;
+let _sirespAmbTabAtiva = 'perf';
+
+async function buscarSirespAmb() {
+  const btnEl     = document.getElementById('btn-siresp-amb');
+  const statusEl  = document.getElementById('siresp-amb-status');
+  const contentEl = document.getElementById('siresp-amb-content');
+  const tabsEl    = document.getElementById('siresp-amb-tabs');
+  const mes       = document.getElementById('siresp-amb-mes')?.value || '05';
+  const ano       = document.getElementById('siresp-amb-ano')?.value || '2026';
+
+  if(btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Buscando…'; }
+  if(statusEl) statusEl.textContent = '🔄 Conectando ao SIRESP…';
+  if(tabsEl) tabsEl.style.display = 'none';
+  if(contentEl) contentEl.innerHTML = `
+    <div style="padding:24px 0;text-align:center;color:#1b5e20;font-size:13px">
+      <span style="font-size:26px;display:inline-block;animation:spin 1s linear infinite">🔄</span><br><br>
+      Autenticando no SIRESP (5 passos)…<br>
+      <span style="font-size:11px;color:#888">www.siresp.saude.sp.gov.br + ambulatorial.siresp.saude.sp.gov.br</span>
+    </div>`;
+
+  try {
+    const r = await fetch('/api/siresp-amb-buscar', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ mes, ano })
+    });
+    const data = await r.json();
+    if(!data.ok) throw new Error(data.erro || 'Falha na busca SIRESP');
+
+    _sirespAmbData = data;
+    _sirespAmbTabAtiva = 'perf';
+
+    const perfCount   = data.performance?.rows?.length  || 0;
+    const consulCount = data.consultas?.count            || 0;
+    const agora = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    if(statusEl) statusEl.textContent = `✅ ${data.label} | ${agora}`;
+
+    // Atualiza badges das abas
+    document.getElementById('stab-perf-badge').textContent   = perfCount;
+    document.getElementById('stab-consul-badge').textContent = consulCount;
+    if(tabsEl) tabsEl.style.display = 'flex';
+
+    _renderSirespAmbPerf(data);
+  } catch(e) {
+    if(contentEl) contentEl.innerHTML = `<div style="color:#c62828;background:#ffebee;padding:14px;border-radius:8px;font-size:12px">❌ ${e.message}</div>`;
+    if(statusEl) statusEl.textContent = '❌ Erro';
+  } finally {
+    if(btnEl) { btnEl.disabled = false; btnEl.textContent = '🔄 Buscar Online'; }
+  }
+}
+
+function sirespAmbTab(key) {
+  _sirespAmbTabAtiva = key;
+  ['perf','consul'].forEach(k => {
+    const b = document.getElementById(`stab-${k}`);
+    if(!b) return;
+    const ativo = k === key;
+    b.style.background   = ativo ? (k==='perf'?'#1b5e20':'#3949ab') : '#fff';
+    b.style.color        = ativo ? '#fff' : '#555';
+    b.style.borderColor  = ativo ? (k==='perf'?'#1b5e20':'#3949ab') : '#c5cae9';
+  });
+  if(!_sirespAmbData) return;
+  if(key === 'perf')   _renderSirespAmbPerf(_sirespAmbData);
+  else                 _renderSirespAmbConsul(_sirespAmbData);
+}
+
+function _fmtN(v) { return v === null || v === undefined ? '–' : Number(v).toLocaleString('pt-BR'); }
+function _fmtP(v, decim=1) {
+  if(v === null || v === undefined) return '–';
+  const n = Number(v);
+  const cor = n >= 90 ? '#1b5e20' : n >= 70 ? '#e65100' : '#c62828';
+  return `<span style="color:${cor};font-weight:700">${n.toFixed(decim)}%</span>`;
+}
+
+function _renderSirespAmbPerf(data) {
+  const contentEl = document.getElementById('siresp-amb-content');
+  if(!contentEl) return;
+  const rows = data.performance?.rows || [];
+  const tot  = data.performance?.total;
+  if(!rows.length) {
+    contentEl.innerHTML = '<div style="color:#888;padding:16px;text-align:center">Sem dados de performance para este período.</div>';
+    return;
+  }
+  const mes3 = {
+    '01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun',
+    '07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'
+  }[data.mes] || data.mes;
+
+  let html = `
+    <div style="font-size:11px;color:#666;margin-bottom:8px">
+      📊 <strong>Relatório de Performance</strong> · ${data.label} · ${mes3}/${data.ano}
+      <a href="https://ambulatorial.siresp.saude.sp.gov.br/report_rel_performance.php?P=report_rel_performance"
+         target="_blank" style="margin-left:8px;color:#1b5e20;font-size:10px">↗ Abrir no SIRESP</a>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:600px">
+      <thead>
+        <tr style="background:#e8f5e9">
+          <th style="padding:5px 8px;text-align:left;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20;white-space:nowrap">Especialidade</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20">Oferta</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20">Agend.</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20">Realizado</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20">Agend Cota</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20">Agend Extra</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20">Falta %</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #a5d6a7;font-size:11px;color:#1b5e20">Desist.</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  rows.forEach((row, i) => {
+    const bg = i%2===0?'#fff':'#f1f8e9';
+    html += `<tr style="background:${bg}">
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${row.especialidade}">${row.especialidade}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;text-align:right;font-family:monospace">${_fmtN(row.oferta)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;text-align:right;font-family:monospace">${_fmtN(row.agendTotal)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;text-align:right;font-weight:700;font-family:monospace">${_fmtN(row.realizadoTotal)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;text-align:right;font-family:monospace">${_fmtN(row.agendCota)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;text-align:right;font-family:monospace">${_fmtN(row.agendExtra)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;text-align:right">${_fmtP(row.faltaTotalPct)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #e8f5e9;text-align:right;font-family:monospace">${_fmtN(row.desistTotal)}</td>
+    </tr>`;
+  });
+
+  if(tot) {
+    html += `<tr style="background:#c8e6c9;font-weight:700">
+      <td style="padding:5px 8px;border-top:2px solid #81c784">TOTAL GERAL</td>
+      <td style="padding:5px 8px;border-top:2px solid #81c784;text-align:right;font-family:monospace">${_fmtN(tot.oferta)}</td>
+      <td style="padding:5px 8px;border-top:2px solid #81c784;text-align:right;font-family:monospace">${_fmtN(tot.agendTotal)}</td>
+      <td style="padding:5px 8px;border-top:2px solid #81c784;text-align:right;font-family:monospace">${_fmtN(tot.realizadoTotal)}</td>
+      <td colspan="2" style="padding:5px 8px;border-top:2px solid #81c784"></td>
+      <td style="padding:5px 8px;border-top:2px solid #81c784;text-align:right">${_fmtP(tot.faltaTotalPct)}</td>
+      <td style="padding:5px 8px;border-top:2px solid #81c784"></td>
+    </tr>`;
+  }
+  html += `</tbody></table></div>`;
+  contentEl.innerHTML = html;
+}
+
+function _renderSirespAmbConsul(data) {
+  const contentEl = document.getElementById('siresp-amb-content');
+  if(!contentEl) return;
+  const rows = data.consultas?.rows || [];
+  if(!rows.length) {
+    contentEl.innerHTML = '<div style="color:#888;padding:16px;text-align:center">Sem dados de consultas para este período.</div>';
+    return;
+  }
+  const mes3 = {
+    '01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun',
+    '07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'
+  }[data.mes] || data.mes;
+
+  let html = `
+    <div style="font-size:11px;color:#666;margin-bottom:8px">
+      🩺 <strong>Relatório de Consultas</strong> · ${data.label} · ${mes3}/${data.ano}
+      <a href="https://ambulatorial.siresp.saude.sp.gov.br/report_rel_consulta.php?P=report_rel_consulta"
+         target="_blank" style="margin-left:8px;color:#3949ab;font-size:10px">↗ Abrir no SIRESP</a>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:500px">
+      <thead>
+        <tr style="background:#e8eaf6">
+          <th style="padding:5px 8px;text-align:left;border-bottom:2px solid #9fa8da;color:#1a237e;white-space:nowrap">Especialidade</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #9fa8da;color:#1a237e">Oferta</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #9fa8da;color:#1a237e">Agend. Total</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #9fa8da;color:#1a237e">Agend. Cota</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #9fa8da;color:#1a237e">Agend. Extra</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #9fa8da;color:#1a237e">Atend. Total</th>
+          <th style="padding:5px 8px;text-align:right;border-bottom:2px solid #9fa8da;color:#1a237e">Ausente %</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  rows.forEach((row, i) => {
+    const bg = i%2===0?'#fff':'#f8f9ff';
+    html += `<tr style="background:${bg}">
+      <td style="padding:4px 8px;border-bottom:1px solid #eee;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${row.especialidade}">${row.especialidade}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-family:monospace">${_fmtN(row.oferta)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-family:monospace">${_fmtN(row.agendTotal)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-family:monospace">${_fmtN(row.agendCota)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-family:monospace">${_fmtN(row.agendExtra)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:700;font-family:monospace">${_fmtN(row.atendTotal)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${_fmtP(row.ausentePct)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  contentEl.innerHTML = html;
 }
 
 function irParaAcessos() {
