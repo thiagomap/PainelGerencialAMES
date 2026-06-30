@@ -145,16 +145,17 @@ function getDash() {
   return _dashCache;
 }
 
-// Meses realizados: 4 (Jan-Abr). Q1=3 meses (Jan-Mar), Q2=1 mês feito (Abr).
-// Meta semestral = cont_4m × 6/4. Meta trimestral = meta_sem / 2. Meta mensal = meta_sem / 6.
+// Meses realizados: 5 (Jan-Mai). Q1=3 meses (Jan-Mar), Q2=2 meses feitos (Abr+Mai).
+// Meta semestral = cont_5m × 6/5. Meta trimestral = meta_sem / 2. Meta mensal = meta_sem / 6.
 
 function calcOfertaConsulta(k) {
   try {
     const s271 = getDash().ames[k]?.qtde?.s271;
     if (!s271 || !s271.cont) return { status: 'pendente', valor: null, observacao: '' };
-    const metaSem  = Math.round(s271.cont * 6 / 4);   // meta semestral real
-    const metaQ1   = Math.round(metaSem / 2);           // meta Q1 = sem ÷ 2
-    const real1T   = Math.round(s271.real * 3 / 4);    // realizado Q1 = 3/4 dos 4m
+    const meses    = getDash().meses || 5;
+    const metaSem  = Math.round(s271.cont * 6 / meses);  // meta semestral real
+    const metaQ1   = Math.round(metaSem / 2);             // meta Q1 = sem ÷ 2
+    const real1T   = Math.round(s271.real * 3 / meses);  // realizado Q1 = 3 meses dos realizados
     const p = pct(real1T, metaQ1);
     return { status: status(p, 90), valor: p,
       observacao: `${real1T.toLocaleString('pt-BR')} de ${metaQ1.toLocaleString('pt-BR')} consultas — Q1 (mín SES 90%)` };
@@ -165,9 +166,10 @@ function calcSadtLinha(k) {
   try {
     const sadt = getDash().ames[k]?.qtde?.sadtExt;
     if (!sadt || !sadt.cont) return { status: 'pendente', valor: null, observacao: '' };
-    const metaSem  = Math.round(sadt.cont * 6 / 4);
+    const meses    = getDash().meses || 5;
+    const metaSem  = Math.round(sadt.cont * 6 / meses);
     const metaQ1   = Math.round(metaSem / 2);
-    const real1T   = Math.round(sadt.real * 3 / 4);
+    const real1T   = Math.round(sadt.real * 3 / meses);
     const p = pct(real1T, metaQ1);
     return { status: status(p, 90), valor: p,
       observacao: `${real1T.toLocaleString('pt-BR')} de ${metaQ1.toLocaleString('pt-BR')} exames SADT — Q1 (mín SES 90%)` };
@@ -179,7 +181,7 @@ const PLAN_FILES = {
   cp:  'Planejamento Semestral/METAS 2026 - AME CAMPINAS_.xlsx',
   frc: 'Planejamento Semestral/METAS 2026- AME FRANCA.xlsx',
   avj: 'Planejamento Semestral/METAS 2026 - AME Vale do Jurumirim.xlsx',
-  cb:  'Planejamento Semestral/METAS 2026 CASA BRANCA.xlsx',
+  cb:  'Planejamento Semestral/ METAS 2026 CASA BRANCA.xlsx',
   scl: 'Planejamento Semestral/METAS 2026 SÃO CARLOS.xlsx',
   rp:  'Planejamento Semestral/Metas 2026 - Ribeirão Preto.xlsx',
 };
@@ -194,6 +196,40 @@ function normNome(s) {
     .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 }
 
+// Localiza, nas linhas de cabeçalho de uma planilha, as colunas "Real." de Abril/Maio/Junho
+// e "Meta Tri" do 2º trimestre. Layouts variam por AME (nº de sub-colunas por mês,
+// coluna extra de código no início etc.) — por isso a busca é por texto, não por índice fixo.
+function normHdr(s) {
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'');
+}
+function findMonthCols(rows, maxHdrRows) {
+  const months = { abr: 'abril', mai: 'maio', jun: 'junho' };
+  const result = {};
+  const limit = Math.min(rows.length, maxHdrRows || 6);
+  for (let r = 0; r < limit; r++) {
+    const row = rows[r] || [];
+    for (let c = 0; c < row.length; c++) {
+      const t = normHdr(row[c]);
+      for (const [key, name] of Object.entries(months)) {
+        if (result[key] || t !== name) continue;
+        for (let rr = r; rr <= r + 2 && rr < rows.length && !result[key]; rr++) {
+          for (let cc = c; cc <= c + 2; cc++) {
+            if (normHdr((rows[rr]||[])[cc]).startsWith('real')) { result[key] = { col: cc, row: rr }; break; }
+          }
+        }
+      }
+    }
+  }
+  const junCol = result.jun ? result.jun.col : -1;
+  outer:
+  for (let r = 0; r < limit; r++) {
+    const row = rows[r] || [];
+    for (let c = junCol + 1; c < row.length; c++) {
+      if (normHdr(row[c]).includes('metatri')) { result.metaTri2T = { col: c, row: r }; break outer; }
+    }
+  }
+  return result;
+}
 let _planCache = {};
 function parsePlanejamento2T(key) {
   if(_planCache[key] !== undefined) return _planCache[key];
@@ -203,24 +239,32 @@ function parsePlanejamento2T(key) {
   if(!fs.existsSync(fp)){ _planCache[key]=null; return null; }
   try {
     const wb = XLSX.readFile(fp);
-    const cmaName = wb.SheetNames.find(s => s.toLowerCase().includes('cma'));
+    const cmaName = wb.SheetNames.find(s => /cma/i.test(s) && /2026/.test(s))
+                 || wb.SheetNames.find(s => s.toLowerCase().includes('cma'));
     if(!cmaName){ _planCache[key]=null; return null; }
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[cmaName], { header:1, defval:'' });
+    const cols = findMonthCols(rows);
+    if(!cols.mai){ _planCache[key]=null; return null; }
+    const startRow = Math.max(cols.mai.row, cols.abr ? cols.abr.row : 0, cols.jun ? cols.jun.row : 0) + 1;
+    // Algumas planilhas (ex.: Franca) têm o código SIGTAP na coluna 0 e o nome na coluna 1
+    const isCodigo = s => /^[\d.\-() ]+$/.test(String(s||'').trim()) && String(s||'').trim().length > 3;
+    const nameCol = isCodigo(rows[startRow]?.[0]) ? 1 : 0;
     const procs={}, totals=[];
-    rows.forEach(r => {
-      const nome = String(r[0]||'').trim();
-      if(!nome || nome.length < 3) return;
-      const meta2T    = parseFloat(r[18])||0;
-      const abrReal   = parseFloat(r[20])||0;
-      const maiReal   = parseFloat(r[22])||0;
-      const junReal   = parseFloat(r[24])||0;
-      const metaTri2T = parseFloat(r[26])||0;
-      const real2T    = abrReal + maiReal + junReal || parseFloat(r[29])||0;
+    rows.forEach((r, idx) => {
+      if (idx < startRow) return;
+      const nome = String(r[nameCol]||'').trim();
+      if(!nome || nome.length < 3 || isCodigo(nome)) return;
+      const abrReal   = cols.abr ? (parseFloat(r[cols.abr.col])||0) : 0;
+      const maiReal   = cols.mai ? (parseFloat(r[cols.mai.col])||0) : 0;
+      const junReal   = cols.jun ? (parseFloat(r[cols.jun.col])||0) : 0;
+      const metaTri2T = cols.metaTri2T ? (parseFloat(r[cols.metaTri2T.col])||0) : 0;
+      const real2T    = abrReal + maiReal + junReal;
+      const mesesQ2   = [abrReal, maiReal, junReal].filter(v => v > 0).length;
       if(nome.toUpperCase().includes('TOTAL')) {
-        totals.push({ meta2T, abrReal, maiReal, junReal, real2T, metaTri2T });
-      } else if(meta2T > 0 || abrReal > 0) {
+        totals.push({ abrReal, maiReal, junReal, real2T, metaTri2T, mesesQ2 });
+      } else if(real2T > 0 || metaTri2T > 0) {
         const nk = normNome(nome);
-        if(nk) procs[nk] = { meta2T, abrReal, maiReal, junReal, real2T, metaTri2T, nome };
+        if(nk) procs[nk] = { abrReal, maiReal, junReal, real2T, metaTri2T, mesesQ2, nome };
       }
     });
     const total = totals.length ? totals.reduce((best,t)=>t.real2T>best.real2T?t:best, totals[0]) : null;
@@ -255,6 +299,7 @@ function enriquecerCom2T(rows, key) {
       row.pct2T    = row.meta2T > 0 ? Math.round(row.real2T / row.meta2T * 100) : null;
       row.status2T = statusTri(row.real2T, row.meta2T);
       row.real2T_parcial = true; // vem do Planejamento, não do Quadro
+      row.mesesQ2  = [planRow.abrReal, planRow.maiReal, planRow.junReal].filter(v => v > 0).length;
       matchCount++;
     }
   });
@@ -270,19 +315,20 @@ function enriquecerCom2T(rows, key) {
         row.pct2T   = row.meta2T > 0 ? Math.round(row.real2T / row.meta2T * 100) : null;
         row.status2T = statusTri(row.real2T, row.meta2T);
         row.real2T_parcial = true;
+        row.mesesQ2 = total.mesesQ2 || row.mesesQ2;
       }
     });
   }
   return rows;
 }
 
-// Lê valores mensais de Abril do CONFIGURACAO.env para uso no 2T parcial
-function lerEnvAbril(ameEnvKey, metricKey) {
+// Lê o valor de um mês (formato "real|meta") do CONFIGURACAO.env para uso no 2T parcial
+function lerEnvMes(ameEnvKey, metricKey, mes) {
   try {
     const cfgPath = path.join(BASE, '..', 'CONFIGURACAO.env');
     const lines = fs.readFileSync(cfgPath, 'utf8').split('\n');
     const get = k => { const l = lines.find(l => l.startsWith(k+'=')); return l ? l.slice(k.length+1).trim() : ''; };
-    const v = get(`${ameEnvKey}_${metricKey}_ABR`);
+    const v = get(`${ameEnvKey}_${metricKey}_${mes}`);
     if (!v) return null;
     const parts = v.split('|');
     const real = parseFloat(parts[0]) || 0;
@@ -291,29 +337,41 @@ function lerEnvAbril(ameEnvKey, metricKey) {
   } catch(e) { return null; }
 }
 
+// Junta os meses do 2T que já têm real lançado no .env (Abr, Mai, Jun — para no 1º mês sem dado)
+function lerMesesQ2(ameEnvKey, metricKey) {
+  const result = [];
+  for (const [label, sigla] of [['Abr','ABR'],['Mai','MAI'],['Jun','JUN']]) {
+    const m = lerEnvMes(ameEnvKey, metricKey, sigla);
+    if (!m || !(m.real > 0)) break;
+    result.push({ label, ...m });
+  }
+  return result;
+}
+
 const ENV_AME_KEYS = { cp:'CAMPINAS', cb:'CASA_BRANCA', frc:'FRANCA', rp:'RIBEIRAO', scl:'SAO_CARLOS', avj:'JURUMIRIM' };
 
-// Q2: Apenas Abril realizado (1 de 3 meses).
-// meta_Q2 = meta_sem / 2. Projeta o Q2 completo = real_abr × 3.
+// Q2: combina os meses já realizados (Abr[+Mai[+Jun]]).
+// meta_Q2 = meta_sem / 2. Projeta o Q2 completo = média mensal dos meses realizados × 3.
 // SES mín Consultas/SADT = 90% da meta Q2.
 function calcOfertaConsulta2T(k) {
   try {
     const s271   = getDash().ames[k]?.qtde?.s271;
     const envKey = ENV_AME_KEYS[k];
-    const abr    = lerEnvAbril(envKey, 'CONS');
-    if (!abr || !abr.meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
-    const metaSem = s271 ? Math.round(s271.cont * 6 / 4) : abr.meta * 6;
-    const metaQ2  = Math.round(metaSem / 2);              // meta Q2 = sem ÷ 2
-    const metaMes = Math.round(metaSem / 6);               // meta mensal = sem ÷ 6
-    const projQ2  = abr.real * 3;                          // projeção Q2 ao ritmo de Abr × 3
-    const pMes    = pct(abr.real, metaMes);                // % vs meta mensal de Abr
-    const pProjQ2 = pct(projQ2, metaQ2);                   // % projeção Q2 vs meta Q2
-    // status: avaliar se projeção Q2 atinge o mínimo SES 90%
-    const stProj = pProjQ2 !== null ? (pProjQ2 >= 100 ? 'sim' : pProjQ2 >= 90 ? 'parcial' : 'nao') : 'pendente';
+    const meses  = lerMesesQ2(envKey, 'CONS');
+    if (!meses.length || !meses[0].meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
+    const metaSem  = s271 ? Math.round(s271.cont * 6 / (getDash().meses || 5)) : meses[0].meta * 6;
+    const metaQ2   = Math.round(metaSem / 2);                     // meta Q2 = sem ÷ 2
+    const metaMes  = Math.round(metaSem / 6);                     // meta mensal = sem ÷ 6
+    const n        = meses.length;
+    const realSoma = meses.reduce((s, m) => s + m.real, 0);
+    const projQ2   = Math.round(realSoma / n * 3);                // projeção Q2 ao ritmo médio dos meses já realizados
+    const pPeriodo = pct(realSoma, metaMes * n);                  // % vs meta acumulada dos meses já realizados
+    const pProjQ2  = pct(projQ2, metaQ2);                         // % projeção Q2 vs meta Q2
+    const labels   = meses.map(m => m.label).join('+');
     return {
       status: 'parcial', // Q2 incompleto = sempre parcial na exibição
-      valor: pMes,
-      observacao: `Abr: ${abr.real.toLocaleString('pt-BR')} (${pMes}% da meta mensal ${metaMes.toLocaleString('pt-BR')}) — proj Q2: ${projQ2.toLocaleString('pt-BR')} de ${metaQ2.toLocaleString('pt-BR')} (${pProjQ2}%) | mín SES 90% — 1 de 3 meses`
+      valor: pPeriodo,
+      observacao: `${labels}: ${realSoma.toLocaleString('pt-BR')} (${pPeriodo}% da meta de ${(metaMes * n).toLocaleString('pt-BR')}) — proj Q2: ${projQ2.toLocaleString('pt-BR')} de ${metaQ2.toLocaleString('pt-BR')} (${pProjQ2}%) | mín SES 90% — ${n} de 3 meses`
     };
   } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
 }
@@ -322,18 +380,21 @@ function calcSadtLinha2T(k) {
   try {
     const sadt   = getDash().ames[k]?.qtde?.sadtExt;
     const envKey = ENV_AME_KEYS[k];
-    const abr    = lerEnvAbril(envKey, 'SADT');
-    if (!abr || !abr.meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
-    const metaSem = sadt ? Math.round(sadt.cont * 6 / 4) : abr.meta * 6;
-    const metaQ2  = Math.round(metaSem / 2);
-    const metaMes = Math.round(metaSem / 6);
-    const projQ2  = abr.real * 3;
-    const pMes    = pct(abr.real, metaMes);
-    const pProjQ2 = pct(projQ2, metaQ2);
+    const meses  = lerMesesQ2(envKey, 'SADT');
+    if (!meses.length || !meses[0].meta) return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' };
+    const metaSem  = sadt ? Math.round(sadt.cont * 6 / (getDash().meses || 5)) : meses[0].meta * 6;
+    const metaQ2   = Math.round(metaSem / 2);
+    const metaMes  = Math.round(metaSem / 6);
+    const n        = meses.length;
+    const realSoma = meses.reduce((s, m) => s + m.real, 0);
+    const projQ2   = Math.round(realSoma / n * 3);
+    const pPeriodo = pct(realSoma, metaMes * n);
+    const pProjQ2  = pct(projQ2, metaQ2);
+    const labels   = meses.map(m => m.label).join('+');
     return {
       status: 'parcial',
-      valor: pMes,
-      observacao: `Abr: ${abr.real.toLocaleString('pt-BR')} (${pMes}% da meta mensal ${metaMes.toLocaleString('pt-BR')}) — proj Q2: ${projQ2.toLocaleString('pt-BR')} de ${metaQ2.toLocaleString('pt-BR')} (${pProjQ2}%) | mín SES 90% — 1 de 3 meses`
+      valor: pPeriodo,
+      observacao: `${labels}: ${realSoma.toLocaleString('pt-BR')} (${pPeriodo}% da meta de ${(metaMes * n).toLocaleString('pt-BR')}) — proj Q2: ${projQ2.toLocaleString('pt-BR')} de ${metaQ2.toLocaleString('pt-BR')} (${pProjQ2}%) | mín SES 90% — ${n} de 3 meses`
     };
   } catch(e) { return { status: 'pendente', valor: null, observacao: 'Aguardando dados Mai-Jun/2026' }; }
 }
@@ -496,7 +557,12 @@ function calcMonitoramentoStatus(procs, triKey) {
   // CMA/cma → SES mín 95%
   const abaixo = procs.filter(pr => pr[pk] !== null && pr[pk] < 100 && pr[pk] > 0);
   const isParcial2T = triKey === '2T' && procs.some(pr => pr.real2T_parcial);
-  const sufixo = isParcial2T ? ' (Abr/2026 — estimativa Q2, 1 de 3 meses)' : '';
+  let sufixo = '';
+  if (isParcial2T) {
+    const mesesQ2 = procs.reduce((max, pr) => Math.max(max, pr.mesesQ2 || 0), 0);
+    const labels = ['Abr', 'Mai', 'Jun'].slice(0, mesesQ2 || 1);
+    sufixo = ` (${labels.join('+')}/2026 — estimativa Q2, ${mesesQ2 || 1} de 3 meses)`;
+  }
   const obs = abaixo.length > 0
     ? `Abaixo de 100%: ${abaixo.map(x => x.nome.substring(0,28)+'…').join('; ')}${sufixo}`
     : `Todos os procedimentos ≥ 100% da meta${sufixo}`;
@@ -653,8 +719,8 @@ KEYS.forEach(k => {
   // Monitoramento 2T: tentar usar real2T do mesmo arquivo 1T (col 19); se vazio, pendente
   const mon2TReal = calcMonitoramentoStatus(procs1T, '2T');
   const mon2TFinal = (mon2TReal.pct !== null && mon2TReal.pct > 0)
-    ? { ...mon2TReal, obs: mon2TReal.obs + ' (Abr/2026 — 1 de 3 meses)' }
-    : { status: 'pendente', pct: null, obs: 'Quadro de Monitoramento 2T sem dados de Abr ainda' };
+    ? mon2TReal
+    : { status: 'pendente', pct: null, obs: 'Quadro de Monitoramento 2T sem dados ainda' };
 
   const oferta2T = calcOfertaConsulta2T(k);
   const sadt2T   = calcSadtLinha2T(k);

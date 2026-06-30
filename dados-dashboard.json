@@ -1,39 +1,39 @@
 {
-  "geradoEm": "2026-05-26T17:21:20.238Z",
-  "periodo": "Janeiro-Abril 2026",
-  "meses": 4,
-  "mesesRealizados": 4,
+  "geradoEm": "2026-06-30T13:37:30.423Z",
+  "periodo": "Janeiro-Maio 2026",
+  "meses": 5,
+  "mesesRealizados": 5,
   "ames": {
     "cp": {
       "label": "CAMPINAS",
       "qtde": {
         "s271": {
-          "cont": 24824,
-          "real": 29515
+          "cont": 31030,
+          "real": 37695
         },
         "s272": {
-          "cont": 18144,
-          "real": 20386
+          "cont": 22680,
+          "real": 25372
         },
         "naoMed": {
-          "cont": 11744,
-          "real": 14183
+          "cont": 14680,
+          "real": 17806
         },
         "procTer": {
-          "cont": 6400,
-          "real": 6203
+          "cont": 8000,
+          "real": 7566
         },
         "cmaA": {
-          "cont": 2800,
-          "real": 2827
+          "cont": 3500,
+          "real": 3511
         },
         "cmaM": {
-          "cont": 2400,
-          "real": 2962
+          "cont": 3000,
+          "real": 3748
         },
         "sadtExt": {
-          "cont": 13096,
-          "real": 12059
+          "cont": 16370,
+          "real": 15352
         }
       },
       "s272mensal": {
@@ -53,45 +53,101 @@
           "c": 4536,
           "r": 4987
         },
-        "cont": 18144,
-        "real": 20386
+        "mai": {
+          "c": 4536,
+          "r": 4986
+        },
+        "cont": 22680,
+        "real": 25372
+      },
+      "s271mensal": {
+        "jan": {
+          "c": 6206,
+          "r": 7173
+        },
+        "fev": {
+          "c": 6206,
+          "r": 6555
+        },
+        "mar": {
+          "c": 6206,
+          "r": 8419
+        },
+        "abr": {
+          "c": 6206,
+          "r": 7368
+        },
+        "mai": {
+          "c": 6206,
+          "r": 8180
+        },
+        "cont": 31030,
+        "real": 37695
+      },
+      "sadtMensal": {
+        "jan": {
+          "c": 3274,
+          "r": 2870
+        },
+        "fev": {
+          "c": 3274,
+          "r": 2889
+        },
+        "mar": {
+          "c": 3274,
+          "r": 3153
+        },
+        "abr": {
+          "c": 3274,
+          "r": 3147
+        },
+        "mai": {
+          "c": 3274,
+          "r": 3293
+        },
+        "cont": 16370,
+        "real": 15352
       },
       "fin": {
-        "receita": 15085464.02,
-        "pessoal": 4212503.49,
-        "terceiros": 6701942.3,
-        "assistenciais": 4914689.42,
-        "administrativos": 1787252.88,
-        "materiais": 1274037.67,
-        "utilidades": 450604.18,
-        "ressarcimento": 411017.61,
-        "despesa": 13064061.06,
-        "saldoAbr": 2147602.37,
+        "receita": 18618385,
+        "pessoal": 5209079.78,
+        "terceiros": 8324224.92,
+        "assistenciais": 6131398.28,
+        "administrativos": 2192826.64,
+        "materiais": 1629396.56,
+        "utilidades": 568043.76,
+        "ressarcimento": 512904.26,
+        "despesa": 16261209.21,
+        "saldoAbr": 2483375.2,
         "saldoJan": 126199.41,
         "mensal": {
           "receita": [
             3522841.05,
             3520525.78,
             3529229.8,
-            4512867.39
+            4512867.39,
+            3532920.98
           ],
           "despesa": [
             3299427.79,
             3102582.82,
             3171038.8,
-            3491011.65
+            3491011.65,
+            3197148.15
           ],
           "pessoal": [
             1100210.73,
             1032438.52,
             1065937.35,
-            1013916.89
+            1013916.89,
+            996576.29
           ],
           "resultado": [
             223413.25999999978,
             417942.95999999996,
             358191,
-            1021855.7399999998
+            1021855.7399999998,
+            335772.8300000001
           ]
         }
       },
@@ -1415,20 +1471,20 @@
       },
       "analise": {
         "label": "Campinas",
-        "consultReal": 29515,
-        "naoMedReal": 14183,
-        "procTerReal": 6203,
-        "s272Real": 20386,
-        "cmaAReal": 2827,
-        "cmaMReal": 2962,
-        "sadtReal": 12059,
-        "consultCont": 24824,
-        "naoMedCont": 11744,
-        "procTerCont": 6400,
-        "s272Cont": 18144,
-        "cmaACont": 2800,
-        "cmaMCont": 2400,
-        "sadtCont": 13096,
+        "consultReal": 37695,
+        "naoMedReal": 17806,
+        "procTerReal": 7566,
+        "s272Real": 25372,
+        "cmaAReal": 3511,
+        "cmaMReal": 3748,
+        "sadtReal": 15352,
+        "consultCont": 31030,
+        "naoMedCont": 14680,
+        "procTerCont": 8000,
+        "s272Cont": 22680,
+        "cmaACont": 3500,
+        "cmaMCont": 3000,
+        "sadtCont": 16370,
         "consultMetaSem": 37236,
         "s272MetaSem": 27216,
         "cmaAMetaSem": 4200,
@@ -1441,15 +1497,15 @@
         "cmaAMeta": 4200,
         "cmaMeta": 3600,
         "sadtMeta": 19644,
-        "consultProj": 44273,
-        "cmaAProj": 4241,
-        "cmaMProj": 4443,
-        "sadtProj": 18089,
-        "pctConsulta": 118.9,
-        "pctNaoMed": 112.4,
-        "pctCmaA": 101,
-        "pctCmaM": 123.4,
-        "pctSadt": 92.1,
+        "consultProj": 45234,
+        "cmaAProj": 4213,
+        "cmaMProj": 4498,
+        "sadtProj": 18422,
+        "pctConsulta": 121.5,
+        "pctNaoMed": 111.9,
+        "pctCmaA": 100.3,
+        "pctCmaM": 124.9,
+        "pctSadt": 93.8,
         "riscos": [],
         "status": "ok",
         "mutirao": true
@@ -1459,32 +1515,32 @@
       "label": "CASA BRANCA",
       "qtde": {
         "s271": {
-          "cont": 18188,
-          "real": 16228
+          "cont": 22735,
+          "real": 20242
         },
         "s272": {
-          "cont": 5660,
-          "real": 5033
+          "cont": 7075,
+          "real": 6331
         },
         "naoMed": {
-          "cont": 2660,
-          "real": 3439
+          "cont": 3325,
+          "real": 4362
         },
         "procTer": {
-          "cont": 3000,
-          "real": 1594
+          "cont": 3750,
+          "real": 1969
         },
         "cmaA": {
-          "cont": 340,
-          "real": 311
+          "cont": 425,
+          "real": 382
         },
         "cmaM": {
-          "cont": 800,
-          "real": 563
+          "cont": 1000,
+          "real": 790
         },
         "sadtExt": {
-          "cont": 3560,
-          "real": 3508
+          "cont": 4450,
+          "real": 4431
         }
       },
       "s272mensal": {
@@ -1504,45 +1560,101 @@
           "c": 1415,
           "r": 1247
         },
-        "cont": 5660,
-        "real": 5033
+        "mai": {
+          "c": 1415,
+          "r": 1298
+        },
+        "cont": 7075,
+        "real": 6331
+      },
+      "s271mensal": {
+        "jan": {
+          "c": 4547,
+          "r": 3495
+        },
+        "fev": {
+          "c": 4547,
+          "r": 3685
+        },
+        "mar": {
+          "c": 4547,
+          "r": 4950
+        },
+        "abr": {
+          "c": 4547,
+          "r": 4098
+        },
+        "mai": {
+          "c": 4547,
+          "r": 4014
+        },
+        "cont": 22735,
+        "real": 20242
+      },
+      "sadtMensal": {
+        "jan": {
+          "c": 890,
+          "r": 707
+        },
+        "fev": {
+          "c": 890,
+          "r": 860
+        },
+        "mar": {
+          "c": 890,
+          "r": 960
+        },
+        "abr": {
+          "c": 890,
+          "r": 981
+        },
+        "mai": {
+          "c": 890,
+          "r": 923
+        },
+        "cont": 4450,
+        "real": 4431
       },
       "fin": {
-        "receita": 4214994.88,
-        "pessoal": 1934053.41,
-        "terceiros": 1643628.75,
-        "assistenciais": 1301441.83,
-        "administrativos": 342186.92,
-        "materiais": 270180.58,
-        "utilidades": 100150.14,
-        "ressarcimento": 122726.86,
-        "despesa": 4414853.21,
-        "saldoAbr": 168505.13,
+        "receita": 5598295.99,
+        "pessoal": 2384318.78,
+        "terceiros": 2603204.13,
+        "assistenciais": 2208817.51,
+        "administrativos": 394386.62,
+        "materiais": 352800.99,
+        "utilidades": 118037.54,
+        "ressarcimento": 153634.93,
+        "despesa": 5957778.39,
+        "saldoAbr": 8881.06,
         "saldoJan": 368363.46,
         "mensal": {
           "receita": [
             1054636.78,
             1054591.1,
             1053923.92,
-            1051843.08
+            1051843.08,
+            1383301.11
           ],
           "despesa": [
             1311151.63,
             941124.46,
             1089983.82,
-            1072593.3
+            1072593.3,
+            1542925.18
           ],
           "pessoal": [
             516233.31,
             427812.35,
             514591.99,
-            475415.76
+            475415.76,
+            450265.37
           ],
           "resultado": [
             -256514.84999999986,
             113466.64000000013,
             -36059.90000000014,
-            -20750.219999999972
+            -20750.219999999972,
+            -159624.06999999983
           ]
         }
       },
@@ -2866,20 +2978,20 @@
       },
       "analise": {
         "label": "Casa Branca",
-        "consultReal": 16228,
-        "naoMedReal": 3439,
-        "procTerReal": 1594,
-        "s272Real": 5033,
-        "cmaAReal": 311,
-        "cmaMReal": 563,
-        "sadtReal": 3508,
-        "consultCont": 18188,
-        "naoMedCont": 2660,
-        "procTerCont": 3000,
-        "s272Cont": 5660,
-        "cmaACont": 340,
-        "cmaMCont": 800,
-        "sadtCont": 3560,
+        "consultReal": 20242,
+        "naoMedReal": 4362,
+        "procTerReal": 1969,
+        "s272Real": 6331,
+        "cmaAReal": 382,
+        "cmaMReal": 790,
+        "sadtReal": 4431,
+        "consultCont": 22735,
+        "naoMedCont": 3325,
+        "procTerCont": 3750,
+        "s272Cont": 7075,
+        "cmaACont": 425,
+        "cmaMCont": 1000,
+        "sadtCont": 4450,
         "consultMetaSem": 27282,
         "s272MetaSem": 8490,
         "cmaAMetaSem": 510,
@@ -2892,22 +3004,22 @@
         "cmaAMeta": 510,
         "cmaMeta": 1200,
         "sadtMeta": 5340,
-        "consultProj": 24342,
-        "cmaAProj": 467,
-        "cmaMProj": 845,
-        "sadtProj": 5262,
-        "pctConsulta": 89.2,
-        "pctNaoMed": 88.9,
-        "pctCmaA": 91.5,
-        "pctCmaM": 70.4,
-        "pctSadt": 98.5,
+        "consultProj": 24290,
+        "cmaAProj": 458,
+        "cmaMProj": 948,
+        "sadtProj": 5317,
+        "pctConsulta": 89,
+        "pctNaoMed": 89.5,
+        "pctCmaA": 89.9,
+        "pctCmaM": 79,
+        "pctSadt": 99.6,
         "riscos": [
           "Consultas 89%",
           "NMed 89%",
-          "CMA 91%",
-          "cma 70%"
+          "CMA 90%",
+          "cma 79%"
         ],
-        "status": "critico",
+        "status": "risco",
         "mutirao": false
       }
     },
@@ -2915,32 +3027,32 @@
       "label": "FRANCA",
       "qtde": {
         "s271": {
-          "cont": 26440,
-          "real": 24474
+          "cont": 34338,
+          "real": 30357
         },
         "s272": {
-          "cont": 12000,
-          "real": 11319
+          "cont": 15570,
+          "real": 15240
         },
         "naoMed": {
-          "cont": 6800,
-          "real": 8017
+          "cont": 9025,
+          "real": 11146
         },
         "procTer": {
-          "cont": 5200,
-          "real": 3302
+          "cont": 6545,
+          "real": 4094
         },
         "cmaA": {
-          "cont": 1512,
-          "real": 1604
+          "cont": 2072,
+          "real": 2133
         },
         "cmaM": {
-          "cont": 1008,
-          "real": 1134
+          "cont": 1328,
+          "real": 1406
         },
         "sadtExt": {
-          "cont": 4848,
-          "real": 4354
+          "cont": 7148,
+          "real": 6272
         }
       },
       "s272mensal": {
@@ -2960,45 +3072,101 @@
           "c": 3000,
           "r": 2575
         },
-        "cont": 12000,
-        "real": 11319
+        "mai": {
+          "c": 3570,
+          "r": 3921
+        },
+        "cont": 15570,
+        "real": 15240
+      },
+      "s271mensal": {
+        "jan": {
+          "c": 6610,
+          "r": 6183
+        },
+        "fev": {
+          "c": 6610,
+          "r": 5580
+        },
+        "mar": {
+          "c": 6610,
+          "r": 6828
+        },
+        "abr": {
+          "c": 6610,
+          "r": 5883
+        },
+        "mai": {
+          "c": 7898,
+          "r": 5883
+        },
+        "cont": 34338,
+        "real": 30357
+      },
+      "sadtMensal": {
+        "jan": {
+          "c": 1212,
+          "r": 1042
+        },
+        "fev": {
+          "c": 1212,
+          "r": 976
+        },
+        "mar": {
+          "c": 1212,
+          "r": 1223
+        },
+        "abr": {
+          "c": 1212,
+          "r": 1113
+        },
+        "mai": {
+          "c": 2300,
+          "r": 1918
+        },
+        "cont": 7148,
+        "real": 6272
       },
       "fin": {
-        "receita": 7653803.19,
-        "pessoal": 2509336.17,
-        "terceiros": 3989897.12,
-        "assistenciais": 3596829.06,
-        "administrativos": 393068.06,
-        "materiais": 755812.05,
-        "utilidades": 113640.2,
-        "ressarcimento": 239628.28,
-        "despesa": 7865174.45,
-        "saldoAbr": 600034.94,
+        "receita": 9923733.6,
+        "pessoal": 3125013.03,
+        "terceiros": 4920743.91,
+        "assistenciais": 4404233.19,
+        "administrativos": 516510.72,
+        "materiais": 962173.09,
+        "utilidades": 138714.3,
+        "ressarcimento": 299059.74,
+        "despesa": 9787244.53,
+        "saldoAbr": 947895.27,
         "saldoJan": 811406.2,
         "mensal": {
           "receita": [
             1917088.28,
             1907662.91,
             1917495.75,
-            1911556.25
+            1911556.25,
+            2269930.41
           ],
           "despesa": [
             2080358.51,
             1863865.56,
             1902327.74,
-            2018622.64
+            2018622.64,
+            1922070.08
           ],
           "pessoal": [
             613557.38,
             629237.46,
             617072.35,
-            649468.98
+            649468.98,
+            615676.86
           ],
           "resultado": [
             -163270.22999999998,
             43797.34999999986,
             15168.01000000001,
-            -107066.3899999999
+            -107066.3899999999,
+            347860.3300000001
           ]
         }
       },
@@ -4322,22 +4490,22 @@
       },
       "analise": {
         "label": "Franca",
-        "consultReal": 24474,
-        "naoMedReal": 8017,
-        "procTerReal": 3302,
-        "s272Real": 11319,
-        "cmaAReal": 1604,
-        "cmaMReal": 1134,
-        "sadtReal": 4354,
-        "consultCont": 26440,
-        "naoMedCont": 6800,
-        "procTerCont": 5200,
-        "s272Cont": 12000,
-        "cmaACont": 1512,
-        "cmaMCont": 1008,
-        "sadtCont": 4848,
+        "consultReal": 30357,
+        "naoMedReal": 11146,
+        "procTerReal": 4094,
+        "s272Real": 15240,
+        "cmaAReal": 2133,
+        "cmaMReal": 1406,
+        "sadtReal": 6272,
+        "consultCont": 34338,
+        "naoMedCont": 9025,
+        "procTerCont": 6545,
+        "s272Cont": 15570,
+        "cmaACont": 2072,
+        "cmaMCont": 1328,
+        "sadtCont": 7148,
         "consultMetaSem": 42236,
-        "s272MetaSem": 18000,
+        "s272MetaSem": 18570,
         "cmaAMetaSem": 2632,
         "cmaMMetaSem": 1648,
         "sadtMetaSem": 9448,
@@ -4348,19 +4516,20 @@
         "cmaAMeta": 2632,
         "cmaMeta": 1648,
         "sadtMeta": 9448,
-        "consultProj": 36711,
-        "cmaAProj": 2406,
-        "cmaMProj": 1701,
-        "sadtProj": 6531,
-        "pctConsulta": 92.6,
-        "pctNaoMed": 94.3,
-        "pctCmaA": 106.1,
-        "pctCmaM": 112.5,
-        "pctSadt": 89.8,
+        "consultProj": 36428,
+        "cmaAProj": 2560,
+        "cmaMProj": 1687,
+        "sadtProj": 7526,
+        "pctConsulta": 88.4,
+        "pctNaoMed": 97.9,
+        "pctCmaA": 102.9,
+        "pctCmaM": 105.9,
+        "pctSadt": 87.7,
         "riscos": [
-          "SADT 90%"
+          "Consultas 88%",
+          "SADT 88%"
         ],
-        "status": "atencao",
+        "status": "risco",
         "mutirao": true
       }
     },
@@ -4368,32 +4537,32 @@
       "label": "RIBEIRAO PRETO",
       "qtde": {
         "s271": {
-          "cont": 29760,
-          "real": 25886
+          "cont": 37200,
+          "real": 33323
         },
         "s272": {
-          "cont": 13680,
-          "real": 14466
+          "cont": 17100,
+          "real": 18272
         },
         "naoMed": {
-          "cont": 11620,
-          "real": 12296
+          "cont": 14520,
+          "real": 15865
         },
         "procTer": {
-          "cont": 2000,
-          "real": 2170
+          "cont": 2500,
+          "real": 2407
         },
         "cmaA": {
-          "cont": 1872,
-          "real": 1943
+          "cont": 2340,
+          "real": 2435
         },
         "cmaM": {
-          "cont": 1120,
-          "real": 846
+          "cont": 1400,
+          "real": 1418
         },
         "sadtExt": {
-          "cont": 10308,
-          "real": 9319
+          "cont": 12885,
+          "real": 12044
         }
       },
       "s272mensal": {
@@ -4413,45 +4582,101 @@
           "c": 3420,
           "r": 3297
         },
-        "cont": 13680,
-        "real": 14466
+        "mai": {
+          "c": 3420,
+          "r": 3806
+        },
+        "cont": 17100,
+        "real": 18272
+      },
+      "s271mensal": {
+        "jan": {
+          "c": 7440,
+          "r": 6368
+        },
+        "fev": {
+          "c": 7440,
+          "r": 5855
+        },
+        "mar": {
+          "c": 7440,
+          "r": 7113
+        },
+        "abr": {
+          "c": 7440,
+          "r": 6550
+        },
+        "mai": {
+          "c": 7440,
+          "r": 7437
+        },
+        "cont": 37200,
+        "real": 33323
+      },
+      "sadtMensal": {
+        "jan": {
+          "c": 2577,
+          "r": 2293
+        },
+        "fev": {
+          "c": 2577,
+          "r": 2128
+        },
+        "mar": {
+          "c": 2577,
+          "r": 2804
+        },
+        "abr": {
+          "c": 2577,
+          "r": 2094
+        },
+        "mai": {
+          "c": 2577,
+          "r": 2725
+        },
+        "cont": 12885,
+        "real": 12044
       },
       "fin": {
-        "receita": 11535993.36,
-        "pessoal": 2782123.45,
-        "terceiros": 5281699.34,
-        "assistenciais": 4223424.16,
-        "administrativos": 1058275.18,
-        "materiais": 724965.92,
-        "utilidades": 629014.74,
-        "ressarcimento": 306130.79,
-        "despesa": 9992021.81,
-        "saldoAbr": 4233705.53,
+        "receita": 14248275.53,
+        "pessoal": 3443971.16,
+        "terceiros": 6472035.92,
+        "assistenciais": 5249914.44,
+        "administrativos": 1222121.48,
+        "materiais": 1011741.3,
+        "utilidades": 763503.67,
+        "ressarcimento": 383128.86,
+        "despesa": 12343700.3,
+        "saldoAbr": 4594309.21,
         "saldoJan": 2689733.98,
         "mensal": {
           "receita": [
             2694695.33,
             2690765.32,
             2704159.88,
-            3446372.83
+            3446372.83,
+            2712282.17
           ],
           "despesa": [
             2462765.86,
             2491069.64,
             2412943.77,
-            2625242.54
+            2625242.54,
+            2351678.49
           ],
           "pessoal": [
             710610.64,
             669322.05,
             736613.73,
-            665577.03
+            665577.03,
+            661847.71
           ],
           "resultado": [
             231929.4700000002,
             199695.6799999997,
             291216.10999999987,
-            821130.29
+            821130.29,
+            360603.6799999997
           ]
         }
       },
@@ -5775,21 +6000,21 @@
       },
       "analise": {
         "label": "Ribeirão Preto",
-        "consultReal": 25886,
-        "naoMedReal": 12296,
-        "procTerReal": 2170,
-        "s272Real": 14466,
-        "cmaAReal": 1943,
-        "cmaMReal": 846,
-        "sadtReal": 9319,
-        "consultCont": 29760,
-        "naoMedCont": 11620,
-        "procTerCont": 2000,
-        "s272Cont": 13680,
-        "cmaACont": 1872,
-        "cmaMCont": 1120,
-        "sadtCont": 10308,
-        "consultMetaSem": 44560,
+        "consultReal": 33323,
+        "naoMedReal": 15865,
+        "procTerReal": 2407,
+        "s272Real": 18272,
+        "cmaAReal": 2435,
+        "cmaMReal": 1418,
+        "sadtReal": 12044,
+        "consultCont": 37200,
+        "naoMedCont": 14520,
+        "procTerCont": 2500,
+        "s272Cont": 17100,
+        "cmaACont": 2340,
+        "cmaMCont": 1400,
+        "sadtCont": 12885,
+        "consultMetaSem": 44600,
         "s272MetaSem": 20520,
         "cmaAMetaSem": 2808,
         "cmaMMetaSem": 1680,
@@ -5797,24 +6022,23 @@
         "cmaAMetaContratual": 2808,
         "mutiraoMetaSem": 0,
         "mutiraoRealSem": 0,
-        "consultMeta": 44560,
+        "consultMeta": 44600,
         "cmaAMeta": 2808,
         "cmaMeta": 1680,
         "sadtMeta": 15462,
-        "consultProj": 38829,
-        "cmaAProj": 2915,
-        "cmaMProj": 1269,
-        "sadtProj": 13979,
-        "pctConsulta": 87,
-        "pctNaoMed": 105.7,
-        "pctCmaA": 103.8,
-        "pctCmaM": 75.5,
-        "pctSadt": 90.4,
+        "consultProj": 39988,
+        "cmaAProj": 2922,
+        "cmaMProj": 1702,
+        "sadtProj": 14453,
+        "pctConsulta": 89.6,
+        "pctNaoMed": 106.9,
+        "pctCmaA": 104.1,
+        "pctCmaM": 101.3,
+        "pctSadt": 93.5,
         "riscos": [
-          "Consultas 87%",
-          "cma 76%"
+          "Consultas 90%"
         ],
-        "status": "risco",
+        "status": "atencao",
         "mutirao": true
       }
     },
@@ -5822,32 +6046,32 @@
       "label": "SAO CARLOS",
       "qtde": {
         "s271": {
-          "cont": 12000,
-          "real": 12189
+          "cont": 15000,
+          "real": 15382
         },
         "s272": {
-          "cont": 3520,
-          "real": 3673
+          "cont": 4400,
+          "real": 4512
         },
         "naoMed": {
-          "cont": 3200,
-          "real": 3461
+          "cont": 4000,
+          "real": 4265
         },
         "procTer": {
-          "cont": 320,
-          "real": 212
+          "cont": 400,
+          "real": 247
         },
         "cmaA": {
-          "cont": 260,
-          "real": 292
+          "cont": 325,
+          "real": 374
         },
         "cmaM": {
-          "cont": 600,
-          "real": 366
+          "cont": 750,
+          "real": 578
         },
         "sadtExt": {
-          "cont": 5484,
-          "real": 5125
+          "cont": 6855,
+          "real": 6583
         }
       },
       "s272mensal": {
@@ -5867,45 +6091,101 @@
           "c": 880,
           "r": 870
         },
-        "cont": 3520,
-        "real": 3673
+        "mai": {
+          "c": 880,
+          "r": 839
+        },
+        "cont": 4400,
+        "real": 4512
+      },
+      "s271mensal": {
+        "jan": {
+          "c": 3000,
+          "r": 2756
+        },
+        "fev": {
+          "c": 3000,
+          "r": 2678
+        },
+        "mar": {
+          "c": 3000,
+          "r": 3719
+        },
+        "abr": {
+          "c": 3000,
+          "r": 3036
+        },
+        "mai": {
+          "c": 3000,
+          "r": 3193
+        },
+        "cont": 15000,
+        "real": 15382
+      },
+      "sadtMensal": {
+        "jan": {
+          "c": 1371,
+          "r": 1393
+        },
+        "fev": {
+          "c": 1371,
+          "r": 1262
+        },
+        "mar": {
+          "c": 1371,
+          "r": 1228
+        },
+        "abr": {
+          "c": 1371,
+          "r": 1242
+        },
+        "mai": {
+          "c": 1371,
+          "r": 1458
+        },
+        "cont": 6855,
+        "real": 6583
       },
       "fin": {
-        "receita": 4248921.11,
-        "pessoal": 1450474.52,
-        "terceiros": 2552354.45,
-        "assistenciais": 1991929.12,
-        "administrativos": 560425.33,
-        "materiais": 217438.42,
-        "utilidades": 99980.57,
-        "ressarcimento": 92327.82,
-        "despesa": 4455864.36,
-        "saldoAbr": 794317.36,
+        "receita": 5309619.02,
+        "pessoal": 1803824.87,
+        "terceiros": 3176587.26,
+        "assistenciais": 2508438.29,
+        "administrativos": 668148.97,
+        "materiais": 277833.27,
+        "utilidades": 124160.44,
+        "ressarcimento": 155216.34,
+        "despesa": 5559157.11,
+        "saldoAbr": 751722.52,
         "saldoJan": 1001260.61,
         "mensal": {
           "receita": [
             1063473.99,
             1059578.66,
             1062689.37,
-            1063179.09
+            1063179.09,
+            1060697.91
           ],
           "despesa": [
             1141916.11,
             1080168.65,
             1066883.18,
-            1166896.42
+            1166896.42,
+            1103292.75
           ],
           "pessoal": [
             366341.48,
             380055.02,
             347334.55,
-            356743.47
+            356743.47,
+            353350.35
           ],
           "resultado": [
             -78442.12000000011,
             -20589.98999999999,
             -4193.809999999823,
-            -103717.32999999984
+            -103717.32999999984,
+            -42594.840000000084
           ]
         }
       },
@@ -7229,20 +7509,20 @@
       },
       "analise": {
         "label": "São Carlos",
-        "consultReal": 12189,
-        "naoMedReal": 3461,
-        "procTerReal": 212,
-        "s272Real": 3673,
-        "cmaAReal": 292,
-        "cmaMReal": 366,
-        "sadtReal": 5125,
-        "consultCont": 12000,
-        "naoMedCont": 3200,
-        "procTerCont": 320,
-        "s272Cont": 3520,
-        "cmaACont": 260,
-        "cmaMCont": 600,
-        "sadtCont": 5484,
+        "consultReal": 15382,
+        "naoMedReal": 4265,
+        "procTerReal": 247,
+        "s272Real": 4512,
+        "cmaAReal": 374,
+        "cmaMReal": 578,
+        "sadtReal": 6583,
+        "consultCont": 15000,
+        "naoMedCont": 4000,
+        "procTerCont": 400,
+        "s272Cont": 4400,
+        "cmaACont": 325,
+        "cmaMCont": 750,
+        "sadtCont": 6855,
         "consultMetaSem": 18000,
         "s272MetaSem": 5280,
         "cmaAMetaSem": 390,
@@ -7255,19 +7535,19 @@
         "cmaAMeta": 390,
         "cmaMeta": 900,
         "sadtMeta": 8226,
-        "consultProj": 18284,
-        "cmaAProj": 438,
-        "cmaMProj": 549,
-        "sadtProj": 7688,
-        "pctConsulta": 101.6,
-        "pctNaoMed": 104.3,
-        "pctCmaA": 112.3,
-        "pctCmaM": 61,
-        "pctSadt": 93.5,
+        "consultProj": 18458,
+        "cmaAProj": 449,
+        "cmaMProj": 694,
+        "sadtProj": 7900,
+        "pctConsulta": 102.5,
+        "pctNaoMed": 102.5,
+        "pctCmaA": 115.1,
+        "pctCmaM": 77.1,
+        "pctSadt": 96,
         "riscos": [
-          "cma 61%"
+          "cma 77%"
         ],
-        "status": "critico",
+        "status": "atencao",
         "mutirao": false
       }
     },
@@ -7275,32 +7555,32 @@
       "label": "VALE DO JURUMIRIM",
       "qtde": {
         "s271": {
-          "cont": 25776,
-          "real": 18332
+          "cont": 32220,
+          "real": 24741
         },
         "s272": {
-          "cont": 13360,
-          "real": 14738
+          "cont": 16700,
+          "real": 18797
         },
         "naoMed": {
-          "cont": 11680,
-          "real": 13108
+          "cont": 14600,
+          "real": 16805
         },
         "procTer": {
-          "cont": 1680,
-          "real": 1630
+          "cont": 2100,
+          "real": 1992
         },
         "cmaA": {
-          "cont": 1260,
-          "real": 1108
+          "cont": 1575,
+          "real": 1475
         },
         "cmaM": {
-          "cont": 1328,
-          "real": 1534
+          "cont": 1660,
+          "real": 2025
         },
         "sadtExt": {
-          "cont": 7468,
-          "real": 6286
+          "cont": 9348,
+          "real": 7520
         }
       },
       "s272mensal": {
@@ -7320,45 +7600,101 @@
           "c": 3340,
           "r": 4278
         },
-        "cont": 13360,
-        "real": 14738
+        "mai": {
+          "c": 3340,
+          "r": 4059
+        },
+        "cont": 16700,
+        "real": 18797
+      },
+      "s271mensal": {
+        "jan": {
+          "c": 6444,
+          "r": 3946
+        },
+        "fev": {
+          "c": 6444,
+          "r": 3750
+        },
+        "mar": {
+          "c": 6444,
+          "r": 5624
+        },
+        "abr": {
+          "c": 6444,
+          "r": 5012
+        },
+        "mai": {
+          "c": 6444,
+          "r": 6409
+        },
+        "cont": 32220,
+        "real": 24741
+      },
+      "sadtMensal": {
+        "jan": {
+          "c": 1867,
+          "r": 1550
+        },
+        "fev": {
+          "c": 1867,
+          "r": 1556
+        },
+        "mar": {
+          "c": 1867,
+          "r": 1701
+        },
+        "abr": {
+          "c": 1867,
+          "r": 1479
+        },
+        "mai": {
+          "c": 1880,
+          "r": 1234
+        },
+        "cont": 9348,
+        "real": 7520
       },
       "fin": {
-        "receita": 7622521.97,
-        "pessoal": 2065902.16,
-        "terceiros": 3630875.39,
-        "assistenciais": 2893002.7,
-        "administrativos": 737872.69,
-        "materiais": 466470.75,
-        "utilidades": 164641.98,
-        "ressarcimento": 214576.11,
-        "despesa": 6549789.49,
-        "saldoAbr": 1533316.29,
+        "receita": 10324117.05,
+        "pessoal": 2561651.67,
+        "terceiros": 4569071.95,
+        "assistenciais": 3673607.96,
+        "administrativos": 895463.99,
+        "materiais": 561782.54,
+        "utilidades": 213902.95,
+        "ressarcimento": 268490.1,
+        "despesa": 8183227.71,
+        "saldoAbr": 2601473.15,
         "saldoJan": 460583.81,
         "mensal": {
           "receita": [
             1901233.08,
             1898861.82,
             1908764.48,
-            1913662.59
+            1913662.59,
+            2701595.08
           ],
           "despesa": [
             1713028.34,
             1530311.73,
             1534689.49,
-            1771759.93
+            1771759.93,
+            1633438.22
           ],
           "pessoal": [
             544889.65,
             493447.28,
             515241.31,
-            512323.92
+            512323.92,
+            495749.51
           ],
           "resultado": [
             188204.74,
             368550.0900000001,
             374074.99,
-            141902.66000000015
+            141902.66000000015,
+            1068156.86
           ]
         }
       },
@@ -8682,47 +9018,47 @@
       },
       "analise": {
         "label": "Jurumirim",
-        "consultReal": 18332,
-        "naoMedReal": 13108,
-        "procTerReal": 1630,
-        "s272Real": 14738,
-        "cmaAReal": 1108,
-        "cmaMReal": 1534,
-        "sadtReal": 6286,
-        "consultCont": 25776,
-        "naoMedCont": 11680,
-        "procTerCont": 1680,
-        "s272Cont": 13360,
-        "cmaACont": 1260,
-        "cmaMCont": 1328,
-        "sadtCont": 7468,
+        "consultReal": 24741,
+        "naoMedReal": 16805,
+        "procTerReal": 1992,
+        "s272Real": 18797,
+        "cmaAReal": 1475,
+        "cmaMReal": 2025,
+        "sadtReal": 7520,
+        "consultCont": 32220,
+        "naoMedCont": 14600,
+        "procTerCont": 2100,
+        "s272Cont": 16700,
+        "cmaACont": 1575,
+        "cmaMCont": 1660,
+        "sadtCont": 9348,
         "consultMetaSem": 38664,
         "s272MetaSem": 20040,
         "cmaAMetaSem": 1890,
         "cmaMMetaSem": 1992,
-        "sadtMetaSem": 11202,
+        "sadtMetaSem": 11228,
         "cmaAMetaContratual": 1890,
         "mutiraoMetaSem": 0,
         "mutiraoRealSem": 0,
         "consultMeta": 38664,
         "cmaAMeta": 1890,
         "cmaMeta": 1992,
-        "sadtMeta": 11202,
-        "consultProj": 27498,
-        "cmaAProj": 1662,
-        "cmaMProj": 2301,
-        "sadtProj": 9429,
-        "pctConsulta": 71.1,
-        "pctNaoMed": 110.3,
-        "pctCmaA": 87.9,
-        "pctCmaM": 115.5,
-        "pctSadt": 84.2,
+        "sadtMeta": 11228,
+        "consultProj": 29689,
+        "cmaAProj": 1770,
+        "cmaMProj": 2430,
+        "sadtProj": 9024,
+        "pctConsulta": 76.8,
+        "pctNaoMed": 112.6,
+        "pctCmaA": 93.7,
+        "pctCmaM": 122,
+        "pctSadt": 80.4,
         "riscos": [
-          "Consultas 71%",
-          "CMA 88%",
-          "SADT 84%"
+          "Consultas 77%",
+          "CMA 94%",
+          "SADT 80%"
         ],
-        "status": "critico",
+        "status": "risco",
         "mutirao": true
       }
     }
@@ -8730,84 +9066,84 @@
   "totais": {
     "qtde": {
       "s271": {
-        "cont": 136988,
-        "real": 126624
+        "cont": 172523,
+        "real": 161740
       },
       "s272": {
-        "cont": 66364,
-        "real": 69615
+        "cont": 83525,
+        "real": 88524
       },
       "naoMed": {
-        "cont": 47704,
-        "real": 54504
+        "cont": 60150,
+        "real": 70249
       },
       "procTer": {
-        "cont": 18600,
-        "real": 15111
+        "cont": 23295,
+        "real": 18275
       },
       "cmaA": {
-        "cont": 8044,
-        "real": 8085
+        "cont": 10237,
+        "real": 10310
       },
       "cmaM": {
-        "cont": 7256,
-        "real": 7405
+        "cont": 9138,
+        "real": 9965
       },
       "sadtExt": {
-        "cont": 44764,
-        "real": 40651
+        "cont": 57056,
+        "real": 52202
       }
     },
     "fin": {
-      "receita": 50361698.53,
-      "pessoal": 14954393.2,
-      "terceiros": 23800397.349999998,
-      "assistenciais": 18921316.29,
-      "administrativos": 4879081.0600000005,
-      "materiais": 3708905.3899999997,
-      "utilidades": 1558031.8099999998,
-      "ressarcimento": 1386407.4700000002,
-      "despesa": 46341764.38,
-      "saldoAbr": 9477481.620000001,
+      "receita": 64022426.19,
+      "pessoal": 18527859.29,
+      "terceiros": 30065868.09,
+      "assistenciais": 24176409.67,
+      "administrativos": 5889458.420000001,
+      "materiais": 4795727.750000001,
+      "utilidades": 1926362.66,
+      "ressarcimento": 1772434.23,
+      "despesa": 58092317.25000001,
+      "saldoAbr": 11387656.41,
       "saldoJan": 5457547.47,
       "mensal": "0[object Object][object Object][object Object][object Object][object Object][object Object]"
     },
     "analise": {
-      "consultReal": 126624,
-      "naoMedReal": 54504,
-      "procTerReal": 15111,
-      "s272Real": 69615,
-      "cmaAReal": 8085,
-      "cmaMReal": 7405,
-      "sadtReal": 40651,
-      "consultCont": 136988,
-      "naoMedCont": 47704,
-      "procTerCont": 18600,
-      "s272Cont": 66364,
-      "cmaACont": 8044,
-      "cmaMCont": 7256,
-      "sadtCont": 44764,
-      "consultMetaSem": 207978,
-      "s272MetaSem": 99546,
+      "consultReal": 161740,
+      "naoMedReal": 70249,
+      "procTerReal": 18275,
+      "s272Real": 88524,
+      "cmaAReal": 10310,
+      "cmaMReal": 9965,
+      "sadtReal": 52202,
+      "consultCont": 172523,
+      "naoMedCont": 60150,
+      "procTerCont": 23295,
+      "s272Cont": 83525,
+      "cmaACont": 10237,
+      "cmaMCont": 9138,
+      "sadtCont": 57056,
+      "consultMetaSem": 208018,
+      "s272MetaSem": 100116,
       "cmaAMetaSem": 12430,
       "cmaMMetaSem": 11020,
-      "sadtMetaSem": 69322,
+      "sadtMetaSem": 69348,
       "cmaAMetaContratual": 12430,
       "mutiraoMetaSem": 0,
       "mutiraoRealSem": 0,
-      "consultMeta": 207978,
+      "consultMeta": 208018,
       "cmaAMeta": 12430,
       "cmaMeta": 11020,
-      "sadtMeta": 69322,
-      "consultProj": 189937,
-      "cmaAProj": 12129,
-      "cmaMProj": 11108,
-      "sadtProj": 60978,
-      "pctConsulta": 560.4000000000001,
-      "pctNaoMed": 615.9,
-      "pctCmaA": 602.6,
-      "pctCmaM": 558.3,
-      "pctSadt": 548.5
+      "sadtMeta": 69348,
+      "consultProj": 194087,
+      "cmaAProj": 12372,
+      "cmaMProj": 11959,
+      "sadtProj": 62642,
+      "pctConsulta": 567.8,
+      "pctNaoMed": 621.3000000000001,
+      "pctCmaA": 606.0000000000001,
+      "pctCmaM": 610.2,
+      "pctSadt": 551
     }
   },
   "especialidades": {

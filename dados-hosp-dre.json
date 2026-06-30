@@ -1,0 +1,1062 @@
+{
+  "gerado": "2026-06-02T13:47:34.406Z",
+  "meses": {
+    "jan": {
+      "nome": "Janeiro",
+      "dre": {
+        "receitaTotal": 22090925.44,
+        "receitaSUS": 10496711.2,
+        "receitaConvenio": 2553542.53,
+        "receitaColaboracao": 448189.04,
+        "subvencoes": 2336582.67,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19229165.31,
+        "folhaPagamento": -7548776.47,
+        "honorarios": -5340261.79,
+        "materiaisMed": -4609916.82,
+        "despesasOp": -2422718.01,
+        "folhaAdm": -1313888.9,
+        "resultadoFinal": 288267.43
+      },
+      "desemp": {
+        "receitaOpLiq": 19754342.77,
+        "custoAssistencial": -19564130.84,
+        "despesasOp": -2465678.23,
+        "subvGov": 1282305.38,
+        "ebitdaAjust": -993160.92,
+        "ebitda": -33784.96,
+        "subvInvest": 322052.39,
+        "resultadoLiq": 288267.43
+      }
+    },
+    "fev": {
+      "nome": "Fevereiro",
+      "dre": {
+        "receitaTotal": 22057448.96,
+        "receitaSUS": 9672645.12,
+        "receitaConvenio": 2602310.6,
+        "receitaColaboracao": 437733.87,
+        "subvencoes": 3228793.86,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19805346.73,
+        "folhaPagamento": -8235723.72,
+        "honorarios": -5064543.35,
+        "materiaisMed": -4516713.6,
+        "despesasOp": -2556058.34,
+        "folhaAdm": -1428735.01,
+        "resultadoFinal": -414403.53
+      },
+      "desemp": {
+        "receitaOpLiq": 18828655.1,
+        "custoAssistencial": -20126186.73,
+        "despesasOp": -2612314.64,
+        "subvGov": 2218139.17,
+        "ebitdaAjust": -1691707.1,
+        "ebitda": -735982.97,
+        "subvInvest": 321579.44,
+        "resultadoLiq": -414403.53
+      }
+    },
+    "mar": {
+      "nome": "Março",
+      "dre": {
+        "receitaTotal": 22447702.02,
+        "receitaSUS": 8990642.68,
+        "receitaConvenio": 3217412.78,
+        "receitaColaboracao": 469443.8,
+        "subvencoes": 3635534.8,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -20567598.31,
+        "folhaPagamento": -8244092.05,
+        "honorarios": -5552347.18,
+        "materiaisMed": -4826374.45,
+        "despesasOp": -3045049.76,
+        "folhaAdm": -1780310.06,
+        "resultadoFinal": -1108298
+      },
+      "desemp": {
+        "receitaOpLiq": 18812167.22,
+        "custoAssistencial": -20897939.94,
+        "despesasOp": -3133568.41,
+        "subvGov": 2478214.06,
+        "ebitdaAjust": -2741127.07,
+        "ebitda": -1430760.96,
+        "subvInvest": 322462.96,
+        "resultadoLiq": -1108298
+      }
+    },
+    "abr": {
+      "nome": "Abril",
+      "dre": {
+        "receitaTotal": 23060345.88,
+        "receitaSUS": 10987727.44,
+        "receitaConvenio": 2866098.62,
+        "receitaColaboracao": 352051.68,
+        "subvencoes": 2707657.94,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -20753933.53,
+        "folhaPagamento": -8310013.17,
+        "honorarios": -5738704.33,
+        "materiaisMed": -4818619.04,
+        "despesasOp": -2813466.64,
+        "folhaAdm": -1553738.03,
+        "resultadoFinal": -545620.15
+      },
+      "desemp": {
+        "receitaOpLiq": 20352687.94,
+        "custoAssistencial": -21086060.18,
+        "despesasOp": -2861227.33,
+        "subvGov": 1561686.24,
+        "ebitdaAjust": -2032913.33,
+        "ebitda": -867436.36,
+        "subvInvest": 321816.21,
+        "resultadoLiq": -545620.15
+      }
+    }
+  },
+  "historico": {
+    "receita": {
+      "y2015": 139710263.10000002,
+      "y2016": 181153747.32,
+      "y2017": 243842350.32
+    },
+    "resultado": {
+      "y2015": 6047061.48,
+      "y2016": -8217452.976,
+      "y2017": 10986768.36
+    }
+  },
+  "timeline": [
+    {
+      "ano": 2020,
+      "mes": 1,
+      "nome": "Janeiro",
+      "key": "2020-01",
+      "dre": {
+        "receitaTotal": 12304205.18,
+        "receitaSUS": 6614808.43,
+        "receitaConvenio": 1174104.27,
+        "receitaColaboracao": 528514.7,
+        "subvencoes": 3739648.86,
+        "complementacaoEstadual": 0,
+        "custoServicos": -9684175.14,
+        "folhaPagamento": -3758935.99,
+        "honorarios": -2849863.78,
+        "materiaisMed": -2232614.81,
+        "despesasOp": -1177348.13,
+        "folhaAdm": -612673.99,
+        "resultadoFinal": 1155319.81
+      },
+      "desemp": null
+    },
+    {
+      "ano": 2020,
+      "mes": 2,
+      "nome": "Fevereiro",
+      "key": "2020-02",
+      "dre": {
+        "receitaTotal": 10980838.67,
+        "receitaSUS": 6844370.43,
+        "receitaConvenio": 912539.14,
+        "receitaColaboracao": 337617.85,
+        "subvencoes": 2804052.1,
+        "complementacaoEstadual": 0,
+        "custoServicos": -9694858.76,
+        "folhaPagamento": -3781032.21,
+        "honorarios": -2786282.26,
+        "materiaisMed": -2163133.85,
+        "despesasOp": -1143375.34,
+        "folhaAdm": -708860.95,
+        "resultadoFinal": -147476.23
+      },
+      "desemp": null
+    },
+    {
+      "ano": 2023,
+      "mes": 1,
+      "nome": "Janeiro",
+      "key": "2023-01",
+      "dre": {
+        "receitaTotal": 13148620.18,
+        "receitaSUS": 7030980.39,
+        "receitaConvenio": 1594607.44,
+        "receitaColaboracao": 207563.47,
+        "subvencoes": 3948664.63,
+        "complementacaoEstadual": 0,
+        "custoServicos": -12782013.68,
+        "folhaPagamento": -5101921.05,
+        "honorarios": -3698949.39,
+        "materiaisMed": -2728126.66,
+        "despesasOp": -1583126.62,
+        "folhaAdm": -838585,
+        "resultadoFinal": -1374011.65
+      },
+      "desemp": {
+        "receitaOpLiq": 9199955.55,
+        "custoAssistencial": -12989677.51,
+        "despesasOp": -1595815.93,
+        "subvGov": 3264181.45,
+        "ebitdaAjust": -2121356.44,
+        "ebitda": -1573178.39,
+        "subvInvest": 199166.74,
+        "resultadoLiq": -1374011.65
+      }
+    },
+    {
+      "ano": 2023,
+      "mes": 3,
+      "nome": "Março",
+      "key": "2023-03",
+      "dre": {
+        "receitaTotal": 15420885.48,
+        "receitaSUS": 8173973.02,
+        "receitaConvenio": 1925311.28,
+        "receitaColaboracao": 605852.13,
+        "subvencoes": 4319402.54,
+        "complementacaoEstadual": 0,
+        "custoServicos": -14260252.57,
+        "folhaPagamento": -5533617.99,
+        "honorarios": -3856147.1,
+        "materiaisMed": -3524129.76,
+        "despesasOp": -1682858.82,
+        "folhaAdm": -902851.12,
+        "resultadoFinal": -333076.91
+      },
+      "desemp": {
+        "receitaOpLiq": 11101482.94,
+        "custoAssistencial": -14447936.72,
+        "despesasOp": -1722067.34,
+        "subvGov": 3538578.81,
+        "ebitdaAjust": -1529942.31,
+        "ebitda": -531678.49,
+        "subvInvest": 198601.58,
+        "resultadoLiq": -333076.91
+      }
+    },
+    {
+      "ano": 2023,
+      "mes": 4,
+      "nome": "Abril",
+      "key": "2023-04",
+      "dre": {
+        "receitaTotal": 14675276.15,
+        "receitaSUS": 7830910.59,
+        "receitaConvenio": 1605754.47,
+        "receitaColaboracao": 726290.24,
+        "subvencoes": 4116542.38,
+        "complementacaoEstadual": 0,
+        "custoServicos": -14895360.14,
+        "folhaPagamento": -6775008.29,
+        "honorarios": -3695625.95,
+        "materiaisMed": -3019547.42,
+        "despesasOp": -1807359.76,
+        "folhaAdm": -1049884.38,
+        "resultadoFinal": -2174902.03
+      },
+      "desemp": {
+        "receitaOpLiq": 10558733.77,
+        "custoAssistencial": -15085428.78,
+        "despesasOp": -1843307.72,
+        "subvGov": 3461597.09,
+        "ebitdaAjust": -2908405.64,
+        "ebitda": -2372758.7,
+        "subvInvest": 197856.67,
+        "resultadoLiq": -2174902.03
+      }
+    },
+    {
+      "ano": 2023,
+      "mes": 5,
+      "nome": "Maio",
+      "key": "2023-05",
+      "dre": {
+        "receitaTotal": 16307669.01,
+        "receitaSUS": 9036375.35,
+        "receitaConvenio": 2084370.6,
+        "receitaColaboracao": 575339.38,
+        "subvencoes": 4205069,
+        "complementacaoEstadual": 0,
+        "custoServicos": -14078965.71,
+        "folhaPagamento": -5589827.71,
+        "honorarios": -3812225.99,
+        "materiaisMed": -3272744.08,
+        "despesasOp": -1818537.3,
+        "folhaAdm": -975233.68,
+        "resultadoFinal": 247327.57
+      },
+      "desemp": null
+    },
+    {
+      "ano": 2023,
+      "mes": 6,
+      "nome": "Junho",
+      "key": "2023-06",
+      "dre": {
+        "receitaTotal": 15928277.23,
+        "receitaSUS": 8851181.12,
+        "receitaConvenio": 1893241.15,
+        "receitaColaboracao": 589403.98,
+        "subvencoes": 4192934.01,
+        "complementacaoEstadual": 0,
+        "custoServicos": -14382304.22,
+        "folhaPagamento": -5735343.5,
+        "honorarios": -3757689.72,
+        "materiaisMed": -3398765.53,
+        "despesasOp": -1658974.49,
+        "folhaAdm": -858623.72,
+        "resultadoFinal": 210724.28
+      },
+      "desemp": {
+        "receitaOpLiq": 11735343.22,
+        "custoAssistencial": -14588013.83,
+        "despesasOp": -1704000.95,
+        "subvGov": 3449048.58,
+        "ebitdaAjust": -1107622.98,
+        "ebitda": 15061.87,
+        "subvInvest": 195662.41,
+        "resultadoLiq": 210724.28
+      }
+    },
+    {
+      "ano": 2024,
+      "mes": 9,
+      "nome": "Setembro",
+      "key": "2024-09",
+      "dre": {
+        "receitaTotal": 20012495.92,
+        "receitaSUS": 8416152.72,
+        "receitaConvenio": 2556879.51,
+        "receitaColaboracao": 668291.91,
+        "subvencoes": 2816178.6,
+        "complementacaoEstadual": 5183851.7,
+        "custoServicos": -16391370.84,
+        "folhaPagamento": -6352946.42,
+        "honorarios": -4779080.84,
+        "materiaisMed": -3568215.92,
+        "despesasOp": -2195044.53,
+        "folhaAdm": -1188908.05,
+        "resultadoFinal": 1336936.46
+      },
+      "desemp": {
+        "receitaOpLiq": 17196317.32,
+        "custoAssistencial": -16724644.12,
+        "despesasOp": -2352571.42,
+        "subvGov": 1993473.24,
+        "ebitdaAjust": 112575.02,
+        "ebitda": 1037505.07,
+        "subvInvest": 299431.39,
+        "resultadoLiq": 1336936.46
+      }
+    },
+    {
+      "ano": 2024,
+      "mes": 10,
+      "nome": "Outubro",
+      "key": "2024-10",
+      "dre": {
+        "receitaTotal": 21671469.21,
+        "receitaSUS": 9003506.11,
+        "receitaConvenio": 2713976.71,
+        "receitaColaboracao": 717550.83,
+        "subvencoes": 3669643.83,
+        "complementacaoEstadual": 5183851.69,
+        "custoServicos": -17045851.48,
+        "folhaPagamento": -6768617.6,
+        "honorarios": -4994163.87,
+        "materiaisMed": -3531868.5,
+        "despesasOp": -2366396.08,
+        "folhaAdm": -1209326.61,
+        "resultadoFinal": 2058809.38
+      },
+      "desemp": {
+        "receitaOpLiq": 18001825.38,
+        "custoAssistencial": -17371599.5,
+        "despesasOp": -2632846.1,
+        "subvGov": 2720189.31,
+        "ebitdaAjust": 717569.09,
+        "ebitda": 1759535.44,
+        "subvInvest": 299273.94,
+        "resultadoLiq": 2058809.38
+      }
+    },
+    {
+      "ano": 2024,
+      "mes": 11,
+      "nome": "Novembro",
+      "key": "2024-11",
+      "dre": {
+        "receitaTotal": 18880173.74,
+        "receitaSUS": 8896091.66,
+        "receitaConvenio": 2054929.08,
+        "receitaColaboracao": 596587.77,
+        "subvencoes": 1758674.22,
+        "complementacaoEstadual": 5183851.69,
+        "custoServicos": -16937617.36,
+        "folhaPagamento": -6674968.14,
+        "honorarios": -4812355.41,
+        "materiaisMed": -3635303.37,
+        "despesasOp": -2780459.19,
+        "folhaAdm": -1671215.89,
+        "resultadoFinal": -978861.41
+      },
+      "desemp": {
+        "receitaOpLiq": 17121499.52,
+        "custoAssistencial": -17260236.8,
+        "despesasOp": -3033876.18,
+        "subvGov": 924945.29,
+        "ebitdaAjust": -2247668.17,
+        "ebitda": -1278435.37,
+        "subvInvest": 299573.96,
+        "resultadoLiq": -978861.41
+      }
+    },
+    {
+      "ano": 2024,
+      "mes": 12,
+      "nome": "Dezembro",
+      "key": "2024-12",
+      "dre": {
+        "receitaTotal": 20716644.57,
+        "receitaSUS": 9486185.51,
+        "receitaConvenio": 2266493.9,
+        "receitaColaboracao": 847655.48,
+        "subvencoes": 2000982.23,
+        "complementacaoEstadual": 5739539.23,
+        "custoServicos": -17232017.52,
+        "folhaPagamento": -6695682.57,
+        "honorarios": -5085257.59,
+        "materiaisMed": -3771296.38,
+        "despesasOp": -2344441.95,
+        "folhaAdm": -1175653.7,
+        "resultadoFinal": 1245371.69
+      },
+      "desemp": {
+        "receitaOpLiq": 18715662.34,
+        "custoAssistencial": -17554164.41,
+        "despesasOp": -4212708.37,
+        "subvGov": 1029060.08,
+        "ebitdaAjust": -2022150.36,
+        "ebitda": 946974.65,
+        "subvInvest": 298397.04,
+        "resultadoLiq": 1245371.69
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 1,
+      "nome": "Janeiro",
+      "key": "2025-01",
+      "dre": {
+        "receitaTotal": 20374722.64,
+        "receitaSUS": 8945738.69,
+        "receitaConvenio": 2715908.33,
+        "receitaColaboracao": 492239.67,
+        "subvencoes": 1407109.79,
+        "complementacaoEstadual": 6503489.46,
+        "custoServicos": -18154979.21,
+        "folhaPagamento": -6742969.74,
+        "honorarios": -5092552.19,
+        "materiaisMed": -4618937.21,
+        "despesasOp": -2119233.62,
+        "folhaAdm": -1142085.65,
+        "resultadoFinal": -23037.56
+      },
+      "desemp": {
+        "receitaOpLiq": 18967612.85,
+        "custoAssistencial": -18496829.92,
+        "despesasOp": -2146398.83,
+        "subvGov": 551544.33,
+        "ebitdaAjust": -1124071.57,
+        "ebitda": -324092.46,
+        "subvInvest": 301054.9,
+        "resultadoLiq": -23037.56
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 2,
+      "nome": "Fevereiro",
+      "key": "2025-02",
+      "dre": {
+        "receitaTotal": 18849793.53,
+        "receitaSUS": 8653346.46,
+        "receitaConvenio": 2248900.49,
+        "receitaColaboracao": 462446.22,
+        "subvencoes": 1392658.21,
+        "complementacaoEstadual": 5773331.69,
+        "custoServicos": -17535507.93,
+        "folhaPagamento": -6821982.7,
+        "honorarios": -4799626.57,
+        "materiaisMed": -4060949.06,
+        "despesasOp": -2125031.93,
+        "folhaAdm": -1142109.08,
+        "resultadoFinal": -893993.06
+      },
+      "desemp": {
+        "receitaOpLiq": 17457135.32,
+        "custoAssistencial": -17865998.51,
+        "despesasOp": -2164477.59,
+        "subvGov": 583347.1,
+        "ebitdaAjust": -1989993.68,
+        "ebitda": -1193996.23,
+        "subvInvest": 300003.17,
+        "resultadoLiq": -893993.06
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 3,
+      "nome": "Março",
+      "key": "2025-03",
+      "dre": {
+        "receitaTotal": 20025435.89,
+        "receitaSUS": 9078174.3,
+        "receitaConvenio": 2515737.13,
+        "receitaColaboracao": 840782.52,
+        "subvencoes": 1453238.31,
+        "complementacaoEstadual": 5791096.52,
+        "custoServicos": -18345815.3,
+        "folhaPagamento": -7308856.36,
+        "honorarios": -5177243.07,
+        "materiaisMed": -4061922.61,
+        "despesasOp": -2282778.46,
+        "folhaAdm": -1246822.71,
+        "resultadoFinal": 683844.87
+      },
+      "desemp": {
+        "receitaOpLiq": 18572197.58,
+        "custoAssistencial": -18672020.13,
+        "despesasOp": -2359557.81,
+        "subvGov": 575136.83,
+        "ebitdaAjust": -1884243.53,
+        "ebitda": 385761.92,
+        "subvInvest": 298082.95,
+        "resultadoLiq": 683844.87
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 4,
+      "nome": "Abril",
+      "key": "2025-04",
+      "dre": {
+        "receitaTotal": 21896157.75,
+        "receitaSUS": 11579147.58,
+        "receitaConvenio": 2314013.98,
+        "receitaColaboracao": 673995.85,
+        "subvencoes": 1444104.6,
+        "complementacaoEstadual": 5537011.86,
+        "custoServicos": -18567757.16,
+        "folhaPagamento": -7061421.18,
+        "honorarios": -5237123.82,
+        "materiaisMed": -4537913.2,
+        "despesasOp": -2280716.39,
+        "folhaAdm": -1236078.91,
+        "resultadoFinal": 976839.78
+      },
+      "desemp": {
+        "receitaOpLiq": 20452053.15,
+        "custoAssistencial": -18904007.75,
+        "despesasOp": -2323450.85,
+        "subvGov": 577172.74,
+        "ebitdaAjust": -198232.71,
+        "ebitda": 676124.95,
+        "subvInvest": 300714.83,
+        "resultadoLiq": 976839.78
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 5,
+      "nome": "Maio",
+      "key": "2025-05",
+      "dre": {
+        "receitaTotal": 22380193.17,
+        "receitaSUS": 9868104.79,
+        "receitaConvenio": 2375218.31,
+        "receitaColaboracao": 834308.07,
+        "subvencoes": 1731991.86,
+        "complementacaoEstadual": 7213719.97,
+        "custoServicos": -19010617.62,
+        "folhaPagamento": -7340892.34,
+        "honorarios": -5306420.7,
+        "materiaisMed": -4479782.97,
+        "despesasOp": -2376968.57,
+        "folhaAdm": -1258119.6,
+        "resultadoFinal": 344521.34
+      },
+      "desemp": {
+        "receitaOpLiq": 20648201.31,
+        "custoAssistencial": -19335356.88,
+        "despesasOp": -2435524.85,
+        "subvGov": 894105.86,
+        "ebitdaAjust": -228574.56,
+        "ebitda": 42476.85,
+        "subvInvest": 302044.49,
+        "resultadoLiq": 344521.34
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 6,
+      "nome": "Junho",
+      "key": "2025-06",
+      "dre": {
+        "receitaTotal": 21620095.84,
+        "receitaSUS": 10084196.2,
+        "receitaConvenio": 2453108.08,
+        "receitaColaboracao": 580304.24,
+        "subvencoes": 1825306.84,
+        "complementacaoEstadual": 6290736.51,
+        "custoServicos": -18689054.89,
+        "folhaPagamento": -7346566.44,
+        "honorarios": -5196205.05,
+        "materiaisMed": -4327225.56,
+        "despesasOp": -2348229.52,
+        "folhaAdm": -1249699.75,
+        "resultadoFinal": 883073.59
+      },
+      "desemp": {
+        "receitaOpLiq": 19794789,
+        "custoAssistencial": -19019008.55,
+        "despesasOp": -2403810.5,
+        "subvGov": 891335.05,
+        "ebitdaAjust": -736695,
+        "ebitda": 581137.01,
+        "subvInvest": 301936.58,
+        "resultadoLiq": 883073.59
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 7,
+      "nome": "Julho",
+      "key": "2025-07",
+      "dre": {
+        "receitaTotal": 22083599.21,
+        "receitaSUS": 11296193.38,
+        "receitaConvenio": 2759693.76,
+        "receitaColaboracao": 489263.43,
+        "subvencoes": 1516650.71,
+        "complementacaoEstadual": 5662758.57,
+        "custoServicos": -19370883.65,
+        "folhaPagamento": -7331240.57,
+        "honorarios": -5412892.48,
+        "materiaisMed": -4699334.14,
+        "despesasOp": -2183029.86,
+        "folhaAdm": -1163479.89,
+        "resultadoFinal": 1541820.22
+      },
+      "desemp": {
+        "receitaOpLiq": 20566948.5,
+        "custoAssistencial": -19689460.65,
+        "despesasOp": -2238274.58,
+        "subvGov": 662039.57,
+        "ebitdaAjust": -698747.16,
+        "ebitda": 1242489.36,
+        "subvInvest": 299330.86,
+        "resultadoLiq": 1541820.22
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 8,
+      "nome": "Agosto",
+      "key": "2025-08",
+      "dre": {
+        "receitaTotal": 21660847.12,
+        "receitaSUS": 10386889.94,
+        "receitaConvenio": 2930529.24,
+        "receitaColaboracao": 576550.1,
+        "subvencoes": 1663846.56,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19315907.6,
+        "folhaPagamento": -7571424.14,
+        "honorarios": -5319515.53,
+        "materiaisMed": -4485277.83,
+        "despesasOp": -2391058.74,
+        "folhaAdm": -1247831.67,
+        "resultadoFinal": -539976.33
+      },
+      "desemp": {
+        "receitaOpLiq": 19997000.56,
+        "custoAssistencial": -19622481.36,
+        "despesasOp": -3083112.81,
+        "subvGov": 730898.14,
+        "ebitdaAjust": -1977695.47,
+        "ebitda": -841412.94,
+        "subvInvest": 301436.61,
+        "resultadoLiq": -539976.33
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 9,
+      "nome": "Setembro",
+      "key": "2025-09",
+      "dre": {
+        "receitaTotal": 22422335.2,
+        "receitaSUS": 9748905.43,
+        "receitaConvenio": 3041503.94,
+        "receitaColaboracao": 500677.16,
+        "subvencoes": 2971631.85,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19478254.89,
+        "folhaPagamento": -7486584.48,
+        "honorarios": -5301635.99,
+        "materiaisMed": -4788050.69,
+        "despesasOp": -2438386.12,
+        "folhaAdm": -1334385.29,
+        "resultadoFinal": 480299.09
+      },
+      "desemp": {
+        "receitaOpLiq": 19450703.35,
+        "custoAssistencial": -19790169.85,
+        "despesasOp": -2515815.57,
+        "subvGov": 1881894.28,
+        "ebitdaAjust": -973387.79,
+        "ebitda": 170860.49,
+        "subvInvest": 309438.6,
+        "resultadoLiq": 480299.09
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 10,
+      "nome": "Outubro",
+      "key": "2025-10",
+      "dre": {
+        "receitaTotal": 21972932.86,
+        "receitaSUS": 10030345.92,
+        "receitaConvenio": 2853107.51,
+        "receitaColaboracao": 457128.63,
+        "subvencoes": 2487264.88,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19688114.94,
+        "folhaPagamento": -7667043.18,
+        "honorarios": -5414582.43,
+        "materiaisMed": -4740336.87,
+        "despesasOp": -2478028.32,
+        "folhaAdm": -1341252.32,
+        "resultadoFinal": -127114.89
+      },
+      "desemp": {
+        "receitaOpLiq": 19485667.98,
+        "custoAssistencial": -19999493.84,
+        "despesasOp": -2533877.35,
+        "subvGov": 1556485.04,
+        "ebitdaAjust": -1491218.17,
+        "ebitda": -438756.51,
+        "subvInvest": 311641.62,
+        "resultadoLiq": -127114.89
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 11,
+      "nome": "Novembro",
+      "key": "2025-11",
+      "dre": {
+        "receitaTotal": 22661254.69,
+        "receitaSUS": 10210162.8,
+        "receitaConvenio": 2489338.35,
+        "receitaColaboracao": 457154.03,
+        "subvencoes": 3337089.04,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -18636201.32,
+        "folhaPagamento": -7722309.79,
+        "honorarios": -5237773.71,
+        "materiaisMed": -3871097.35,
+        "despesasOp": -2631181.81,
+        "folhaAdm": -1558233.75,
+        "resultadoFinal": 1406161.76
+      },
+      "desemp": {
+        "receitaOpLiq": 19324165.65,
+        "custoAssistencial": -18955129.02,
+        "despesasOp": -2688383.69,
+        "subvGov": 2415270.36,
+        "ebitdaAjust": 95923.3,
+        "ebitda": 1084776.2,
+        "subvInvest": 321385.56,
+        "resultadoLiq": 1406161.76
+      }
+    },
+    {
+      "ano": 2025,
+      "mes": 12,
+      "nome": "Dezembro",
+      "key": "2025-12",
+      "dre": {
+        "receitaTotal": 22811487.59,
+        "receitaSUS": 9248523.91,
+        "receitaConvenio": 2323586.6,
+        "receitaColaboracao": 557194.31,
+        "subvencoes": 4534061.88,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19316906.68,
+        "folhaPagamento": -7671144.53,
+        "honorarios": -5360792.97,
+        "materiaisMed": -4586178.41,
+        "despesasOp": -2648872.35,
+        "folhaAdm": -1343800.73,
+        "resultadoFinal": 926500.8
+      },
+      "desemp": {
+        "receitaOpLiq": 18277425.71,
+        "custoAssistencial": -19653376.98,
+        "despesasOp": -4402357.21,
+        "subvGov": 3288425.53,
+        "ebitdaAjust": -2489882.95,
+        "ebitda": 608051.52,
+        "subvInvest": 318449.28,
+        "resultadoLiq": 926500.8
+      }
+    },
+    {
+      "ano": 2026,
+      "mes": 1,
+      "nome": "Janeiro",
+      "key": "2026-01",
+      "dre": {
+        "receitaTotal": 22090925.44,
+        "receitaSUS": 10496711.2,
+        "receitaConvenio": 2553542.53,
+        "receitaColaboracao": 448189.04,
+        "subvencoes": 2336582.67,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19229165.31,
+        "folhaPagamento": -7548776.47,
+        "honorarios": -5340261.79,
+        "materiaisMed": -4609916.82,
+        "despesasOp": -2422718.01,
+        "folhaAdm": -1313888.9,
+        "resultadoFinal": 288267.43
+      },
+      "desemp": {
+        "receitaOpLiq": 19754342.77,
+        "custoAssistencial": -19564130.84,
+        "despesasOp": -2465678.23,
+        "subvGov": 1282305.38,
+        "ebitdaAjust": -993160.92,
+        "ebitda": -33784.96,
+        "subvInvest": 322052.39,
+        "resultadoLiq": 288267.43
+      }
+    },
+    {
+      "ano": 2026,
+      "mes": 2,
+      "nome": "Fevereiro",
+      "key": "2026-02",
+      "dre": {
+        "receitaTotal": 22057448.96,
+        "receitaSUS": 9672645.12,
+        "receitaConvenio": 2602310.6,
+        "receitaColaboracao": 437733.87,
+        "subvencoes": 3228793.86,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -19805346.73,
+        "folhaPagamento": -8235723.72,
+        "honorarios": -5064543.35,
+        "materiaisMed": -4516713.6,
+        "despesasOp": -2556058.34,
+        "folhaAdm": -1428735.01,
+        "resultadoFinal": -414403.53
+      },
+      "desemp": {
+        "receitaOpLiq": 18828655.1,
+        "custoAssistencial": -20126186.73,
+        "despesasOp": -2612314.64,
+        "subvGov": 2218139.17,
+        "ebitdaAjust": -1691707.1,
+        "ebitda": -735982.97,
+        "subvInvest": 321579.44,
+        "resultadoLiq": -414403.53
+      }
+    },
+    {
+      "ano": 2026,
+      "mes": 3,
+      "nome": "Março",
+      "key": "2026-03",
+      "dre": {
+        "receitaTotal": 22447702.02,
+        "receitaSUS": 8990642.68,
+        "receitaConvenio": 3217412.78,
+        "receitaColaboracao": 469443.8,
+        "subvencoes": 3635534.8,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -20567598.31,
+        "folhaPagamento": -8244092.05,
+        "honorarios": -5552347.18,
+        "materiaisMed": -4826374.45,
+        "despesasOp": -3045049.76,
+        "folhaAdm": -1780310.06,
+        "resultadoFinal": -1108298
+      },
+      "desemp": {
+        "receitaOpLiq": 18812167.22,
+        "custoAssistencial": -20897939.94,
+        "despesasOp": -3133568.41,
+        "subvGov": 2478214.06,
+        "ebitdaAjust": -2741127.07,
+        "ebitda": -1430760.96,
+        "subvInvest": 322462.96,
+        "resultadoLiq": -1108298
+      }
+    },
+    {
+      "ano": 2026,
+      "mes": 4,
+      "nome": "Abril",
+      "key": "2026-04",
+      "dre": {
+        "receitaTotal": 23060345.88,
+        "receitaSUS": 10987727.44,
+        "receitaConvenio": 2866098.62,
+        "receitaColaboracao": 352051.68,
+        "subvencoes": 2707657.94,
+        "complementacaoEstadual": 5790023.89,
+        "custoServicos": -20753933.53,
+        "folhaPagamento": -8310013.17,
+        "honorarios": -5738704.33,
+        "materiaisMed": -4818619.04,
+        "despesasOp": -2813466.64,
+        "folhaAdm": -1553738.03,
+        "resultadoFinal": -545620.15
+      },
+      "desemp": {
+        "receitaOpLiq": 20352687.94,
+        "custoAssistencial": -21086060.18,
+        "despesasOp": -2861227.33,
+        "subvGov": 1561686.24,
+        "ebitdaAjust": -2032913.33,
+        "ebitda": -867436.36,
+        "subvInvest": 321816.21,
+        "resultadoLiq": -545620.15
+      }
+    }
+  ],
+  "anuais": [
+    {
+      "ano": 2020,
+      "meses": 2,
+      "recTotal": 23285043.85,
+      "resTotal": 1007843.5800000001,
+      "ebitdaTotal": 0,
+      "recAnual": 139710263.10000002,
+      "resAnual": 6047061.48
+    },
+    {
+      "ano": 2023,
+      "meses": 5,
+      "recTotal": 75480728.05,
+      "resTotal": -3423938.74,
+      "ebitdaTotal": -4462553.71,
+      "recAnual": 181153747.32,
+      "resAnual": -8217452.976
+    },
+    {
+      "ano": 2024,
+      "meses": 4,
+      "recTotal": 81280783.44,
+      "resTotal": 3662256.1199999996,
+      "ebitdaTotal": 2465579.7899999996,
+      "recAnual": 243842350.32,
+      "resAnual": 10986768.36
+    },
+    {
+      "ano": 2025,
+      "meses": 12,
+      "recTotal": 258758855.48999998,
+      "resTotal": 5658939.609999999,
+      "ebitdaTotal": 1993420.16,
+      "recAnual": 258758855.48999998,
+      "resAnual": 5658939.609999999
+    },
+    {
+      "ano": 2026,
+      "meses": 4,
+      "recTotal": 89656422.3,
+      "resTotal": -1780054.25,
+      "ebitdaTotal": -3067965.2499999995,
+      "recAnual": 268969266.9,
+      "resAnual": -5340162.75
+    }
+  ],
+  "sazonalidade": [
+    {
+      "mes": 1,
+      "nome": "Janeiro",
+      "mediaResultado": 11634.507500000036,
+      "amostras": 4
+    },
+    {
+      "mes": 2,
+      "nome": "Fevereiro",
+      "mediaResultado": -485290.94,
+      "amostras": 3
+    },
+    {
+      "mes": 3,
+      "nome": "Março",
+      "mediaResultado": -252510.01333333334,
+      "amostras": 3
+    },
+    {
+      "mes": 4,
+      "nome": "Abril",
+      "mediaResultado": -581227.4666666667,
+      "amostras": 3
+    },
+    {
+      "mes": 5,
+      "nome": "Maio",
+      "mediaResultado": 295924.455,
+      "amostras": 2
+    },
+    {
+      "mes": 6,
+      "nome": "Junho",
+      "mediaResultado": 546898.9349999999,
+      "amostras": 2
+    },
+    {
+      "mes": 7,
+      "nome": "Julho",
+      "mediaResultado": 1541820.22,
+      "amostras": 1
+    },
+    {
+      "mes": 8,
+      "nome": "Agosto",
+      "mediaResultado": -539976.33,
+      "amostras": 1
+    },
+    {
+      "mes": 9,
+      "nome": "Setembro",
+      "mediaResultado": 908617.775,
+      "amostras": 2
+    },
+    {
+      "mes": 10,
+      "nome": "Outubro",
+      "mediaResultado": 965847.245,
+      "amostras": 2
+    },
+    {
+      "mes": 11,
+      "nome": "Novembro",
+      "mediaResultado": 213650.175,
+      "amostras": 2
+    },
+    {
+      "mes": 12,
+      "nome": "Dezembro",
+      "mediaResultado": 1085936.245,
+      "amostras": 2
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "ts": "2026-06-09T13:47:28.960Z",
+  "hospitais": {
+    "santaCasa": {
+      "_raw": "Your connection was refused",
+      "erro": "Resposta não é JSON válido"
+    },
+    "cancer": {
+      "erro": "Código CNES não configurado — preencha em Configurações → CNES"
+    },
+    "coracao": {
+      "erro": "Código CNES não configurado — preencha em Configurações → CNES"
+    }
+  }
+}

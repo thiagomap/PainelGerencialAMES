@@ -5,6 +5,10 @@ const fs     = require('fs');
 const path   = require('path');
 const os     = require('os');
 const { exec } = require('child_process');
+const XLSX   = require('xlsx');
+
+// Pasta de rede Regulação & Planejamento
+const REDE_BASE = '\\\\172.16.10.2\\regulacao_e_planejamento\\ROSANA_PASTA REDE';
 
 // â”€â”€ LÃª .env simples (key=value, ignora #) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadEnv(file) {
@@ -220,16 +224,37 @@ const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url.startsWith('/api/gestao-captcha')) {
     return handleGestaoCaptcha(req, res);
   }
+  if (req.method === 'GET' && req.url.startsWith('/api/siresp-test-units')) {
+    return handleSirespTestUnits(req, res);
+  }
   if (req.method === 'GET' && req.url.startsWith('/api/siresp-amb-unidades')) {
     return handleSirespAmbUnidades(req, res);
   }
+  // ── Pasta de Rede: Regulação & Planejamento ─────────────────────
+  if (req.method === 'GET' && req.url.startsWith('/api/rede/')) {
+    return handleRedeApi(req, res);
+  }
+  if (req.method === 'GET' && req.url.startsWith('/api/cma-screenshot')) {
+    return handleCmaScreenshot(req, res);
+  }
+  if (req.method === 'GET' && req.url.startsWith('/api/cma-dados')) {
+    return handleCmaDados(req, res);
+  }
+  if (req.method === 'GET' && req.url.startsWith('/api/numb3rs')) {
+    return handleNumb3rs(req, res);
+  }
+  if (req.method === 'GET' && req.url.startsWith('/api/dados-hosp-dre')) {
+    const f = path.join(ROOT, 'dados-hosp-dre.json');
+    res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
+    try { return res.end(fs.readFileSync(f, 'utf8')); }
+    catch { return res.end(JSON.stringify({ ok: false, msg: 'Execute: node extrair-dados-hosp.js' })); }
+  }
   if (req.method === 'GET' && req.url.startsWith('/api/siresp-amb-dados')) {
     const f = path.join(ROOT, 'siresp-amb-dados.json');
+    res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
     try {
-      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
       return res.end(fs.readFileSync(f, 'utf8'));
     } catch {
-      res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
       return res.end(JSON.stringify({ ok: false, msg: 'Sem dados SIRESP AME — clique em Buscar' }));
     }
   }
@@ -264,14 +289,16 @@ const server = http.createServer((req, res) => {
   }
 
   fs.readFile(filePath, (err, data) => {
+    if (res.headersSent) return; // guarda contra double-send (API async + static race)
     if (err) {
       res.writeHead(404, {'Content-Type': 'text/html; charset=utf-8', ...cors});
-      res.end(`<h2>404 â€“ NÃ£o encontrado: ${url}</h2>`);
+      res.end(`<h2>404 - Nao encontrado: ${url}</h2>`);
       return;
     }
     const ext  = path.extname(filePath).toLowerCase();
     const mime = MIME[ext] || 'application/octet-stream';
-    res.writeHead(200, {'Content-Type': mime, 'Cache-Control': 'no-cache', ...cors});
+    const cc = (ext === '.html' || ext === '.js') ? 'no-store, no-cache, must-revalidate' : 'no-cache';
+    res.writeHead(200, {'Content-Type': mime, 'Cache-Control': cc, ...cors});
     res.end(data);
   });
 
@@ -677,7 +704,9 @@ function lerConfiguracaoEnv() {
   result.gestaoSenha2 = get('SIRESP_SENHA')  || '260718';
   // Credenciais SIRESP Ambulatorial (projeto siresp-login)
   result.sirespAmbUser       = get('SIRESP_AMB_USER')        || 'antalves';
-  result.sirespAmbSenha      = get('SIRESP_AMB_SENHA')       || '';
+  result.sirespAmbSenha      = get('SIRESP_AMB_SENHA')       || '1cff35078ebef77951a8abdeabe9c188';
+  result.sirespAmbUser2      = get('SIRESP_AMB_USER2')       || '';
+  result.sirespAmbSenha2     = get('SIRESP_AMB_SENHA2')      || '';
   result.sirespAmbCode       = get('SIRESP_AMB_CODE')        || '9042';
   result.sirespAmbLabel      = get('SIRESP_AMB_LABEL')       || 'AME FRANCA';
   result.sirespAmbExtraUnits = get('SIRESP_AMB_EXTRA_UNITS') || '';
@@ -1026,7 +1055,7 @@ const KPIH_COMP = {
   '1/2025':29370,'2/2025':29763,'3/2025':30163,'4/2025':30513,'5/2025':30853,
   '6/2025':31207,'7/2025':31588,'8/2025':31985,'9/2025':32400,'10/2025':32777,
   '11/2025':33134,'12/2025':33614,
-  '1/2026':33958,'2/2026':34281,'3/2026':34760,'4/2026':35068
+  '1/2026':33958,'2/2026':34281,'3/2026':34760,'4/2026':35068,'5/2026':35635
 };
 
 function _kpihReq(method, path, postData, extraHeaders) {
@@ -1521,6 +1550,8 @@ let _sirespAmb = {
   lastLogin: 0,
   SESSION_DURATION: 45 * 60 * 1000,
   currentUnit: null, // código da unidade selecionada na última autenticação
+  currentUser: null, // usuário que autenticou (para controle de sessão)
+  unitList: null,    // lista de AMEs capturada no último login
 };
 
 // Mescla Set-Cookie no cookie jar existente (por chave=valor)
@@ -1584,18 +1615,20 @@ function _sirespAmbReq(method, urlPath, postData, extraHeaders) {
 
 // ── Autenticação SIRESP em 5 passos (porta de auth.ts) ────────────────────────
 // code/label opcionais: se diferentes da sessão atual, força re-autenticação
-async function sirespAmbEnsureAuth(code, label) {
+// _userOverride / _passOverride: usados internamente para retry com usuário secundário
+async function sirespAmbEnsureAuth(code, label, _userOverride, _passOverride) {
   const cfg = lerConfiguracaoEnv();
   if (!code)  code  = cfg.sirespAmbCode  || '9042';
   if (!label) label = cfg.sirespAmbLabel || 'AME FRANCA';
 
-  // Reutiliza sessão apenas se a unidade for a mesma
-  if (_sirespAmb.authenticated && _sirespAmb.currentUnit === code &&
+  const user = _userOverride || cfg.sirespAmbUser  || 'antalves';
+  const pass = _passOverride || cfg.sirespAmbSenha || '1cff35078ebef77951a8abdeabe9c188';
+
+  // Reutiliza sessão apenas se a unidade e o usuário forem os mesmos
+  if (_sirespAmb.authenticated && _sirespAmb.currentUnit === code && _sirespAmb.currentUser === user &&
       Date.now() - _sirespAmb.lastLogin < _sirespAmb.SESSION_DURATION) {
     return true;
   }
-  const user = cfg.sirespAmbUser  || 'antalves';
-  const pass = cfg.sirespAmbSenha || '';
 
   _sirespAmb.mainCookies = '';
   _sirespAmb.ambCookies  = '';
@@ -1622,7 +1655,63 @@ async function sirespAmbEnsureAuth(code, label) {
   const r3 = await _sirespAmbReq('POST', '/index.php?&sistema=4', p3, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/' });
   console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: POST amb/index.php → HTTP ${r3.status}`);
 
-  // Passo 4: Selecionar unidade
+  // Passo 4a: GET escolher_unidade.php para descobrir unidades disponíveis (cacheia antes de selecionar)
+  try {
+    const rU = await _sirespAmbReq('GET', '/escolher_unidade.php');
+    const hU = rU.body.toString('latin1');
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 SIRESP escolher_unidade: HTTP ${rU.status} | ${hU.length} chars`);
+
+    const unidades = [];
+    // Regex principal: <option value="...">texto</option>
+    const optRx = /<option[^>]+value=["']([^"']+)["'][^>]*>([\s\S]*?)<\/option>/gi;
+    let mU;
+    while ((mU = optRx.exec(hU)) !== null) {
+      const val = mU[1].trim();
+      const txt = mU[2].replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+      if (val && val !== '0' && val !== '') {
+        const parts = val.split('_');
+        const uCode  = parts[0];
+        const uLabel = parts.slice(1).join('_') || txt;
+        unidades.push({ value: val, code: uCode, label: uLabel, display: txt || uLabel });
+      }
+    }
+    // Fallback: regex para values no formato "DDDD_TEXTO"
+    if (unidades.length === 0) {
+      const rx2 = /value=["'](\d+_[^"']+)["']/gi;
+      while ((mU = rx2.exec(hU)) !== null) {
+        const val = mU[1].trim();
+        const parts = val.split('_');
+        unidades.push({ value: val, code: parts[0], label: parts.slice(1).join('_'), display: parts.slice(1).join(' ') });
+      }
+    }
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 SIRESP unidades brutas (${unidades.length}): ${unidades.map(u=>u.value).slice(0,10).join(' | ')}`);
+
+    // Filtra apenas AMEs
+    let filtradas = unidades.filter(u => u.display.toUpperCase().includes('AME'));
+    // Se filtro não pegou nada, aceita todas (pode ser que a conta só tenha AMEs)
+    if (filtradas.length === 0 && unidades.length > 0) filtradas = unidades;
+
+    // Adiciona extras do env
+    const cfgExtra = lerConfiguracaoEnv().sirespAmbExtraUnits || '';
+    if (cfgExtra.trim()) {
+      cfgExtra.split(',').forEach(entry => {
+        const pipe = entry.trim().indexOf('|');
+        if (pipe < 0) return;
+        const eCode  = entry.trim().slice(0, pipe).trim();
+        const eLabel = entry.trim().slice(pipe + 1).trim();
+        if (!eCode || !eLabel) return;
+        if (!filtradas.some(u => u.code === eCode))
+          filtradas.push({ value: `${eCode}_${eLabel}`, code: eCode, label: eLabel, display: eLabel });
+      });
+    }
+    filtradas.sort((a,b) => a.display.localeCompare(b.display,'pt-BR'));
+    if (filtradas.length > 0) _sirespAmb.unitList = filtradas;
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} 🏥 SIRESP unidades finais: ${filtradas.map(u=>u.display).join(', ')}`);
+  } catch(e) {
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} ⚠️ SIRESP: não listou unidades — ${e.message}`);
+  }
+
+  // Passo 4b: Selecionar unidade
   const unidade = `${code}_${label.toUpperCase()}`;
   const p4 = `unidade=${encodeURIComponent(unidade)}&escolher=Ok`;
   const r4 = await _sirespAmbReq('POST', '/escolher_unidade.php', p4, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/index.php' });
@@ -1638,6 +1727,42 @@ async function sirespAmbEnsureAuth(code, label) {
   const digitoDoc = codeMap[tipoDoc.toUpperCase()] || null;
   console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: GET principal.php → HTTP ${r5.status} | tipo_doc="${tipoDoc}" → digito="${digitoDoc}"`);
 
+  // Se tipo_doc está vazio, a unidade não é acessível nesta tentativa
+  if (!tipoDoc) {
+    _sirespAmb.authenticated = false;
+    _sirespAmb.currentUnit   = null;
+    _sirespAmb.currentUser   = null;
+    // Reset total de cookies para evitar session pollution no próximo login
+    _sirespAmb.mainCookies = '';
+    _sirespAmb.ambCookies  = '';
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} ❌ SIRESP: unidade ${code} (${label}) sem tipo_doc para usuário "${user}"`);
+
+    const user2  = cfg.sirespAmbUser2;
+    const pass2  = cfg.sirespAmbSenha2;
+
+    // 1ª tentativa: se não usamos override e USER2 está configurado → tenta USER2
+    if (!_userOverride && user2 && user2.trim()) {
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ⏳ SIRESP: aguardando 2s antes de tentar "${user2}"...`);
+      await new Promise(r => setTimeout(r, 2000)); // delay evita session pollution
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} 🔄 SIRESP: tentando "${user2}" para ${label}...`);
+      return sirespAmbEnsureAuth(code, label, user2.trim(), pass2 ? pass2.trim() : '');
+    }
+
+    // 2ª tentativa: se JÁ estamos com override (USER2) e falhou — retry automático (até 2x)
+    const retryCount = _sirespAmb._retryCount || 0;
+    if (_userOverride && retryCount < 2) {
+      _sirespAmb._retryCount = retryCount + 1;
+      const delaySec = (retryCount + 1) * 3; // 3s, depois 6s
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} ♻️  SIRESP: retry ${retryCount+1}/2 para "${user}" em ${delaySec}s...`);
+      await new Promise(r => setTimeout(r, delaySec * 1000));
+      return sirespAmbEnsureAuth(code, label, _userOverride, _passOverride);
+    }
+    _sirespAmb._retryCount = 0; // reset contagem para próxima chamada
+
+    throw new Error(`AME "${label}" não disponível — nenhum usuário configurado tem acesso (tentativas esgotadas). Verifique SIRESP_AMB_USER2 no CONFIGURACAO.env.`);
+  }
+  _sirespAmb._retryCount = 0; // reset se tipo_doc foi encontrado com sucesso
+
   if (digitoDoc) {
     const p5 = `digito_doc=${digitoDoc}&type_doc=${encodeURIComponent(tipoDoc.toUpperCase())}`;
     const r5b = await _sirespAmbReq('POST',
@@ -1649,7 +1774,8 @@ async function sirespAmbEnsureAuth(code, label) {
   _sirespAmb.authenticated = true;
   _sirespAmb.lastLogin = Date.now();
   _sirespAmb.currentUnit = code;
-  console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ SIRESP AMB: login concluído! Unidade: ${code}_${label}`);
+  _sirespAmb.currentUser = user;
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} ✅ SIRESP AMB: login concluído! Usuário: ${user} | Unidade: ${code}_${label}`);
   return true;
 }
 
@@ -1657,13 +1783,14 @@ async function sirespAmbEnsureAuth(code, label) {
 async function _sirespBuscarUnidades() {
   const cfg  = lerConfiguracaoEnv();
   const user = cfg.sirespAmbUser  || 'antalves';
-  const pass = cfg.sirespAmbSenha || '';
+  const pass = cfg.sirespAmbSenha || '1cff35078ebef77951a8abdeabe9c188';
 
   // Reset sessão para forçar autenticação limpa (sem unidade escolhida)
   _sirespAmb.mainCookies = '';
   _sirespAmb.ambCookies  = '';
   _sirespAmb.authenticated = false;
   _sirespAmb.currentUnit = null;
+  _sirespAmb.currentUser = null;
 
   // Passos 1-3 (sem escolher unidade)
   const r1 = await _sirespMainReq('GET', '/');
@@ -1741,10 +1868,89 @@ async function _sirespBuscarUnidades() {
   return filtradas;
 }
 
+// ── Handler: GET /api/siresp-test-units (diagnóstico — testa login em todas as unidades) ──
+async function handleSirespTestUnits(req, res) {
+  const cfg = lerConfiguracaoEnv();
+
+  // Monta lista completa: padrão + extras do env
+  const todos = [];
+  todos.push({ code: cfg.sirespAmbCode || '9042', label: cfg.sirespAmbLabel || 'AME FRANCA' });
+  (cfg.sirespAmbExtraUnits || '').split(',').forEach(e => {
+    const pipe = e.trim().indexOf('|');
+    if (pipe < 0) return;
+    const c = e.trim().slice(0, pipe).trim();
+    const l = e.trim().slice(pipe + 1).trim();
+    if (c && l && !todos.some(x => x.code === c)) todos.push({ code: c, label: l });
+  });
+
+  const resultados = [];
+  for (const u of todos) {
+    // Força nova autenticação para cada unidade
+    _sirespAmb.authenticated = false;
+    _sirespAmb.currentUnit   = null;
+    _sirespAmb.currentUser   = null;
+    try {
+      await sirespAmbEnsureAuth(u.code, u.label);
+      resultados.push({ code: u.code, label: u.label, ok: true,
+        user: _sirespAmb.currentUser, msg: '✅ Login OK' });
+    } catch(e) {
+      resultados.push({ code: u.code, label: u.label, ok: false,
+        user: null, msg: `❌ ${e.message}` });
+    }
+  }
+
+  const okCount   = resultados.filter(r =>  r.ok).length;
+  const failCount = resultados.filter(r => !r.ok).length;
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} 🧪 SIRESP test-units: ${okCount} OK / ${failCount} FALHA`);
+  resultados.forEach(r => console.log(`  ${r.ok ? '✅' : '❌'} ${r.label} (${r.code}) → ${r.user || 'N/A'}`));
+
+  res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', ...cors });
+  res.end(JSON.stringify({ ok: true, resultados, resumo: `${okCount}/${todos.length} unidades OK` }));
+}
+
 // ── Handler: GET /api/siresp-amb-unidades ────────────────────────────────────
+// Retorna lista de unidades. Se não tiver cache, faz auth leve para descobrir.
 async function handleSirespAmbUnidades(req, res) {
   try {
-    const unidades = await _sirespBuscarUnidades();
+    const cfg = lerConfiguracaoEnv();
+
+    // Se unitList está vazio, faz auth com unidade padrão para descobrir todas
+    if (!_sirespAmb.unitList || _sirespAmb.unitList.length === 0) {
+      try {
+        const defCode  = cfg.sirespAmbCode  || '9042';
+        const defLabel = cfg.sirespAmbLabel || 'AME FRANCA';
+        await sirespAmbEnsureAuth(defCode, defLabel);
+        // sirespAmbEnsureAuth já popula _sirespAmb.unitList no passo 4a
+      } catch(e) {
+        console.log(`${new Date().toLocaleTimeString('pt-BR')} ⚠️ SIRESP unidades: auth falhou — ${e.message}`);
+      }
+    }
+
+    // Copia lista cacheada (sem modificar o original)
+    let unidades = (_sirespAmb.unitList || []).map(u => ({...u}));
+
+    // Adiciona extras do env que ainda não estejam na lista
+    const cfgExtra = cfg.sirespAmbExtraUnits || '';
+    if (cfgExtra.trim()) {
+      cfgExtra.split(',').forEach(entry => {
+        const pipe = entry.trim().indexOf('|');
+        if (pipe < 0) return;
+        const eCode  = entry.trim().slice(0, pipe).trim();
+        const eLabel = entry.trim().slice(pipe + 1).trim();
+        if (!eCode || !eLabel) return;
+        if (!unidades.some(u => u.code === eCode))
+          unidades.push({ value: `${eCode}_${eLabel}`, code: eCode, label: eLabel, display: eLabel });
+      });
+    }
+
+    // Garante que a unidade padrão aparece sempre
+    const defCode  = cfg.sirespAmbCode  || '9042';
+    const defLabel = cfg.sirespAmbLabel || 'AME FRANCA';
+    if (!unidades.some(u => u.code === defCode))
+      unidades.unshift({ value: `${defCode}_${defLabel}`, code: defCode, label: defLabel, display: defLabel });
+
+    unidades.sort((a,b) => a.display.localeCompare(b.display,'pt-BR'));
+
     res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
     res.end(JSON.stringify({ ok: true, unidades }));
   } catch(e) {
@@ -1817,15 +2023,18 @@ async function _sirespColetarPerformance(code, mesStr, anoStr) {
 }
 
 // ── Coleta relatório de Consultas (HTML) — porta de consultation-report.collector.ts ──
-async function _sirespColetarConsultas(mesStr, anoStr) {
+// tipo: 'CM' = consulta médica, 'CN' = consulta não médica
+async function _sirespColetarConsultas(mesStr, anoStr, tipo) {
+  if (!tipo) tipo = 'CM';
   const consultUrl = '/report_rel_consulta.php?P=report_rel_consulta';
   await _sirespAmbReq('GET', consultUrl, null, { Referer: 'https://ambulatorial.siresp.saude.sp.gov.br/principal.php' });
 
+  // FLT_CBO_TIPO=C + CBO 22214 (MEDICO EM GERAL) retorna todas as especialidades médicas/não médicas
   const payload = [
     `hdd_acao=S`, `FLT_CBO_TIPO=C`,
     `CBO_ID_ARVORE_T%5B1%5D=22214`, `CBO_ID_ARVORE_T%5B2%5D=`,
     `CBO_ID_ARVORE_T%5B3%5D=`, `CBO_ID_ARVORE_T%5B4%5D=`,
-    `FLT_TIPO_MARCA=T`, `FLT_TIPO_CONSULTA=CM`, `FLT_TIPO_ATENDIMENTO=T`,
+    `FLT_TIPO_MARCA=T`, `FLT_TIPO_CONSULTA=${tipo}`, `FLT_TIPO_ATENDIMENTO=T`,
     `FLT_ID_ESPECIALIDADE=`, `FLT_MES=${mesStr}`, `FLT_ANO=${anoStr}`,
     `FLG_MARCA_REC=S`, `FLG_UNID_ATIVA=S`, `FLT_TIPO_REL=A`, `FLT_AGRUPAR=E`,
     `FLG_VLR_EXAME=S`, `FLG_FILHOS=S`, `btn_acao=Buscar`,
@@ -1837,9 +2046,15 @@ async function _sirespColetarConsultas(mesStr, anoStr) {
     Referer: `https://ambulatorial.siresp.saude.sp.gov.br${consultUrl}`,
   });
   const html = r.body.toString('latin1');
-  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: consultas HTTP ${r.status} | ${html.length} chars`);
+  console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP: consultas [${tipo}] HTTP ${r.status} | ${html.length} chars`);
 
-  // Extrai linhas tr.dados.relatorio — igual ao selector cheerio $('tr.dados.relatorio')
+  // DEBUG: mostrar classes de TR encontradas (primeiras 8)
+  { const dbgRe = /<tr[^>]*class="([^"]+)"/gi; const classes = []; let dm;
+    while ((dm = dbgRe.exec(html)) !== null && classes.length < 8) classes.push(dm[1]);
+    console.log(`${new Date().toLocaleTimeString('pt-BR')} SIRESP debug [${tipo}]: TR classes = ${classes.join(' | ') || '(nenhuma)'}`);
+  }
+
+  // Extrai linhas tr.dados.relatorio — cf. consultation-report.collector.ts (NestJS reference)
   const rows = [];
   const trRe = /<tr[^>]*class="([^"]*)"[^>]*>([\s\S]*?)<\/tr>/gi;
   let trM;
@@ -1856,26 +2071,79 @@ async function _sirespColetarConsultas(mesStr, anoStr) {
       const txt = tdM[2].replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
       cells.push({ text: txt, title: titleM ? titleM[1] : '' });
     }
-    if (cells.length < 13) continue;
-    const toN = s => { const n = Number(s.replace(/\./g,'').replace(',','.')); return isFinite(n) ? n : null; };
-    const toP = s => { const n = Number(s.replace('%','').replace(',','.').trim()); return isFinite(n) ? n : null; };
-    // Layout detalhado (31 cols) ou resumido (21+ cols) — cf. consultation-report.collector.ts
+    if (cells.length < 21) continue;
+    const toN = s => { const n = Number((s||'').replace(/\./g,'').replace(',','.')); return isFinite(n) ? n : null; };
+    const toP = s => { const n = Number((s||'').replace(/%/g,'').replace(',','.').trim()); return isFinite(n) ? n : null; };
     const det = cells.length >= 31;
-    rows.push({
-      codigo:        cells[0].title || '',
-      especialidade: cells[0].text,
-      oferta:        toN(cells[1]?.text || ''),
-      agendTotal:    toN(cells[2]?.text || ''),
-      agendTotalPct: toP(cells[3]?.text || ''),
-      agendCota:     toN(cells[4]?.text || ''),
-      agendCotaPct:  toP(cells[5]?.text || ''),
-      agendExtra:    toN(cells[10]?.text || ''),
-      agendExtraPct: toP(cells[11]?.text || ''),
-      despachadoPct: toP((det ? cells[12] : cells[6])?.text || ''),
-      atendTotal:    toN((det ? cells[13] : cells[3])?.text || ''),
-      atendTotalPct: toP((det ? cells[14] : cells[4])?.text || ''),
-      ausentePct:    toP((det ? cells[20] : cells[10])?.text || ''),
-    });
+    if (det) {
+      // Layout detalhado — 31 colunas
+      rows.push({
+        codigo:             cells[0].title || '',
+        especialidade:      cells[0].text,
+        oferta:             toN(cells[1]?.text),
+        agendTotal:         toN(cells[2]?.text),
+        agendTotalPct:      toP(cells[3]?.text),
+        agendCota:          toN(cells[4]?.text),
+        agendCotaPct:       toP(cells[5]?.text),
+        agendOverflow:      toN(cells[6]?.text),
+        agendOverflowPct:   toP(cells[7]?.text),
+        agendNaoDistrib:    toN(cells[8]?.text),
+        agendNaoDistribPct: toP(cells[9]?.text),
+        agendExtra:         toN(cells[10]?.text),
+        agendExtraPct:      toP(cells[11]?.text),
+        despachadoPct:      toP(cells[12]?.text),
+        atendTotal:         toN(cells[13]?.text),
+        atendTotalPct:      toP(cells[14]?.text),
+        atendPresencial:    toN(cells[15]?.text),
+        atendPresencialPct: toP(cells[16]?.text),
+        teleconsulta:       toN(cells[17]?.text),
+        teleconsultaPct:    toP(cells[18]?.text),
+        ausente:            toN(cells[19]?.text),
+        ausentePct:         toP(cells[20]?.text),
+        desistencia:        toN(cells[21]?.text),
+        desistenciaPct:     toP(cells[22]?.text),
+        dispensado:         toN(cells[23]?.text),
+        dispensadoPct:      toP(cells[24]?.text),
+        naoInformado:       toN(cells[25]?.text),
+        naoInformadoPct:    toP(cells[26]?.text),
+        falta:              toN(cells[27]?.text),
+        faltaPct:           toP(cells[28]?.text),
+        alta:               toN(cells[29]?.text),
+        altaPct:            toP(cells[30]?.text),
+      });
+    } else {
+      // Layout resumido — 21 colunas
+      rows.push({
+        codigo:             cells[0].title || '',
+        especialidade:      cells[0].text,
+        oferta:             toN(cells[1]?.text),
+        agendTotal:         toN(cells[2]?.text),
+        agendTotalPct:      null,
+        agendCota:          null,
+        agendCotaPct:       null,
+        agendExtra:         null,
+        agendExtraPct:      null,
+        despachadoPct:      null,
+        atendTotal:         toN(cells[3]?.text),
+        atendTotalPct:      toP(cells[4]?.text),
+        atendPresencial:    toN(cells[5]?.text),
+        atendPresencialPct: toP(cells[6]?.text),
+        teleconsulta:       toN(cells[7]?.text),
+        teleconsultaPct:    toP(cells[8]?.text),
+        ausente:            toN(cells[9]?.text),
+        ausentePct:         toP(cells[10]?.text),
+        desistencia:        toN(cells[11]?.text),
+        desistenciaPct:     toP(cells[12]?.text),
+        dispensado:         toN(cells[13]?.text),
+        dispensadoPct:      toP(cells[14]?.text),
+        naoInformado:       toN(cells[15]?.text),
+        naoInformadoPct:    toP(cells[16]?.text),
+        falta:              toN(cells[17]?.text),
+        faltaPct:           toP(cells[18]?.text),
+        alta:               toN(cells[19]?.text),
+        altaPct:            toP(cells[20]?.text),
+      });
+    }
   }
 
   // Linha TOTAL
@@ -1911,10 +2179,13 @@ async function handleSirespAmbBuscar(req, res) {
       const ok = await sirespAmbEnsureAuth(code, label);
       if (!ok) throw new Error('Falha no login SIRESP Ambulatorial');
 
-      const [performance, consultas] = await Promise.all([
+      // Performance em paralelo com consulta médica; consulta não-médica em seguida
+      const [performance, consultasMedicas] = await Promise.all([
         _sirespColetarPerformance(code, mes, ano),
-        _sirespColetarConsultas(mes, ano),
+        _sirespColetarConsultas(mes, ano, 'CM'),
       ]);
+      const consultasNaoMedicas = await _sirespColetarConsultas(mes, ano, 'CN');
+      const consultas = { medica: consultasMedicas, naoMedica: consultasNaoMedicas };
 
       const resultado = {
         ok: true, mes, ano, code, label,
@@ -1923,7 +2194,7 @@ async function handleSirespAmbBuscar(req, res) {
       };
 
       try { fs.writeFileSync(path.join(ROOT, 'siresp-amb-dados.json'), JSON.stringify(resultado, null, 2), 'utf8'); } catch {}
-      console.log(`${new Date().toLocaleTimeString('pt-BR')} 💾 SIRESP AMB: dados salvos (perf=${performance?.rows?.length||0} rows, consul=${consultas?.count||0} rows)`);
+      console.log(`${new Date().toLocaleTimeString('pt-BR')} 💾 SIRESP AMB: dados salvos (perf=${performance?.rows?.length||0} rows, c.med=${consultasMedicas?.count||0}, c.nmed=${consultasNaoMedicas?.count||0})`);
 
       res.writeHead(200, {'Content-Type':'application/json;charset=utf-8',...cors});
       res.end(JSON.stringify(resultado));
@@ -1934,6 +2205,525 @@ async function handleSirespAmbBuscar(req, res) {
       res.end(JSON.stringify({ ok: false, erro: e.message }));
     }
   });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PASTA DE REDE — Regulação & Planejamento
+// Base: \\172.16.10.2\regulacao_e_planejamento\ROSANA_PASTA REDE
+// ══════════════════════════════════════════════════════════════════
+
+// Cache simples em memória (5 min TTL)
+const _redeCache = new Map();
+function _redeCacheGet(k) {
+  const e = _redeCache.get(k);
+  if (!e) return null;
+  if (Date.now() - e.ts > 5 * 60 * 1000) { _redeCache.delete(k); return null; }
+  return e.val;
+}
+function _redeCacheSet(k, v) { _redeCache.set(k, { val: v, ts: Date.now() }); }
+
+function _sanitizePath(p) {
+  return (p || '').replace(/\.\./g, '').replace(/[<>"|?*]/g, '').trim();
+}
+
+function _excelSerialToDate(n) {
+  if (!n || typeof n !== 'number') return null;
+  const d = new Date((n - 25569) * 86400 * 1000);
+  return `${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+// ── CMA Dados Estruturados — /api/cma-dados ──────────────────────
+let _cmaDadosCache = null;
+let _cmaDadosTs    = 0;
+
+function _parseCmaTexto(texto) {
+  const lines = texto.split('\n').map(l => l.trim()).filter(l => l);
+  const get = (label) => {
+    const i = lines.indexOf(label);
+    return i >= 0 ? (lines[i + 1] || '') : '';
+  };
+  const num = (label) => parseInt(get(label)) || 0;
+  const pct = (s) => parseInt((s || '').replace('%', '')) || 0;
+
+  // ── KPIs principais ──────────────────────────────────────────
+  const ocupPctStr = get('Porcentagem oc.');
+  const metaStr    = lines.find(l => l.startsWith('Meta de ')) || '';
+  const atualizado = lines.find(l => l.includes('Atualizado há')) || '';
+
+  const resultado = {
+    hospital     : lines.find(l => l === 'Hospital Geral' || l === 'Santa Casa' || (l.length > 3 && l.length < 50 && !l.includes('%') && lines[lines.indexOf(l)+1] === 'Hospital')) || 'Hospital Geral',
+    atualizado,
+    ocupPct      : pct(ocupPctStr),
+    metaPct      : parseInt(metaStr.replace('Meta de ', '').replace('%','')) || 85,
+    totalLeitos  : num('Total de leitos'),
+    totalOcupados: num('Total ocupação'),
+    isolados     : num('Isolados'),
+    interditados : num('Interditados'),
+    manutencao   : num('Manutenção'),
+    reservados   : num('Reservados'),
+    disponiveis  : 0,
+    unidades     : [],
+    pa           : [],
+    painelClinico: [],
+    ts           : Date.now(),
+  };
+
+  // disponíveis = OCUPAÇÃO → Disponíveis
+  const ocupIdx = lines.indexOf('OCUPAÇÃO');
+  if (ocupIdx >= 0) {
+    result_disponiveis: for (let j = ocupIdx; j < Math.min(ocupIdx + 8, lines.length); j++) {
+      if (lines[j] === 'Disponíveis') { resultado.disponiveis = parseInt(lines[j+1]) || 0; break result_disponiveis; }
+    }
+  }
+
+  // ── Tabela de unidades ───────────────────────────────────────
+  const HEADERS = ['Setor ↑','Porcentagem','Quantidade SUS','Quantidade Livres','Pacientes','Isolados','Interditados','Manutenção','Reservados','Extras','Total de Pacientes','Ocupados'];
+  const tblIdx = lines.indexOf('OCUPAÇÃO POR UNIDADE');
+  if (tblIdx >= 0) {
+    // nomes dos setores aparecem antes dos dados numéricos
+    const hdEnd = lines.indexOf('Ocupados', tblIdx) + 1;
+    const paIdx = lines.indexOf('PRONTO ATENDIMENTO', tblIdx);
+    const endIdx = paIdx > 0 ? paIdx : tblIdx + 200;
+
+    // Identifica os nomes (linhas com texto U.I / U.T.I / UCI / UTIN etc)
+    const nomesSec = [];
+    for (let j = hdEnd; j < endIdx; j++) {
+      const l = lines[j];
+      if (/^U[\.\s]/.test(l) || /^UCI/.test(l)) nomesSec.push({ nome: l, idx: j });
+    }
+    const N = nomesSec.length;
+
+    // Após os nomes vêm as colunas: pct[], sus[], livres[], pacientes[], isolados[], interditados[], manut[], reservados[], extras[], totalPac[], ocupados[]
+    // Cada coluna tem N valores
+    const dataStart = N > 0 ? nomesSec[N-1].idx + 1 : hdEnd;
+    const cols = [];
+    let colStart = dataStart;
+    for (let col = 1; col < HEADERS.length; col++) {
+      const vals = [];
+      for (let n = 0; n < N; n++) {
+        const v = lines[colStart + n];
+        vals.push(v !== undefined ? v : '0');
+      }
+      cols.push(vals);
+      colStart += N;
+    }
+
+    nomesSec.forEach((s, i) => {
+      resultado.unidades.push({
+        nome        : s.nome,
+        pct         : pct(cols[0]?.[i]),
+        sus         : parseInt(cols[1]?.[i]) || 0,
+        livres      : parseInt(cols[2]?.[i]) || 0,
+        pacientes   : parseInt(cols[3]?.[i]) || 0,
+        isolados    : parseInt(cols[4]?.[i]) || 0,
+        interditados: parseInt(cols[5]?.[i]) || 0,
+        manutencao  : parseInt(cols[6]?.[i]) || 0,
+        reservados  : parseInt(cols[7]?.[i]) || 0,
+        extras      : parseInt(cols[8]?.[i]) || 0,
+        totalPac    : parseInt(cols[9]?.[i]) || 0,
+        ocupados    : parseInt(cols[10]?.[i]) || 0,
+      });
+    });
+  }
+
+  // ── PA ───────────────────────────────────────────────────────
+  const paIdx2 = lines.indexOf('PRONTO ATENDIMENTO');
+  if (paIdx2 >= 0) {
+    const paEndIdx = lines.indexOf('DISTRIBUIÇÃO GERAL', paIdx2);
+    let j = paIdx2 + 3; // pula header
+    while (j < (paEndIdx > 0 ? paEndIdx : paIdx2 + 30)) {
+      const nome = lines[j];
+      if (nome && !['Setor ↑','Pacientes','Solicitações de vaga'].includes(nome) && nome.toUpperCase() === nome) {
+        resultado.pa.push({ nome, pacientes: parseInt(lines[j+1]) || 0, solicitacoes: parseInt(lines[j+2]) || 0 });
+        j += 3;
+      } else { j++; }
+    }
+  }
+
+  return resultado;
+}
+
+async function _cmaPuppeteerLogin(page, user, senha) {
+  const senhaEl = await page.$('input[type="password"]');
+  if (!senhaEl) return; // já logado
+  const loginSel = 'input[type="email"],input[name="email"],input[name="login"],input[name="user[email]"]';
+  const loginEl  = await page.$(loginSel);
+  if (loginEl) await loginEl.type(user, { delay: 30 });
+  await senhaEl.type(senha, { delay: 30 });
+  const submitEl = await page.$('button[type="submit"],input[type="submit"]');
+  if (submitEl) await submitEl.click(); else await senhaEl.press('Enter');
+  await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }).catch(() => {});
+  if (!page.url().includes('/dashboards/')) {
+    await page.goto(_CMA_DASHBOARD, { waitUntil: 'networkidle2', timeout: 20000 });
+  }
+}
+
+async function handleCmaDados(req, res) {
+  const hdrs   = { ...cors, 'Content-Type': 'application/json;charset=utf-8' };
+  const forcar = req.url.includes('forcar=1');
+  const user   = _lerEnvRaw('CMA_USER')  || process.env.CMA_USER  || '';
+  const senha  = _lerEnvRaw('CMA_SENHA') || process.env.CMA_SENHA || '';
+
+  if (!user || !senha) {
+    res.writeHead(200, hdrs);
+    return res.end(JSON.stringify({ ok: false, erro: 'CMA_USER/CMA_SENHA não configurados no CONFIGURACAO.env' }));
+  }
+
+  // Serve cache se válido
+  if (!forcar && _cmaDadosCache && (Date.now() - _cmaDadosTs < _CMA_CACHE_TTL)) {
+    res.writeHead(200, hdrs);
+    return res.end(JSON.stringify({ ok: true, cached: true, ..._cmaDadosCache }));
+  }
+
+  let browser;
+  try {
+    const puppeteer = require('puppeteer');
+    browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox','--disable-setuid-sandbox','--ignore-certificate-errors'] });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1600, height: 900 });
+    await page.goto(_CMA_DASHBOARD, { waitUntil: 'networkidle2', timeout: 30000 });
+    await _cmaPuppeteerLogin(page, user, senha);
+    await new Promise(r => setTimeout(r, 3000));
+
+    const texto = await page.evaluate(() => document.body.innerText);
+    const dados = _parseCmaTexto(texto);
+
+    _cmaDadosCache = dados;
+    _cmaDadosTs    = Date.now();
+
+    res.writeHead(200, hdrs);
+    res.end(JSON.stringify({ ok: true, cached: false, ...dados }));
+  } catch (e) {
+    res.writeHead(200, hdrs);
+    res.end(JSON.stringify({ ok: false, erro: 'Erro ao extrair CMA: ' + e.message }));
+  } finally {
+    if (browser) await browser.close().catch(() => {});
+  }
+}
+
+// ── CMA Screenshot — Ocupação Hospitalar ─────────────────────────
+const _CMA_CACHE_FILE  = path.join(ROOT, 'cma-ocupacao-cache.png');
+const _CMA_CACHE_TTL   = 30 * 60 * 1000; // 30 minutos
+let   _cmaLastCapture  = 0;
+const _CMA_DASHBOARD   = 'https://cma.gruposcf.com.br/dashboards/hospital-occupancy';
+
+function _lerEnvRaw(chave) {
+  try {
+    const lines = fs.readFileSync(CONFIG_FILE, 'utf8').split('\n');
+    const l = lines.find(l => l.startsWith(chave + '='));
+    return l ? l.slice(chave.length + 1).trim() : '';
+  } catch { return ''; }
+}
+
+async function handleCmaScreenshot(req, res) {
+  const hdrs  = { ...cors, 'Content-Type': 'application/json;charset=utf-8' };
+  const user  = _lerEnvRaw('CMA_USER')  || process.env.CMA_USER  || '';
+  const senha = _lerEnvRaw('CMA_SENHA') || process.env.CMA_SENHA || '';
+  const forcar = req.url.includes('forcar=1');
+
+  // Serve cache se válido e não forçado
+  if (!forcar && Date.now() - _cmaLastCapture < _CMA_CACHE_TTL && fs.existsSync(_CMA_CACHE_FILE)) {
+    const img = fs.readFileSync(_CMA_CACHE_FILE).toString('base64');
+    res.writeHead(200, hdrs);
+    return res.end(JSON.stringify({ ok: true, img, cached: true, ts: _cmaLastCapture }));
+  }
+
+  if (!user || !senha) {
+    res.writeHead(200, hdrs);
+    return res.end(JSON.stringify({ ok: false, erro: 'Credenciais CMA não configuradas. Adicione CMA_USER e CMA_SENHA no CONFIGURACAO.env' }));
+  }
+
+  let browser;
+  try {
+    const puppeteer = require('puppeteer');
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--ignore-certificate-errors']
+    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1600, height: 900 });
+
+    // Navega ao dashboard (pode redirecionar para login)
+    await page.goto(_CMA_DASHBOARD, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    // Detecta se caiu na página de login (URL mudou ou há campo de senha)
+    const currentUrl = page.url();
+    if (currentUrl !== _CMA_DASHBOARD || await page.$('input[type="password"]')) {
+      // Preenche credenciais
+      const loginSel = 'input[type="email"], input[name="email"], input[name="login"], input[name="user[email]"]';
+      const senhaSel = 'input[type="password"]';
+      await page.waitForSelector(senhaSel, { timeout: 10000 }).catch(() => {});
+      const loginEl = await page.$(loginSel);
+      if (loginEl) await loginEl.type(user, { delay: 40 });
+      const senhaEl = await page.$(senhaSel);
+      if (senhaEl) await senhaEl.type(senha, { delay: 40 });
+      // Submete (Enter ou botão submit)
+      const submitSel = 'button[type="submit"], input[type="submit"]';
+      const submitEl  = await page.$(submitSel);
+      if (submitEl) await submitEl.click();
+      else          await senhaEl.press('Enter');
+      // Aguarda navegação após login
+      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }).catch(() => {});
+      // Se ainda não está no dashboard, tenta navegar
+      if (!page.url().includes('/dashboards/')) {
+        await page.goto(_CMA_DASHBOARD, { waitUntil: 'networkidle2', timeout: 20000 });
+      }
+    }
+
+    // Aguarda o conteúdo do dashboard
+    await new Promise(r => setTimeout(r, 3000));
+
+    const screenshot = await page.screenshot({ type: 'png', fullPage: false });
+    fs.writeFileSync(_CMA_CACHE_FILE, screenshot);
+    _cmaLastCapture = Date.now();
+
+    res.writeHead(200, hdrs);
+    res.end(JSON.stringify({ ok: true, img: screenshot.toString('base64'), cached: false, ts: _cmaLastCapture }));
+  } catch (e) {
+    res.writeHead(200, hdrs);
+    res.end(JSON.stringify({ ok: false, erro: 'Erro ao capturar CMA: ' + e.message }));
+  } finally {
+    if (browser) await browser.close().catch(() => {});
+  }
+}
+
+// ── Numb3rs Analytics — screenshots de views Tableau ─────────────
+const _NUMB3RS_BASE = 'https://wapp.numb3rs.com.br';
+const _NUMB3RS_VIEWS = {
+  ocupacao:     '/tableau/02-indicadores-hospitalares-202405271716817679/trusted/201-taxa-de-ocupacao-202503051741177045',
+  permanencia:  '/tableau/02-indicadores-hospitalares-202405271716817679/trusted/202-media-de-permanencia',
+  cebas:        '/tableau/02-indicadores-hospitalares-202405271716817679/trusted/203-cebas-202407121720814653',
+  ciha:         '/tableau/02-indicadores-hospitalares-202405271716817679/trusted/205-ciha-acompanhamento-de-remessa',
+  fat_total:    '/tableau/03-faturamento/trusted/301-total-202502171739809713',
+  fat_projecao: '/tableau/03-faturamento/trusted/302-projecao-202502171739816439',
+  fat_hosp:     '/tableau/03-faturamento/trusted/303-hospitalar-por-internacao-202407111720722217',
+  fat_proc:     '/tableau/03-faturamento/trusted/304-hospitalar-por-procedimento',
+  fat_amb:      '/tableau/03-faturamento/trusted/305-ambulatorial-por-procedimento',
+  aih_sintetico:'/tableau/03-faturamento/trusted/3081-sintetico',
+  aih_rejeit:   '/tableau/03-faturamento/trusted/3083-perdidas-202407111720726912',
+  fat_valor:    '/tableau/03-faturamento/trusted/310-valor-medio-da-aih',
+  fat_historico:'/tableau/03-faturamento/trusted/311-serie-historica',
+  fat_cid:      '/tableau/03-faturamento/trusted/317-producao-por-cid',
+  utilizacao:   '/tableau/04-epidemiologia/trusted/401-utilizacao-hospitalar-202405211716323422',
+  mortalidade:  '/tableau/04-epidemiologia/trusted/402-mortalidade-hospitalar',
+  distribuicao: '/tableau/04-epidemiologia/trusted/403-distribuicao-geografica',
+  cid:          '/tableau/04-epidemiologia/trusted/406-preenchimento-de-cid',
+  consultas:    '/tableau/04-epidemiologia/trusted/408-consultas-medicas',
+  causas:       '/tableau/04-epidemiologia/trusted/409-internacao-causas-sensiveis',
+};
+const _NUMB3RS_CACHE_TTL = 30 * 60 * 1000;
+const _numb3rsCache = {}; // { [secao]: { img, ts } }
+let   _numb3rsBrowser = null; // sessão reutilizável
+let   _numb3rsLogado  = false;
+
+async function _numb3rsEnsureLogin(browser) {
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1600, height: 900 });
+  await page.goto(_NUMB3RS_BASE + '/dashboard', { waitUntil: 'networkidle2', timeout: 30000 });
+  const senhaEl = await page.$('input[type="password"]');
+  if (senhaEl) {
+    const user  = _lerEnvRaw('NUMB3RS_USER');
+    const senha = _lerEnvRaw('NUMB3RS_SENHA');
+    const emailSels = ['input[type="email"]','input[name="email"]','input[placeholder*="mail" i]'];
+    for (const s of emailSels) {
+      const el = await page.$(s); if (el) { await el.type(user, { delay: 30 }); break; }
+    }
+    await senhaEl.type(senha, { delay: 30 });
+    const submit = await page.$('button[type="submit"],input[type="submit"]');
+    if (submit) await submit.click(); else await senhaEl.press('Enter');
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 25000 }).catch(() => {});
+  }
+  await new Promise(r => setTimeout(r, 1500));
+  await page.close();
+}
+
+async function handleNumb3rs(req, res) {
+  const hdrs   = { ...cors, 'Content-Type': 'application/json;charset=utf-8' };
+  const urlObj = new URL(req.url, 'http://x');
+  const secao  = urlObj.searchParams.get('secao') || 'fat_total';
+  const forcar = urlObj.searchParams.get('forcar') === '1';
+
+  const user  = _lerEnvRaw('NUMB3RS_USER');
+  const senha = _lerEnvRaw('NUMB3RS_SENHA');
+  if (!user || !senha) {
+    res.writeHead(200, hdrs);
+    return res.end(JSON.stringify({ ok: false, erro: 'NUMB3RS_USER/NUMB3RS_SENHA não configurados' }));
+  }
+
+  const viewPath = _NUMB3RS_VIEWS[secao];
+  if (!viewPath) {
+    res.writeHead(200, hdrs);
+    return res.end(JSON.stringify({ ok: false, erro: `Seção desconhecida: ${secao}. Disponíveis: ${Object.keys(_NUMB3RS_VIEWS).join(', ')}` }));
+  }
+
+  // Serve cache se válido
+  const cached = _numb3rsCache[secao];
+  if (!forcar && cached && (Date.now() - cached.ts < _NUMB3RS_CACHE_TTL)) {
+    res.writeHead(200, hdrs);
+    return res.end(JSON.stringify({ ok: true, cached: true, img: cached.img, secao, ts: cached.ts }));
+  }
+
+  let browser;
+  try {
+    const puppeteer = require('puppeteer');
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox','--disable-setuid-sandbox','--ignore-certificate-errors']
+    });
+
+    // Login
+    await _numb3rsEnsureLogin(browser);
+
+    // Navega para a view diretamente
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1440, height: 810 });
+    await page.goto(_NUMB3RS_BASE + viewPath, { waitUntil: 'networkidle2', timeout: 35000 });
+    await new Promise(r => setTimeout(r, 4000)); // aguarda Tableau renderizar
+
+    const ss = await page.screenshot({ type: 'png', fullPage: false });
+    const img = ss.toString('base64');
+
+    _numb3rsCache[secao] = { img, ts: Date.now() };
+
+    res.writeHead(200, hdrs);
+    res.end(JSON.stringify({ ok: true, cached: false, img, secao, ts: Date.now() }));
+  } catch (e) {
+    res.writeHead(200, hdrs);
+    res.end(JSON.stringify({ ok: false, erro: 'Erro Numb3rs: ' + e.message }));
+  } finally {
+    if (browser) await browser.close().catch(() => {});
+  }
+}
+
+async function handleRedeApi(req, res) {
+  const urlObj = new URL(req.url, 'http://x');
+  const endpoint = urlObj.pathname.replace('/api/rede/', '');
+  const hdrs = { 'Content-Type': 'application/json;charset=utf-8', ...cors };
+
+  const sendOk  = (data) => { res.writeHead(200, hdrs); res.end(JSON.stringify({ ok: true, ...data })); };
+  const sendErr = (msg)  => { res.writeHead(500, hdrs); res.end(JSON.stringify({ ok: false, erro: msg })); };
+
+  // ── GET /api/rede/listar?path=<subpath> ──────────────────────────
+  if (endpoint === 'listar') {
+    const sub = _sanitizePath(urlObj.searchParams.get('path') || '');
+    const dir = path.join(REDE_BASE, sub);
+    const cacheKey = 'listar:' + dir;
+    const cached = _redeCacheGet(cacheKey);
+    if (cached) return sendOk(cached);
+    try {
+      const raw = fs.readdirSync(dir);
+      const items = raw
+        .filter(n => !n.startsWith('~$') && !n.startsWith('.'))
+        .map(name => {
+          try {
+            const s = fs.statSync(path.join(dir, name));
+            return { name, tipo: s.isDirectory() ? 'dir' : 'file', size: s.size,
+                     modified: s.mtime.toLocaleDateString('pt-BR'), ext: path.extname(name).toLowerCase() };
+          } catch { return null; }
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.tipo === b.tipo ? a.name.localeCompare(b.name, 'pt-BR') : (a.tipo === 'dir' ? -1 : 1));
+      const result = { path: sub, items };
+      _redeCacheSet(cacheKey, result);
+      sendOk(result);
+    } catch(e) { sendErr(e.message); }
+    return;
+  }
+
+  // ── GET /api/rede/excel?file=<relative_path> ──────────────────────
+  if (endpoint === 'excel') {
+    const file = _sanitizePath(urlObj.searchParams.get('file') || '');
+    const fullPath = path.join(REDE_BASE, file);
+    const cacheKey = 'excel:' + fullPath;
+    const cached = _redeCacheGet(cacheKey);
+    if (cached) return sendOk(cached);
+    try {
+      const wb = XLSX.readFile(fullPath, { sheetStubs: false });
+      const sheets = wb.SheetNames.slice(0, 8).map(nome => {
+        const ws = wb.Sheets[nome];
+        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'', range: 0 });
+        const nonEmpty = rows.filter(r => r.some(c => c !== ''));
+        return { nome, linhas: nonEmpty.slice(0, 100) };
+      });
+      const result = { arquivo: path.basename(fullPath), abas: wb.SheetNames, sheets };
+      _redeCacheSet(cacheKey, result);
+      sendOk(result);
+    } catch(e) { sendErr(e.message); }
+    return;
+  }
+
+  // ── GET /api/rede/indicadores-pa ─────────────────────────────────
+  if (endpoint === 'indicadores-pa') {
+    const cached = _redeCacheGet('indicadores-pa');
+    if (cached) return sendOk(cached);
+    try {
+      const basePA = path.join(REDE_BASE, '0000. PAINEL DE INDICADORES');
+      const wb = XLSX.readFile(path.join(basePA, "ATENDIMENTOS PA'S POR ANO.xlsx"));
+      // Sheet GERAL: row1=ano, row2=headers, row3+=dados
+      const anos = [];
+      wb.SheetNames.forEach(shName => {
+        const ws = wb.Sheets[shName];
+        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+        if (!rows.length) return;
+        // Detecta padrão: primeira célula = ano (número > 2000)
+        let anoAtual = null;
+        let headers = [];
+        rows.forEach((r, i) => {
+          if (typeof r[0] === 'number' && r[0] > 2000 && r[0] < 2030) {
+            anoAtual = r[0]; headers = [];
+          } else if (anoAtual && headers.length === 0 && r.some(c => typeof c === 'string' && c.length > 1)) {
+            headers = r;
+          } else if (anoAtual && headers.length > 0 && typeof r[0] === 'string' && r[0].length === 3) {
+            const obj = { ano: anoAtual, mes: r[0] };
+            headers.forEach((h, j) => { if (h && j > 0) obj[String(h).trim()] = r[j] || 0; });
+            anos.push(obj);
+          }
+        });
+      });
+      const result = { dados: anos, total: anos.length };
+      _redeCacheSet('indicadores-pa', result);
+      sendOk(result);
+    } catch(e) { sendErr(e.message); }
+    return;
+  }
+
+  // ── GET /api/rede/cirurgias ───────────────────────────────────────
+  if (endpoint === 'cirurgias') {
+    const cached = _redeCacheGet('cirurgias');
+    if (cached) return sendOk(cached);
+    try {
+      const basePA = path.join(REDE_BASE, '0000. PAINEL DE INDICADORES');
+      const wb = XLSX.readFile(path.join(basePA, 'RELATORIO CIRURGIAS - ATUALIZADA 16.07.2025.xlsx'));
+      // Aba "Planilha1": summary com totais mensais
+      const wsSumm = wb.Sheets['Planilha1'];
+      const rowsSumm = XLSX.utils.sheet_to_json(wsSumm, { header:1, defval:'' });
+      // Row 1: PRODUCAO ELETIVAS, col2+= Excel serial dates
+      const meses = rowsSumm[0]?.slice(1).map(d => _excelSerialToDate(d)).filter(Boolean) || [];
+      const linhas = [];
+      rowsSumm.slice(1).forEach(r => {
+        if (!r[0] || r[0] === '') return;
+        const label = String(r[0]).trim();
+        const vals  = meses.map((_, i) => typeof r[i+1] === 'number' ? r[i+1] : 0);
+        linhas.push({ label, meses, vals });
+      });
+      // Aba "HCOR 2025": convenios por mês
+      const wsHcor = wb.Sheets['HCOR 2025'];
+      const rowsHcor = wsHcor ? XLSX.utils.sheet_to_json(wsHcor, { header:1, defval:'' }) : [];
+      const mesesHcor = rowsHcor[2]?.slice(1).map(d => _excelSerialToDate(d)).filter(Boolean) || [];
+      const conveniosHcor = [];
+      rowsHcor.slice(3).forEach(r => {
+        if (!r[0] || typeof r[0] !== 'string') return;
+        const total = r.slice(1).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0);
+        if (total > 0) conveniosHcor.push({ nome: r[0].trim(), total, meses: mesesHcor, vals: mesesHcor.map((_,i)=>r[i+1]||0) });
+      });
+      const result = { resumo: linhas, hcor2025: conveniosHcor, meses };
+      _redeCacheSet('cirurgias', result);
+      sendOk(result);
+    } catch(e) { sendErr(e.message); }
+    return;
+  }
+
+  sendErr('Endpoint não encontrado: ' + endpoint);
 }
 
 server.listen(PORT, '0.0.0.0', () => {

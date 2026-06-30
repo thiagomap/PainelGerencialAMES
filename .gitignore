@@ -9,7 +9,7 @@ Benchmarking/
 contrato de gestão/
 Planos de Ação/
 cronoata/
-
+.env
 # Pasta deploy (duplicata dos arquivos principais — gerada pelo Vercel)
 deploy/
 
@@ -36,3 +36,36 @@ patch-*.js
 # Arquivos de sistema Windows
 *.log
 Sti_Trace.log
+
+# Pastas de dados/relatórios grandes ou projetos de referência (não fazem parte do produto)
+Oncologia/
+internação/
+Relatorio Gerencial Hospitais/
+siresp-login/
+
+# Apresentações geradas (binários grandes, não fazem parte do produto)
+*.pptx
+
+# Gestão SES — sessão/diagnóstico (sensível ou temporário)
+gestao-ses-cookies.json
+gestao-captcha-solucao.txt
+gestao-ses-log.txt
+gestao-ses-err.txt
+gestao-ses-*.png
+gestao-captcha*.png
+
+# Diagnóstico Numb3rs / CMA (capturas de tela exploratórias)
+numb3rs-diagnostico.png
+numb3rs-diagnostico.json
+numb3rs-secoes.json
+numb3rs-view-urls.json
+numb3rs-fat_*.png
+numb3rs-mortalidade.png
+numb3rs-ocupacao.png
+numb3rs-permanencia*.png
+numb3rs-utilizacao.png
+numb3rs-sus-paulista-2.png
+numb3rs-tabela-sus-paulista.png
+cma-diagnostico.png
+cma-hospital-discharge.png
+discharge-sus-paulista-diagnostico.json

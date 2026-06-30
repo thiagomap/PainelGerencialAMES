@@ -59,16 +59,17 @@ function parseSectionMonthly(html, code) {
     'i'
   );
   const m = html.match(reTotal);
-  if (!m) return { jan:{c:0,r:0}, fev:{c:0,r:0}, mar:{c:0,r:0}, abr:{c:0,r:0}, cont:0, real:0 };
+  if (!m) return { jan:{c:0,r:0}, fev:{c:0,r:0}, mar:{c:0,r:0}, abr:{c:0,r:0}, mai:{c:0,r:0}, cont:0, real:0 };
   const tds = tdVals('<tr>' + m[1] + '</tr>');
   // [0]=jan_c [1]=jan_r [2]=fev_c [3]=fev_r [4]=mar_c [5]=mar_r [6]=abr_c [7]=abr_r
-  // [8]=tot_cont [9]=tot_real
+  // [8]=mai_c [9]=mai_r [10]=tot_cont [11]=tot_real
   return {
     jan: { c: parseBR(tds[0]), r: parseBR(tds[1]) },
     fev: { c: parseBR(tds[2]), r: parseBR(tds[3]) },
     mar: { c: parseBR(tds[4]), r: parseBR(tds[5]) },
     abr: { c: parseBR(tds[6]), r: parseBR(tds[7]) },
-    cont: parseBR(tds[8]), real: parseBR(tds[9]),
+    mai: { c: parseBR(tds[8]), r: parseBR(tds[9]) },
+    cont: parseBR(tds[10]), real: parseBR(tds[11]),
   };
 }
 
@@ -85,9 +86,9 @@ function parseSectionTotal(html, code) {
 
   const tds = tdVals('<tr>' + m[1] + '</tr>');
   // Após remover a célula "Total", a ordem é:
-  // [0]=jan_c [1]=jan_r [2]=feb_c [3]=feb_r [4]=mar_c [5]=mar_r [6]=apr_c [7]=apr_r
-  // [8]=tot_cont [9]=tot_real [10]=pct
-  return { cont: parseBR(tds[8]), real: parseBR(tds[9]) };
+  // [0]=jan_c [1]=jan_r [2]=fev_c [3]=fev_r [4]=mar_c [5]=mar_r [6]=abr_c [7]=abr_r
+  // [8]=mai_c [9]=mai_r [10]=tot_cont [11]=tot_real [12]=pct
+  return { cont: parseBR(tds[10]), real: parseBR(tds[11]) };
 }
 
 // Retorna {cont, real} de uma linha de dados identificada por label parcial (para sub-linhas)
@@ -100,9 +101,9 @@ function parseDataRow(html, labelFragment) {
   const m = html.match(re);
   if (!m) return { cont: 0, real: 0 };
   // m[2] = restante das tds da linha (sem a célula label)
-  // [0]=jan_c [1]=jan_r ... [8]=tot_cont [9]=tot_real [10]=pct
+  // [0]=jan_c [1]=jan_r ... [8]=mai_c [9]=mai_r [10]=tot_cont [11]=tot_real [12]=pct
   const tds = tdVals('<tr>' + m[2] + '</tr>');
-  return { cont: parseBR(tds[8]), real: parseBR(tds[9]) };
+  return { cont: parseBR(tds[10]), real: parseBR(tds[11]) };
 }
 
 function parseQtde(html) {
@@ -144,19 +145,19 @@ function findFinRowFirst(html, label) {
   return m ? parseBR(m[1]) : 0;
 }
 
-// Retorna TODOS os valores numéricos <NOBR> de uma linha como array [jan,fev,mar,abr,total]
+// Retorna TODOS os valores numéricos <NOBR> de uma linha como array [jan,fev,mar,abr,mai,total]
 function findFinRowAll(html, label) {
   const idx = html.indexOf(label);
-  if (idx === -1) return [0,0,0,0,0];
+  if (idx === -1) return [0,0,0,0,0,0];
   const trEnd = html.indexOf('</tr>', idx);
-  if (trEnd === -1) return [0,0,0,0,0];
+  if (trEnd === -1) return [0,0,0,0,0,0];
   const rowHtml = html.slice(idx, trEnd);
   const re = /<NOBR>(?:<b>)?([\d.,]+)(?:<\/b>)?<\/NOBR>/gi;
   const vals = []; let m;
   while ((m = re.exec(rowHtml)) !== null) vals.push(parseBR(m[1]));
-  // Preenche até 5 com 0
-  while (vals.length < 5) vals.push(0);
-  return vals; // [jan, fev, mar, abr, total]
+  // Preenche até 6 com 0
+  while (vals.length < 6) vals.push(0);
+  return vals; // [jan, fev, mar, abr, mai, total]
 }
 
 function parseFin(html) {
@@ -178,10 +179,10 @@ function parseFin(html) {
   const mDesp = findFinRowAll(html, 'Total de Despesas');
   const mPes  = findFinRowAll(html, 'Pessoal (CLT)');
   r.mensal = {
-    receita:  mRec.slice(0,4),
-    despesa:  mDesp.slice(0,4),
-    pessoal:  mPes.slice(0,4),
-    resultado: mRec.slice(0,4).map((v,i)=>v-mDesp[i]),
+    receita:  mRec.slice(0,5),
+    despesa:  mDesp.slice(0,5),
+    pessoal:  mPes.slice(0,5),
+    resultado: mRec.slice(0,5).map((v,i)=>v-mDesp[i]),
   };
   return r;
 }
@@ -231,9 +232,9 @@ function parseDet(html) {
 
 // ── processamento principal ──────────────────────────────────────────────────
 
-const MESES = 4;
+const MESES = 5;
 const SEM   = 6;
-const FATOR = SEM / MESES; // 1.5
+const FATOR = SEM / MESES; // 1.2
 
 // Mínimos contratuais
 const MIN = { consulta: 90, naoMed: 90, cmaA: 95, cmaM: 95, sadt: 90 };
@@ -281,6 +282,8 @@ for (const file of fs.readdirSync(QTDE).filter(f => f.endsWith('.xls')).sort()) 
   if (!ames[key]) ames[key] = { label: nome.replace('AME ', '') };
   ames[key].qtde = parseQtde(html);
   ames[key].s272mensal = parseSectionMonthly(html, '272'); // mensal para NMED
+  ames[key].s271mensal = parseSectionMonthly(html, '271'); // mensal para CONS
+  ames[key].sadtMensal = parseSectionMonthly(html, '680'); // mensal para SADT
   console.log(`  ${key} (${nome}): consulta=${ames[key].qtde.s271.real} | CMA=${ames[key].qtde.cmaA.real} | cma=${ames[key].qtde.cmaM.real} | SADT=${ames[key].qtde.sadtExt.real}`);
 }
 
@@ -376,13 +379,14 @@ for (const [key, ame] of Object.entries(ames)) {
     ...(() => {
       const cm = envMetas[key] || {};
       const avg = v => Math.round(v / MESES);
-      const consultMetaSem = q.s271.cont    + (cm.CONS?.MAI     || avg(q.s271.cont))     + (cm.CONS?.JUN     || avg(q.s271.cont));
-      const cmaMMetaSem    = q.cmaM.cont    + (cm.CMA_MENOR?.MAI|| avg(q.cmaM.cont))     + (cm.CMA_MENOR?.JUN|| avg(q.cmaM.cont));
-      const sadtMetaSem    = q.sadtExt.cont + (cm.SADT?.MAI     || avg(q.sadtExt.cont))  + (cm.SADT?.JUN     || avg(q.sadtExt.cont));
-      const s272MetaSem    = q.s272.cont    + (cm.NMED?.MAI      || avg(q.s272.cont))     + (cm.NMED?.JUN      || avg(q.s272.cont));
+      // 5 meses já realizados — só falta JUN para completar o semestre
+      const consultMetaSem = q.s271.cont    + (cm.CONS?.JUN     || avg(q.s271.cont));
+      const cmaMMetaSem    = q.cmaM.cont    + (cm.CMA_MENOR?.JUN|| avg(q.cmaM.cont));
+      const sadtMetaSem    = q.sadtExt.cont + (cm.SADT?.JUN     || avg(q.sadtExt.cont));
+      const s272MetaSem    = q.s272.cont    + (cm.NMED?.JUN      || avg(q.s272.cont));
 
       // CMA Maior: meta contratual + volume de mutirão (se ativo)
-      const cmaAMetaContratual = q.cmaA.cont + (cm.CMA?.MAI || avg(q.cmaA.cont)) + (cm.CMA?.JUN || avg(q.cmaA.cont));
+      const cmaAMetaContratual = q.cmaA.cont + (cm.CMA?.JUN || avg(q.cmaA.cont));
       const mv = cm.mutiraoVol || {};
       const mutiraoMetaSem = cm.mutirao
         ? ['JAN','FEV','MAR','ABR','MAI','JUN'].reduce((s, m) => s + (mv[m]?.meta || 0), 0)
@@ -453,8 +457,8 @@ for (const ame of Object.values(ames)) {
   }
 }
 
-// 5b. Atualizar CONFIGURACAO.env com valores mensais de NMED extraídos do Excel
-(function atualizarNmedNoEnv() {
+// 5b. Atualizar CONFIGURACAO.env com valores mensais (NMED, CONS, SADT) extraídos do Excel
+(function atualizarEnv() {
   const cfgPath = path.join(BASE, 'CONFIGURACAO.env');
   if (!fs.existsSync(cfgPath)) return;
   let cfgLines = fs.readFileSync(cfgPath, 'utf8').split('\n');
@@ -464,30 +468,45 @@ for (const ame of Object.values(ames)) {
     if (idx >= 0) cfgLines[idx] = nova; else cfgLines.push(nova);
   };
   const ENV_AMES = { cp:'CAMPINAS', cb:'CASA_BRANCA', frc:'FRANCA', rp:'RIBEIRAO', scl:'SAO_CARLOS', avj:'JURUMIRIM' };
-  const MESES_MAP = { jan:'JAN', fev:'FEV', mar:'MAR', abr:'ABR' };
+  const MESES_MAP = { jan:'JAN', fev:'FEV', mar:'MAR', abr:'ABR', mai:'MAI' };
   let atualizados = 0;
   for (const [key, ek] of Object.entries(ENV_AMES)) {
+    // NMED (s272)
     const nm = ames[key]?.s272mensal;
-    if (!nm) continue;
-    for (const [mes, envMes] of Object.entries(MESES_MAP)) {
-      const r = nm[mes]?.r || 0;
-      const c = nm[mes]?.c || 0;
-      if (r > 0 || c > 0) {
-        setVal(`${ek}_NMED_${envMes}`, `${r||''}|${c||''}`);
-        atualizados++;
+    if (nm) {
+      for (const [mes, envMes] of Object.entries(MESES_MAP)) {
+        const r = nm[mes]?.r || 0; const c = nm[mes]?.c || 0;
+        if (r > 0 || c > 0) { setVal(`${ek}_NMED_${envMes}`, `${r||''}|${c||''}`); atualizados++; }
+      }
+    }
+    // CONS (s271)
+    const sm = ames[key]?.s271mensal;
+    if (sm) {
+      for (const [mes, envMes] of Object.entries(MESES_MAP)) {
+        const r = sm[mes]?.r || 0; const c = sm[mes]?.c || 0;
+        if (r > 0 || c > 0) { setVal(`${ek}_CONS_${envMes}`, `${r||''}|${c||''}`); atualizados++; }
+      }
+    }
+    // SADT (s680)
+    const sa = ames[key]?.sadtMensal;
+    if (sa) {
+      for (const [mes, envMes] of Object.entries(MESES_MAP)) {
+        const r = sa[mes]?.r || 0; const c = sa[mes]?.c || 0;
+        if (r > 0 || c > 0) { setVal(`${ek}_SADT_${envMes}`, `${r||''}|${c||''}`); atualizados++; }
       }
     }
   }
+  setVal('MESES_REALIZADOS', String(MESES));
   if (atualizados > 0) {
     fs.writeFileSync(cfgPath, cfgLines.join('\n'), 'utf8');
-    console.log(`\n  ✓ CONFIGURACAO.env atualizado: ${atualizados} valores NMED mensais`);
+    console.log(`\n  ✓ CONFIGURACAO.env atualizado: ${atualizados} valores mensais (NMED+CONS+SADT) + MESES_REALIZADOS=${MESES}`);
   }
 })();
 
 // 6. Escrita do JSON
 const saida = {
   geradoEm: new Date().toISOString(),
-  periodo:  'Janeiro-Abril 2026',
+  periodo:  'Janeiro-Maio 2026',
   meses:    MESES,
   mesesRealizados: MESES,
   ames,
